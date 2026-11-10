@@ -4,6 +4,7 @@ import PageHead from '@/components/admin/PageHead';
 import RefreshButton from '@/components/admin/RefreshButton';
 
 const CARDS = [
+  { table: 'intro_slides', label: '인트로 영상', href: '/admin/intro' },
   { table: 'hero_slides', label: '메인 슬라이드', href: '/admin/hero' },
   { table: 'family_sites', label: '패밀리사이트', href: '/admin/family' },
   { table: 'partner_logos', label: '파트너 로고', href: '/admin/partners' },

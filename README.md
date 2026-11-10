@@ -8,6 +8,7 @@
 /admin         관리자 (Supabase 로그인)
 /news/[id]     News & Event 내부 작성 글
 /notice        공지사항 목록 / 상세
+/embed/index.html  기존 사이트(htuglobal.com)용 완성 페이지 — 통째로 교체해서 사용
 /embed/*.html  다른 사이트(아임웹·카페24·정적 HTML)에 붙여넣는 섹션 조각
 /api/public/content  섹션용 공개 JSON (CORS 허용)
 ```
@@ -72,6 +73,7 @@ npm run dev                  # http://localhost:3000 , /admin
 | 메뉴 | 수정 가능한 내용 |
 |---|---|
 | 기본 설정 · 섹션 문구 | 사이트 로고·이름, 모든 섹션 제목/버튼 문구, 자동 넘김 간격, 랜덤 재생 |
+| ⓪ 인트로 영상 | 맨 위 전체화면 슬라이드 — Vimeo / mp4(업로드 가능) / 이미지, 문구, 포스터, 전환 간격 |
 | ① 메인 슬라이더 | 인트로 문구, 슬라이드 추가/삭제/순서, 배경 이미지, 링크 버튼, 패밀리사이트 버튼 연결 |
 | 패밀리사이트 팝업 | 팝업 그룹 문구(제목·설명·특징), 그룹별 사이트 목록·링크·새 창 여부 |
 | ② 파트너 로고 | 롤링 로고 / 고정 로고 이미지, 클릭 동작(팝업·링크·없음), 팝업 이미지·문구·버튼 |
@@ -80,7 +82,7 @@ npm run dev                  # http://localhost:3000 , /admin
 | ⑤ 영상 | 오토플레이 릴 영상 추가·순서·**랜덤 재생**, 유튜브 갤러리 영상 추가·순서·제목 |
 | ⑥ News & Event | **외부 링크** 또는 **직접 작성(내부 글)** — 본문 에디터(이미지 업로드·유튜브 삽입) |
 | 공지사항 | 작성/수정/삭제, 상단 고정, 게시일 |
-| 메인 팝업 | 이미지·문구·링크, 게시 기간 예약, '오늘 하루 보지 않기' |
+| 메인 팝업 | 이미지·문구·링크, 게시 기간 예약, '오늘 보지 않기', PC 위치(왼쪽/가운데)·크기 |
 
 모든 목록 공통: 드래그 순서 변경 · ↑↓ · 노출/숨김 토글 · 복제 · 삭제 · 미리보기.
 저장하면 `/api/revalidate` 가 캐시를 비워 **즉시** 반영됩니다 (대시보드의 '즉시 반영' 버튼도 동일).
@@ -92,6 +94,19 @@ npm run dev                  # http://localhost:3000 , /admin
 - 라벨 문구는 기본 설정에서 변경
 
 ---
+
+## 기존 사이트(htuglobal.com)에 완성 페이지로 적용
+
+`public/embed/index.html` (배포 후 `https://관리자도메인/embed/index.html`) 이 기존 index.html 을 대체하는 완성본입니다.
+기존 메타태그·메뉴(menu3.js)·푸터(footer.js)·css 링크를 그대로 포함합니다.
+
+1. 파일 맨 위 `window.HTU_CMS_ENDPOINT = '...'` 를 관리자(Vercel) 주소로 바꿉니다.
+   (Vercel 환경변수 `NEXT_PUBLIC_SITE_URL` 을 넣고 배포하면 자동으로 채워진 파일이 만들어집니다.)
+2. 기존 서버의 index.html 을 이 파일로 교체합니다. img / video / css / js 폴더는 그대로 둡니다.
+
+### 이미 schema.sql 을 실행했던 경우
+인트로 영상 기능 추가분만 `supabase/migration-002-intro.sql` 을 SQL Editor 에서 1회 실행하세요.
+(여러 번 실행해도 중복되지 않습니다.)
 
 ## 다른 사이트에 섹션만 붙여넣기
 
@@ -110,7 +125,8 @@ npm run dev                  # http://localhost:3000 , /admin
 ```
 sections/               ← 홈페이지 섹션 원본 (수정은 여기서)
   css/*.css             ← 기존 섹션 CSS 원본 그대로
-  01-main-slider.html … 08-layer-popup.html
+  01-intro-hero.html, 01-main-slider.html … 08-popup.html
+  standalone/           ← 기존 사이트용 head(메타·메뉴) / foot(푸터·스크립트)
 scripts/build-home.mjs  ← sections → generated/home-template.js + public/embed/*.html (dev/build 시 자동)
 app/route.js            ← 홈페이지 렌더 (데이터 주입)
 app/admin/              ← 관리자

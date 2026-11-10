@@ -255,6 +255,33 @@ begin
   end loop;
 end $$;
 
+-- ---------- 인트로 영상 슬라이더 (#nwHero) ----------
+create table if not exists public.intro_slides (
+  id          uuid primary key default gen_random_uuid(),
+  sort        int  not null default 0,
+  active      boolean not null default true,
+  eyebrow     text,
+  title       text,
+  media_type  text not null default 'vimeo' check (media_type in ('local-video','vimeo','image')),
+  video_url   text,          -- mp4 주소 (local-video)
+  vimeo_url   text,          -- vimeo 주소 또는 숫자 ID
+  poster_url  text,          -- 포스터(로딩 전 / 이미지 슬라이드)
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index if not exists idx_intro_sort on public.intro_slides (sort);
+
+drop trigger if exists trg_touch_intro_slides on public.intro_slides;
+create trigger trg_touch_intro_slides before update on public.intro_slides
+  for each row execute function public.touch_updated_at();
+
+alter table public.intro_slides enable row level security;
+drop policy if exists "intro_slides public read" on public.intro_slides;
+create policy "intro_slides public read" on public.intro_slides for select to anon, authenticated using (active);
+drop policy if exists "intro_slides admin all" on public.intro_slides;
+create policy "intro_slides admin all" on public.intro_slides for all to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+
 -- ---------- Storage: 이미지 업로드 버킷 ----------
 insert into storage.buckets (id, name, public)
 values ('cms', 'cms', true)

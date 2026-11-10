@@ -1,0 +1,252 @@
+<section id="medicalPopupNoticeSection" class="mps-hidden" aria-label="이미지 팝업 섹션">
+  <style>
+/*@include css/popup.css*/
+    /* ===== CMS 추가 ===== */
+    #medicalPopupNoticeSection[data-align="center"] .mps-overlay { justify-content: center; padding: 24px; }
+    #medicalPopupNoticeSection[data-align="center"] .mps-card { justify-content: center; }
+    #medicalPopupNoticeSection .mps-footer-center { color: rgba(255,255,255,.72); font-weight: 700; font-size: 12px; letter-spacing: .04em; }
+    #medicalPopupNoticeSection .mps-footer-center:empty { visibility: hidden; }
+    #medicalPopupNoticeSection .mps-text {
+      display: block; background: #fff; color: #0b1220; line-height: 1.6; padding: 28px 24px; overflow-y: auto;
+      font-size: 14px; word-break: keep-all; text-decoration: none;
+    }
+    #medicalPopupNoticeSection .mps-text h3 { margin: 0 0 10px; font-size: 20px; font-weight: 900; letter-spacing: -.03em; line-height: 1.3; }
+    #medicalPopupNoticeSection .mps-text p { margin: 0; color: rgba(11,18,32,.72); }
+    #medicalPopupNoticeSection .mps-text .mps-more { display: inline-block; margin-top: 14px; font-weight: 800; color: #0a6a62; }
+  </style>
+
+  <div class="mps-backdrop" aria-hidden="true"></div>
+
+  <div class="mps-overlay">
+    <div class="mps-dialog" data-mps-dialog role="dialog" aria-modal="true" aria-label="공지 팝업">
+      <div class="mps-slider-wrap">
+        <div class="mps-track" data-mps-track></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var S = document.getElementById('medicalPopupNoticeSection');
+      if(!S || S.__mpsBound) return;
+      S.__mpsBound = true;
+
+      function htuCms(){
+        if(window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
+        if(!window.__htuCmsP){
+          var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
+          window.__htuCmsP = fetch(ep, { credentials:'omit' })
+            .then(function(r){ return r.ok ? r.json() : null; })
+            .catch(function(){ return null; });
+        }
+        return window.__htuCmsP;
+      }
+      function esc(s){
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+          return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+        });
+      }
+
+      var KEY = 'medicalPopupNoticeSectionHideUntil';
+      function isHiddenToday(){
+        try{ var v = localStorage.getItem(KEY); return v && Number(v) > Date.now(); }catch(e){ return false; }
+      }
+      if(isHiddenToday()) return;
+
+      htuCms().then(function(data){
+        data = data || {};
+        var st = (data.settings && data.settings.popup) || {};
+        var now = Date.now();
+        var list = (data.popups || []).filter(function(p){
+          if(p.starts_at && new Date(p.starts_at).getTime() > now) return false;
+          if(p.ends_at && new Date(p.ends_at).getTime() < now) return false;
+          return true;
+        });
+        if(!list.length) return;
+        build(list, st);
+      });
+
+      function build(list, st){
+        S.setAttribute('data-align', st.align === 'center' ? 'center' : 'left');
+        var CHECK = '<span class="mps-check-circle" aria-hidden="true"><svg viewBox="0 0 34 34"><circle class="ck-ring" cx="17" cy="17" r="15.5"></circle><polyline class="ck-mark" points="10.5,17.5 14.8,22 23.5,12.5"></polyline></svg></span>';
+
+        S.querySelector('[data-mps-track]').innerHTML = list.map(function(p, n){
+          var target = p.link_new_tab ? ' target="_blank" rel="noopener noreferrer"' : '';
+          var media;
+          if(p.image_url){
+            var img = '<img class="mps-card-image" src="' + esc(p.image_url) + '" alt="' + esc(p.title || ('팝업 이미지 ' + (n + 1))) + '" data-mps-img>';
+            media = p.link_url
+              ? '<a class="mps-card-link" href="' + esc(p.link_url) + '"' + target + ' aria-label="' + esc(p.title || '팝업') + '">' + img + '</a>'
+              : '<div class="mps-card-link">' + img + '</div>';
+          }else{
+            var inner = (p.title ? '<h3>' + esc(p.title) + '</h3>' : '') + (p.body_html ? '<p>' + p.body_html + '</p>' : '') +
+              (p.link_url ? '<span class="mps-more">' + esc(p.link_label || '자세히 보기') + ' →</span>' : '');
+            media = p.link_url
+              ? '<a class="mps-text" data-mps-text href="' + esc(p.link_url) + '"' + target + '>' + inner + '</a>'
+              : '<div class="mps-text" data-mps-text>' + inner + '</div>';
+          }
+          return '<article class="mps-card"><div class="mps-card-frame" data-mps-frame>' + media +
+            '<div class="mps-footer">' +
+              '<div class="mps-footer-left"><button class="mps-hide-btn" type="button" data-mps-hide aria-pressed="false" title="오늘 하루 팝업 보지 않기">' + CHECK + '<span class="mps-hide-label">오늘 보지 않기</span></button></div>' +
+              '<div class="mps-footer-center">' + (list.length > 1 ? (n + 1) + ' / ' + list.length : '') + '</div>' +
+              '<div class="mps-footer-right"><button class="mps-close-btn" type="button" data-mps-close aria-label="닫기"><span class="mps-close-icon" aria-hidden="true"></span></button></div>' +
+            '</div></div></article>';
+        }).join('');
+
+        init(st);
+      }
+
+      /* ===== 아래부터 원본 팝업 로직 ===== */
+      function init(st){
+        var CFG = window.MPS_CONFIG || {
+          PC:     { maxW: Number(st.pc_max_w) || 540, maxH: Number(st.pc_max_h) || 720, footerH: 88 },
+          TABLET: { maxW: 340, maxH: 490, footerH: 72 },
+          MOBILE: { maxW: 320, maxH: 630, footerH: 70 }
+        };
+        var PC = CFG.PC, TABLET = CFG.TABLET, MOBILE = CFG.MOBILE;
+        function getSize(){
+          var w = window.innerWidth;
+          if(w <= 420) return MOBILE;
+          if(w <= 860) return TABLET;
+          return PC;
+        }
+
+        var track    = S.querySelector('[data-mps-track]');
+        var cards    = [].slice.call(S.querySelectorAll('.mps-card'));
+        var hideBtns = [].slice.call(S.querySelectorAll('[data-mps-hide]'));
+        var closeBtns= [].slice.call(S.querySelectorAll('[data-mps-close]'));
+        var backdrop = S.querySelector('.mps-backdrop');
+        var idx = 0, perView = 1, maxIdx = 0, hideChecked = false;
+
+        function fitFrames(){
+          var size = getSize();
+          var maxW = size.maxW, footerH = size.footerH, imgMaxH = size.maxH - footerH;
+          [].slice.call(S.querySelectorAll('[data-mps-frame]')).forEach(function(frame){
+            var img    = frame.querySelector('[data-mps-img]');
+            var text   = frame.querySelector('[data-mps-text]');
+            var footer = frame.querySelector('.mps-footer');
+            if(footer) footer.style.height = footerH + 'px';
+            if(text){
+              frame.style.width = maxW + 'px';
+              text.style.maxHeight = imgMaxH + 'px';
+              return;
+            }
+            if(!img) return;
+            var nw = img.naturalWidth  || maxW;
+            var nh = img.naturalHeight || imgMaxH;
+            var ratio = nw / nh;
+            var fitW = maxW, fitH = fitW / ratio;
+            if(fitH > imgMaxH){ fitH = imgMaxH; fitW = fitH * ratio; }
+            fitW = Math.floor(fitW); fitH = Math.floor(fitH);
+            frame.style.width = fitW + 'px';
+            img.style.width   = fitW + 'px';
+            img.style.height  = fitH + 'px';
+          });
+        }
+
+        function waitImagesAndFit(){
+          var imgs = [].slice.call(S.querySelectorAll('[data-mps-img]'));
+          var loaded = 0, total = imgs.length;
+          function done(){ fitFrames(); render(); S.classList.remove('mps-hidden'); }
+          if(total === 0){ done(); return; }
+          function check(){ loaded++; if(loaded >= total) done(); }
+          imgs.forEach(function(img){
+            if(img.complete && img.naturalWidth > 0) check();
+            else{ img.addEventListener('load', check, {once:true}); img.addEventListener('error', check, {once:true}); }
+          });
+        }
+
+        function saveHideToday(){
+          try{ var d = new Date(); d.setHours(23,59,59,999); localStorage.setItem(KEY, String(d.getTime())); }catch(e){}
+        }
+        function closePopup(){
+          if(hideChecked) saveHideToday();
+          S.classList.add('mps-closing');
+          setTimeout(function(){ S.classList.remove('mps-closing'); S.classList.add('mps-hidden'); }, 360);
+        }
+        function calc(){ perView = 1; maxIdx = Math.max(0, cards.length - perView); if(idx > maxIdx) idx = maxIdx; }
+        function render(){
+          calc();
+          var w = cards[0] ? cards[0].getBoundingClientRect().width : 0;
+          track.style.transform = 'translate3d(' + (-(w) * idx) + 'px,0,0)';
+        }
+
+        var sliderWrap = S.querySelector('.mps-slider-wrap');
+        var dragState = { active:false, startX:0, startY:0, currentX:0, baseOffset:0, dirLocked:false, isHorizontal:false, moved:false };
+        var SWIPE_THRESHOLD = 40;
+        function getBaseOffset(){ var w = cards[0] ? cards[0].getBoundingClientRect().width : 0; return -(w) * idx; }
+        function setTrackPos(px){ track.style.transform = 'translate3d(' + px + 'px,0,0)'; }
+
+        function onDragStart(x, y){
+          if(cards.length <= 1) return;
+          dragState.active = true; dragState.startX = x; dragState.startY = y; dragState.currentX = x;
+          dragState.baseOffset = getBaseOffset(); dragState.dirLocked = false; dragState.isHorizontal = false; dragState.moved = false;
+          track.classList.add('is-dragging'); sliderWrap.classList.add('is-dragging');
+        }
+        function onDragMove(x, y, evt){
+          if(!dragState.active) return;
+          var dx = x - dragState.startX, dy = y - dragState.startY;
+          if(!dragState.dirLocked && (Math.abs(dx) > 8 || Math.abs(dy) > 8)){
+            dragState.dirLocked = true; dragState.isHorizontal = Math.abs(dx) >= Math.abs(dy);
+          }
+          if(dragState.dirLocked && !dragState.isHorizontal) return;
+          if(dragState.dirLocked && dragState.isHorizontal){ dragState.moved = true; if(evt.cancelable) evt.preventDefault(); }
+          dragState.currentX = x;
+          var raw = dx;
+          if((idx <= 0 && raw > 0) || (idx >= maxIdx && raw < 0)) raw = raw * 0.3;
+          setTrackPos(dragState.baseOffset + raw);
+        }
+        function onDragEnd(){
+          if(!dragState.active) return;
+          dragState.active = false;
+          track.classList.remove('is-dragging'); sliderWrap.classList.remove('is-dragging');
+          var dx = dragState.currentX - dragState.startX;
+          if(Math.abs(dx) > SWIPE_THRESHOLD){
+            if(dx < 0 && idx < maxIdx) idx++;
+            else if(dx > 0 && idx > 0) idx--;
+          }
+          render();
+        }
+
+        sliderWrap.addEventListener('touchstart', function(e){ if(e.touches.length !== 1) return; onDragStart(e.touches[0].clientX, e.touches[0].clientY); }, {passive:true});
+        sliderWrap.addEventListener('touchmove', function(e){ if(e.touches.length !== 1) return; onDragMove(e.touches[0].clientX, e.touches[0].clientY, e); }, {passive:false});
+        sliderWrap.addEventListener('touchend', onDragEnd, {passive:true});
+        sliderWrap.addEventListener('touchcancel', onDragEnd, {passive:true});
+        sliderWrap.addEventListener('mousedown', function(e){
+          if(cards.length <= 1 || e.target.closest('button')) return;
+          e.preventDefault(); onDragStart(e.clientX, e.clientY);
+        });
+        document.addEventListener('mousemove', function(e){ if(!dragState.active) return; onDragMove(e.clientX, e.clientY, e); });
+        document.addEventListener('mouseup', onDragEnd);
+        /* 드래그 직후 링크 클릭 방지 */
+        track.addEventListener('click', function(e){
+          if(dragState.moved && e.target.closest('a')){ e.preventDefault(); dragState.moved = false; }
+        }, true);
+
+        if(backdrop) backdrop.addEventListener('click', function(e){ e.preventDefault(); closePopup(); });
+
+        /* '오늘 보지 않기' 는 모든 카드에서 같은 상태로 동기화 */
+        hideBtns.forEach(function(btn){
+          btn.addEventListener('click', function(e){
+            e.preventDefault(); e.stopPropagation();
+            hideChecked = !hideChecked;
+            hideBtns.forEach(function(b){
+              b.classList.toggle('is-checked', hideChecked);
+              b.setAttribute('aria-pressed', hideChecked ? 'true' : 'false');
+            });
+          });
+        });
+        closeBtns.forEach(function(btn){ btn.addEventListener('click', function(e){ e.preventDefault(); closePopup(); }); });
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !S.classList.contains('mps-hidden')) closePopup(); });
+
+        var resizeTimer;
+        window.addEventListener('resize', function(){
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function(){ fitFrames(); render(); }, 100);
+        }, {passive:true});
+
+        waitImagesAndFit();
+      }
+    })();
+  </script>
+</section>

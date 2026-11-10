@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <!-- =====================================================================
+       ★ HTU CMS 연결 — 이 한 줄만 관리자(Vercel) 주소로 바꾸세요 ★
+       예) https://htu-cms.vercel.app   (끝에 / 없이)
+       ===================================================================== -->
+  <script>
+    window.HTU_CMS_ENDPOINT = '__HTU_CMS_ENDPOINT__';
+    /* 페이지 로딩과 동시에 콘텐츠를 미리 불러옵니다 (모든 섹션이 공유) */
+    window.__htuCmsP = fetch(String(window.HTU_CMS_ENDPOINT).replace(/\/+$/, '') + '/api/public/content', { credentials: 'omit' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+  </script>
+  <link rel="preconnect" href="https://player.vimeo.com" crossorigin>
+  <link rel="preconnect" href="https://i.ytimg.com" crossorigin>
+
+  <!-- 소유권 인증(각 도메인별 값으로 교체) -->
+<meta name="naver-site-verification" content="1d30790f9fad98e27c8ad29ac3b8d17a0c97d319" />
+  <meta name="google-site-verification" content="구글_인증코드_여기에" />
+
+   <!-- Canonical (대표 URL로 고정) -->
+  <link rel="canonical" href="https://htuglobal.com/" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="./img/favicon.png" sizes="any">
+  <link rel="shortcut icon" href="./img/favicon.png" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="./img/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./img/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./img/favicon.png">
+
+  <meta name="robots" content="index,follow" />
+  <meta name="subject" content="HTU GLOBAL" />
+  <meta name="title" content="HTU GLOBAL" />
+  <meta name="author" content="HTU GLOBAL">
+  <meta name="description" content="HTU GLOBAL — 건강한 아름다움 그리고 새로운 기회의 시작" />
+
+  <meta name="keywords"
+    content="HTU GLOBAL, HTU GLOBAL HOLDINGS, Healthy Beauty, Well-aging, Beauty Health Industry, 글로벌 뷰티 헬스 기업, 건강한 아름다움, 뷰티 산업, 헬스 산업, 웰에이징 산업, 뷰티 헬스 비즈니스, 글로벌 네트워크, 뷰티 교육, 헬스 교육, 뷰티 전문가, 건강 산업, 라이프스타일 산업, 글로벌 비즈니스 플랫폼, HTU 브랜드" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:rich_attachment" content="true" />
+  <meta property="og:site_name" content="HTU GLOBAL" />
+  <meta property="og:title" content="HTU GLOBAL" />
+  <meta property="og:description" content="HTU GLOBAL — 건강한 아름다움 그리고 새로운 기회의 시작" />
+  <meta property="og:image" content="https://htuglobal.com/img/forum3.jpg" />
+  <meta property="og:url" content="https://htuglobal.com/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HTU GLOBAL" />
+  <meta name="twitter:description" content="HTU GLOBAL — 건강한 아름다움 그리고 새로운 기회의 시작" />
+  <meta name="twitter:image" content="https://htuglobal.com/img/forum3.jpg" />
+
+  <meta itemprop="name" content="HTU GLOBAL" />
+  <meta itemprop="description" content="HTU GLOBAL — 건강한 아름다움 그리고 새로운 기회의 시작" />
+  <meta itemprop="image" content="https://htuglobal.com/img/forum3.jpg" />
+
+
+
+  <title>HTU GLOBAL</title>
+
+  <link href="./css/reset.css" rel="stylesheet" type="text/css" />
+  <link href="./css/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div id="menu_navi"></div>
+
+  <script src="./menu3.js"></script>
+

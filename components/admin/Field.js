@@ -60,6 +60,40 @@ function ImageField({ value, onChange, folder }) {
   );
 }
 
+function VideoField({ value, onChange, folder }) {
+  const ref = useRef(null);
+  const [busy, setBusy] = useState(false);
+  const upload = async (file) => {
+    if (!file) return;
+    if (!/^video\//.test(file.type)) return toast('영상(mp4) 파일만 업로드할 수 있습니다.', 'err');
+    setBusy(true);
+    try {
+      onChange(await uploadFile(file, folder || 'video', 50));
+      toast('영상을 업로드했습니다.');
+    } catch (e) {
+      toast(errMsg(e), 'err');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="adm-image">
+      <div className="adm-image-preview" onClick={() => ref.current?.click()}>
+        {value ? <video src={previewUrl(value)} muted playsInline loop autoPlay /> : <span>클릭하여<br />mp4 업로드 (50MB 이하)</span>}
+        {busy ? <div className="adm-image-busy">업로드 중…</div> : null}
+      </div>
+      <div className="adm-image-side">
+        <input className="adm-input" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder="./video/파일.mp4 또는 https://.../파일.mp4" />
+        <div className="adm-row-gap">
+          <button type="button" className="adm-btn sm" onClick={() => ref.current?.click()} disabled={busy}>파일 선택</button>
+          {value ? <button type="button" className="adm-btn sm ghost" onClick={() => onChange('')}>비우기</button> : null}
+        </div>
+      </div>
+      <input ref={ref} type="file" accept="video/mp4,video/*" hidden onChange={(e) => { upload(e.target.files?.[0]); e.target.value = ''; }} />
+    </div>
+  );
+}
+
 function YoutubeField({ value, onChange }) {
   const id = youtubeId(value);
   return (
@@ -133,6 +167,9 @@ export default function Field({ field, value, onChange, form }) {
     }
     case 'image':
       input = <ImageField value={value} onChange={onChange} folder={f.folder} />;
+      break;
+    case 'video':
+      input = <VideoField value={value} onChange={onChange} folder={f.folder} />;
       break;
     case 'youtube':
       input = <YoutubeField value={value} onChange={onChange} />;

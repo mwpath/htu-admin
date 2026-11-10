@@ -7,6 +7,7 @@ const NAV = [
   {
     group: '홈페이지 섹션',
     items: [
+      { href: '/admin/intro', label: '⓪ 인트로 영상' },
       { href: '/admin/hero', label: '① 메인 슬라이더' },
       { href: '/admin/family', label: '　└ 패밀리사이트 팝업' },
       { href: '/admin/partners', label: '② 파트너 로고' },

@@ -12,6 +12,19 @@ export const SETTING_GROUPS = [
     ],
   },
   {
+    key: 'intro',
+    title: '인트로 영상 슬라이더',
+    desc: '홈페이지 맨 위 전체화면 영상 슬라이드입니다.',
+    fields: [
+      { name: 'duration', label: '슬라이드 전환 간격 (ms)', type: 'number', default: 6000, half: true },
+      {
+        name: 'video_pos', label: '영상 가로 위치', type: 'select', default: 'center', half: true,
+        options: [{ value: 'left', label: '왼쪽' }, { value: 'center', label: '가운데' }, { value: 'right', label: '오른쪽' }],
+      },
+      { name: 'show_scroll_hint', label: '스크롤 화살표 표시', type: 'checkbox', default: true, half: true, switchLabel: '하단 ↓ 표시' },
+    ],
+  },
+  {
     key: 'hero',
     title: '메인 슬라이더 · 인트로 문구',
     desc: '첫 화면 가운데 큰 문구입니다.',
@@ -77,6 +90,18 @@ export const SETTING_GROUPS = [
       { name: 'auto_interval', label: '자동 넘김 간격 (ms, 0 = 끔)', type: 'number', default: 4200, half: true },
       { name: 'shuffle', label: '랜덤 순서', type: 'checkbox', default: false, half: true, switchLabel: '방문할 때마다 순서 섞기' },
       { name: 'show_title', label: '제목/설명 표시', type: 'checkbox', default: false, half: true, switchLabel: '썸네일 아래 제목 표시' },
+    ],
+  },
+  {
+    key: 'popup',
+    title: '메인 팝업 표시 방식',
+    fields: [
+      {
+        name: 'align', label: 'PC 위치', type: 'select', default: 'left', half: true,
+        options: [{ value: 'left', label: '왼쪽 (기본)' }, { value: 'center', label: '가운데' }],
+      },
+      { name: 'pc_max_w', label: 'PC 최대 가로 (px)', type: 'number', default: 540, half: true },
+      { name: 'pc_max_h', label: 'PC 최대 세로 (px, 하단 바 포함)', type: 'number', default: 720, half: true },
     ],
   },
 ];

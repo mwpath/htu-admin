@@ -206,6 +206,27 @@ insert into public.news (sort, active, type, title, excerpt, thumbnail_url, exte
   (16, true, 'external', '2025 KBHGA 한일 국제뷰티헬시에이징 선포식 프로그램 성료', '한국뷰티헬시에이징국제교류회 소속 교수진이 주도하여, 일본 연수생들에게 K-뷰티의 핵심 기술과 최신 트렌드를 체계적으로 전달하는 자리로 마련되었다.', 'https://cdn.mdjournal.kr/news/photo/202503/41339_22531_1216.jpeg', 'https://www.mdjournal.kr/news/articleView.html?idxno=41339'),
   (17, true, 'external', 'KBHGA와 라파스 업무협약 체결', '한국뷰티헬시에이징국제교류회(KBHGA)는 한국 뷰티 산업의 혁신과 국제적 확장을 목표로 설립된 단체로, 뷰티와 헬시에이징을 중심으로 다양한 연구와 교류 활동을 활발히 전개하고 있다.', 'https://cdn.mdjournal.kr/news/photo/202502/41311_22438_5432.jpg', 'https://www.mdjournal.kr/news/articleView.html?idxno=41311');
 
+-- ---------- 인트로 영상 슬라이더 (#nwHero) ----------
+insert into public.site_settings (key, value) values
+('intro', jsonb_build_object('duration', 6000, 'video_pos', 'center', 'show_scroll_hint', true)),
+('popup', jsonb_build_object('align', 'left', 'pc_max_w', 540, 'pc_max_h', 720))
+on conflict (key) do nothing;
+
+insert into public.intro_slides (sort, eyebrow, title, media_type, video_url, vimeo_url, poster_url)
+select * from (values
+  (0, 'HTU GLOBAL HOLDINGS', E'건강한 아름다움\n새로운 기회의 시작', 'local-video', './video/htu-001.mp4', null, './img/htu-1.jpg'),
+  (1, 'HTU GLOBAL HOLDINGS', E'올바른 건강 정보와\n소비의 기준을 만들고', 'vimeo', null, 'https://vimeo.com/1172820402', './img/forum1.jpg'),
+  (2, 'HTU GLOBAL HOLDINGS', E'건강한 기업의 성장을 도와\n혁신과 일자리를 창출하는', 'vimeo', null, 'https://vimeo.com/1167068855', './img/intro3-3.jpg'),
+  (3, 'HTU GLOBAL HOLDINGS', E'글로벌 뷰티·헬스\n비즈니스 파트너', 'vimeo', null, 'https://vimeo.com/1167074197', './img/program1.jpg'),
+  (4, '에이치티유 글로벌 홀딩스', 'HTU GLOBAL HOLDINGS', 'vimeo', null, 'https://vimeo.com/1167069196', './img/earth.jpg')
+) as v(sort, eyebrow, title, media_type, video_url, vimeo_url, poster_url)
+where not exists (select 1 from public.intro_slides);
+
+-- ---------- 기존 메인 팝업(10-poster) 이미지 팝업으로 등록 (비노출 상태) ----------
+insert into public.popups (sort, active, title, image_url, link_url, link_new_tab)
+select 0, false, '10회 컨퍼런스 포스터', './img/10-poster.jpg', 'https://mindwellpath.co.kr/conference-10-htu.html', false
+where not exists (select 1 from public.popups where image_url = './img/10-poster.jpg');
+
 -- ---------- 관리자 계정 등록 ----------
 -- 1) Supabase Dashboard → Authentication → Users → "Add user" 로 이메일/비밀번호 계정 생성
 -- 2) 아래 이메일을 바꿔서 실행

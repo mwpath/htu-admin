@@ -38,4 +38,15 @@ body.forEach((f, i) => {
 });
 fs.writeFileSync(path.join(outEmbed, 'all-sections.html'), banner('all-sections.html') + parts.join('\n\n'));
 
-console.log(`[sections] home-template.js + ${body.length} embeds built`);
+// (3) 기존 사이트(htuglobal.com)에 통째로 올리는 완성 페이지
+const sDir = path.join(dir, 'standalone');
+if (fs.existsSync(path.join(sDir, 'head.html'))) {
+  const endpoint = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/+$/, '') || 'https://YOUR-CMS.vercel.app';
+  const page =
+    fs.readFileSync(path.join(sDir, 'head.html'), 'utf8').replace('__HTU_CMS_ENDPOINT__', endpoint) +
+    parts.join('\n\n') +
+    fs.readFileSync(path.join(sDir, 'foot.html'), 'utf8');
+  fs.writeFileSync(path.join(outEmbed, 'index.html'), page);
+}
+
+console.log(`[sections] home-template.js + ${body.length} embeds + index.html built`);

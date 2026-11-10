@@ -1,0 +1,375 @@
+    #medicalPopupNoticeSection{
+      --mps-ease:cubic-bezier(.22,1,.36,1);
+
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      overflow:auto;
+      isolation:isolate;
+      z-index:99999;
+      font-family:"Pretendard","Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      box-sizing:border-box;
+    }
+
+    #medicalPopupNoticeSection *,
+    #medicalPopupNoticeSection *::before,
+    #medicalPopupNoticeSection *::after{
+      box-sizing:border-box;
+    }
+
+    #medicalPopupNoticeSection .mps-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.58);
+      pointer-events:auto;
+      opacity:0;
+      animation:mps_backdropIn .5s var(--mps-ease) forwards;
+    }
+
+    #medicalPopupNoticeSection .mps-overlay{
+      position:relative;
+      width:100%;
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      padding:24px 24px 24px 48px;
+      pointer-events:none;
+    }
+
+    #medicalPopupNoticeSection .mps-dialog{
+      pointer-events:auto;
+      animation:mps_fadeInUp .7s var(--mps-ease) both;
+      background:transparent;
+      border:0;
+      border-radius:0;
+      box-shadow:none;
+      overflow:visible;
+      display:block;
+      margin:0;
+    }
+
+    #medicalPopupNoticeSection .mps-topbar{
+      display:none;
+    }
+
+    #medicalPopupNoticeSection .mps-slider-wrap{
+      overflow:hidden;
+      touch-action:pan-y pinch-zoom;
+      cursor:default;
+      display:block;
+      margin:0;
+      padding:0;
+      line-height:0;
+    }
+
+    #medicalPopupNoticeSection .mps-track{
+      display:flex;
+      gap:0;
+      transition:transform .5s var(--mps-ease);
+      will-change:transform;
+      margin:0;
+      padding:0;
+    }
+
+    #medicalPopupNoticeSection .mps-track.is-dragging{
+      transition:none;
+      cursor:grabbing;
+    }
+
+    #medicalPopupNoticeSection .mps-slider-wrap.is-dragging{
+      cursor:grabbing;
+    }
+
+    #medicalPopupNoticeSection .mps-track img{
+      -webkit-user-drag:none;
+      user-select:none;
+      pointer-events:none;
+    }
+
+    #medicalPopupNoticeSection .mps-card{
+      flex:0 0 100%;
+      min-width:0;
+      overflow:visible;
+      background:transparent;
+      transform:translateY(10px);
+      opacity:0;
+      animation:mps_fadeInUp .6s var(--mps-ease) forwards;
+      margin:0;
+      padding:0;
+      line-height:0;
+      display:flex;
+      justify-content:flex-start;
+      align-items:flex-start;
+    }
+
+    #medicalPopupNoticeSection .mps-card-frame{
+      overflow:hidden;
+      display:block;
+      line-height:0;
+      margin:0;
+      padding:0;
+    }
+
+    #medicalPopupNoticeSection .mps-card-link{
+      display:block;
+      width:100%;
+      text-decoration:none;
+      margin:0;
+      padding:0;
+      line-height:0;
+      overflow:hidden;
+    }
+
+    #medicalPopupNoticeSection .mps-card-image{
+      display:block;
+      width:100%;
+      height:auto;
+      background:transparent;
+      margin:0;
+      padding:0;
+      border:0;
+    }
+
+    #medicalPopupNoticeSection .mps-footer{
+      width:100%;
+      margin:0;
+      padding:0 18px;
+      background:#000;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      color:#fff;
+      line-height:1;
+      box-sizing:border-box;
+    }
+
+    #medicalPopupNoticeSection .mps-footer-left,
+    #medicalPopupNoticeSection .mps-footer-right{
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      line-height:1;
+    }
+
+    #medicalPopupNoticeSection .mps-footer-center{
+      flex:1 1 auto;
+      min-width:0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:-0.04em;
+      line-height:1.2;
+      padding:0 6px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn,
+    #medicalPopupNoticeSection .mps-close-btn{
+      border:0;
+      background:transparent;
+      color:inherit;
+      padding:8px 0;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight:600;
+      letter-spacing:-.04em;
+      transition:opacity .24s ease, transform .24s var(--mps-ease);
+      appearance:none;
+      -webkit-appearance:none;
+      outline:none;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      white-space:nowrap;
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn:hover,
+    #medicalPopupNoticeSection .mps-close-btn:hover{
+      opacity:.86;
+      transform:translateY(-1px);
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn{
+      font-size:13px;
+    }
+
+    #medicalPopupNoticeSection .mps-close-btn{
+      font-size:0;
+      gap:0;
+    }
+
+    #medicalPopupNoticeSection .mps-check-circle{
+      width:20px;
+      height:20px;
+      flex:0 0 20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    #medicalPopupNoticeSection .mps-check-circle svg{
+      width:100%;
+      height:100%;
+      display:block;
+      overflow:visible;
+    }
+
+    #medicalPopupNoticeSection .mps-check-circle .ck-ring{
+      fill:none;
+      stroke:rgba(255,255,255,.75);
+      stroke-width:2;
+      transition:stroke .28s var(--mps-ease), fill .28s var(--mps-ease);
+    }
+
+    #medicalPopupNoticeSection .mps-check-circle .ck-mark{
+      fill:none;
+      stroke:rgba(255,255,255,.35);
+      stroke-width:2.2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      stroke-dasharray:18;
+      stroke-dashoffset:18;
+      transition:stroke-dashoffset .36s var(--mps-ease), stroke .28s var(--mps-ease);
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn.is-checked .ck-ring{
+      fill:#fff;
+      stroke:#fff;
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn.is-checked .ck-mark{
+      stroke:#111;
+      stroke-dashoffset:0;
+    }
+
+    #medicalPopupNoticeSection .mps-hide-label{
+      display:inline-flex;
+      align-items:center;
+      line-height:1.1;
+    }
+
+    #medicalPopupNoticeSection .mps-close-icon{
+      width:24px;
+      height:24px;
+      position:relative;
+      flex:0 0 auto;
+      color:#fff;
+    }
+
+    #medicalPopupNoticeSection .mps-close-icon::before,
+    #medicalPopupNoticeSection .mps-close-icon::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:26px;
+      height:2px;
+      background:currentColor;
+      border-radius:999px;
+      transform-origin:center;
+    }
+
+    #medicalPopupNoticeSection .mps-close-icon::before{
+      transform:translate(-50%,-50%) rotate(45deg);
+    }
+
+    #medicalPopupNoticeSection .mps-close-icon::after{
+      transform:translate(-50%,-50%) rotate(-45deg);
+    }
+
+    #medicalPopupNoticeSection.mps-hidden{
+      display:none !important;
+    }
+
+    #medicalPopupNoticeSection.mps-closing .mps-backdrop{
+      animation:mps_backdropOut .36s var(--mps-ease) forwards;
+    }
+
+    #medicalPopupNoticeSection.mps-closing .mps-dialog{
+      animation:mps_fadeOutDown .36s var(--mps-ease) forwards;
+    }
+
+    @keyframes mps_fadeInUp{
+      from{opacity:0;transform:translateY(26px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+    @keyframes mps_fadeOutDown{
+      from{opacity:1;transform:translateY(0);}
+      to{opacity:0;transform:translateY(30px);}
+    }
+
+    @keyframes mps_backdropIn{
+      from{opacity:0;}
+      to{opacity:1;}
+    }
+
+    @keyframes mps_backdropOut{
+      from{opacity:1;}
+      to{opacity:0;}
+    }
+
+    /* 모바일 overlay 중앙 정렬 */
+    @media (max-width: 860px){
+      #medicalPopupNoticeSection .mps-overlay{
+        padding:20px;
+        align-items:center;
+        justify-content:center;
+      }
+      #medicalPopupNoticeSection .mps-card{
+        justify-content:center;
+      }
+      #medicalPopupNoticeSection .mps-footer{
+        padding:0 10px;
+        gap:8px;
+      }
+      #medicalPopupNoticeSection .mps-hide-btn{
+        font-size:11px;
+        gap:6px;
+        padding:6px 0;
+      }
+      #medicalPopupNoticeSection .mps-check-circle{
+        width:16px;
+        height:16px;
+        flex-basis:16px;
+      }
+      #medicalPopupNoticeSection .mps-close-btn{
+        padding:6px 0 6px 6px;
+      }
+      #medicalPopupNoticeSection .mps-close-icon{
+        width:18px;
+        height:18px;
+      }
+      #medicalPopupNoticeSection .mps-close-icon::before,
+      #medicalPopupNoticeSection .mps-close-icon::after{
+        width:18px;
+      }
+    }
+
+    @media (max-width: 420px){
+      #medicalPopupNoticeSection .mps-footer{
+        padding:0 8px;
+        gap:6px;
+      }
+      #medicalPopupNoticeSection .mps-hide-btn{
+        font-size:10px;
+        gap:5px;
+      }
+      #medicalPopupNoticeSection .mps-close-icon{
+        width:16px;
+        height:16px;
+      }
+      #medicalPopupNoticeSection .mps-close-icon::before,
+      #medicalPopupNoticeSection .mps-close-icon::after{
+        width:16px;
+      }
+    }

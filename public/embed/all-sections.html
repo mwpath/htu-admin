@@ -4,6 +4,707 @@
   <script>window.HTU_CMS_ENDPOINT = 'https://관리자-배포-도메인';</script>
   내용 수정은 관리자 페이지(/admin)에서 하면 자동 반영됩니다.
 -->
+<section id="nwHero" aria-label="HTU Intro Hero" data-video-pos="center">
+  <style>
+    /* ================= Scope: #nwHero only ================= */
+    #nwHero {
+      --ink: #ffffff;
+      --muted: rgba(255, 255, 255, .88);
+      --slideDur: 8000ms;
+      font-family: Pretendard, "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+      background: #000;
+    }
+
+    /* ✅ Slides */
+    #nwHero .slides {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      z-index: 1;
+    }
+
+    #nwHero .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 900ms ease;
+      overflow: hidden;
+      background: #000;
+      z-index: 1;
+    }
+
+    #nwHero .slide.active {
+      opacity: 1;
+      z-index: 2;
+    }
+
+    /* ✅ Media */
+    #nwHero .media {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    /* Images */
+    #nwHero .slide img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      animation: none;
+      transform-origin: center;
+    }
+
+    /* ===== Cover (Vimeo + Local Video 공용) ===== */
+    #nwHero .vimeoCover {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #nwHero .vimeoPoster {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center center;
+      opacity: 1;
+      transform: scale(1.05);
+      transition: opacity 140ms ease;
+      will-change: opacity, transform;
+      z-index: 3;
+    }
+
+    #nwHero .slide.active .vimeoPoster {
+      animation: nwPosterZoom 3.5s ease-out forwards;
+    }
+
+    @keyframes nwPosterZoom {
+      from {
+        transform: scale(1.05);
+      }
+
+      to {
+        transform: scale(1.18);
+      }
+    }
+
+    #nwHero .vimeoFrame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 160ms ease;
+      will-change: opacity;
+      background: #000;
+    }
+
+    /* ✅ Vimeo iframe */
+    #nwHero .vimeoFrame iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vw;
+      height: 56.25vw;
+      min-width: 177.78vh;
+      min-height: 100vh;
+      border: 0;
+      pointer-events: none;
+    }
+
+    /* ✅ Local video */
+    #nwHero .vimeoFrame video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #000;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    /* pos */
+    #nwHero[data-video-pos="left"] .vimeoFrame iframe {
+      left: 35%;
+    }
+
+    #nwHero[data-video-pos="center"] .vimeoFrame iframe {
+      left: 50%;
+    }
+
+    #nwHero[data-video-pos="right"] .vimeoFrame iframe {
+      left: 65%;
+    }
+
+    #nwHero[data-video-pos="left"] .vimeoPoster {
+      background-position: 20% 50%;
+    }
+
+    #nwHero[data-video-pos="center"] .vimeoPoster {
+      background-position: 50% 50%;
+    }
+
+    #nwHero[data-video-pos="right"] .vimeoPoster {
+      background-position: 80% 50%;
+    }
+
+    /* ✅ ready */
+    #nwHero .slide.video-ready .vimeoPoster {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #nwHero .slide.video-ready .vimeoFrame {
+      opacity: 1;
+    }
+
+    /* ===== Vignette ===== */
+    #nwHero .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    #nwHero .vignette::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120% 100% at 20% 60%,
+          rgba(0, 0, 0, .45) 0%,
+          rgba(0, 0, 0, .25) 45%,
+          rgba(0, 0, 0, .08) 70%,
+          rgba(0, 0, 0, 0) 100%);
+    }
+
+    /* ===== Text ===== */
+    #nwHero .content {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      max-width: min(820px, 78vw);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    #nwHero .eyebrow,
+    #nwHero .title {
+      opacity: 0;
+      transform: translateY(30px);
+      will-change: opacity, transform;
+    }
+
+    #nwHero .title {
+      transform: translateY(40px);
+      text-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    }
+
+    #nwHero .eyebrow {
+      font-family: 'Presentation-5';
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    #nwHero .title {
+      font-size: 3.3rem;
+      font-weight: 800;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    #nwHero .content.text-in .eyebrow {
+      animation: textFadeEyebrow 1s ease forwards;
+    }
+
+    #nwHero .content.text-in .title {
+      animation: textFadeTitle 1.2s ease forwards;
+    }
+
+    @keyframes textFadeEyebrow {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes textFadeTitle {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ✅ Dock 비활성화 */
+    #nwHero .dock {
+      display: none !important;
+    }
+
+    /* ✅ Scroll Indicator - 3 arrows only */
+    #nwHero .scrollHint {
+      position: absolute;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%);
+      z-index: 12;
+      width: 44px;
+      height: 78px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      user-select: none;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      padding: 0;
+      opacity: 1;
+      transition: opacity .35s ease, transform .35s ease;
+    }
+
+    #nwHero .scrollHint:hover {
+      transform: translateX(-50%) translateY(2px);
+    }
+
+    #nwHero .scrollHint .arrow {
+      width: 24px;
+      height: 14px;
+      display: block;
+      opacity: .28;
+      animation: nwChevronCascade 1.8s ease-in-out infinite;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .28));
+    }
+
+    #nwHero .scrollHint .arrow svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      stroke: rgba(255, 255, 255, .96);
+      stroke-width: 2.2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #nwHero .scrollHint .arrow:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    #nwHero .scrollHint .arrow:nth-child(2) {
+      animation-delay: .18s;
+    }
+
+    #nwHero .scrollHint .arrow:nth-child(3) {
+      animation-delay: .36s;
+    }
+
+    @keyframes nwChevronCascade {
+      0% {
+        opacity: .12;
+        transform: translateY(-4px);
+      }
+
+      25% {
+        opacity: .95;
+        transform: translateY(0);
+      }
+
+      50% {
+        opacity: .45;
+        transform: translateY(4px);
+      }
+
+      100% {
+        opacity: .12;
+        transform: translateY(8px);
+      }
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width:768px) {
+      #nwHero .title {
+        font-size: 1.55rem;
+        padding-top: 20px;
+      }
+
+      #nwHero .scrollHint {
+        bottom: 20px;
+        width: 40px;
+        height: 70px;
+      }
+
+      #nwHero .scrollHint .arrow {
+        width: 22px;
+        height: 12px;
+      }
+    }
+
+    /* ===== CMS 추가 ===== */
+    #nwHero[data-empty] { display: none; }
+  </style>
+
+  <div class="slides"></div>
+
+  <div class="vignette"></div>
+  <div class="content">
+    <span class="eyebrow"></span>
+    <h2 class="title"></h2>
+  </div>
+
+  <button class="scrollHint" type="button" aria-label="아래로 스크롤">
+    <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 12"><path d="M3 2l9 8 9-8"></path></svg></span>
+    <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 12"><path d="M3 2l9 8 9-8"></path></svg></span>
+    <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 12"><path d="M3 2l9 8 9-8"></path></svg></span>
+  </button>
+
+  <script>
+    (function () {
+      var root = document.querySelector('#nwHero');
+      if (!root || root.__htuInit) return;
+      root.__htuInit = true;
+
+      function htuCms() {
+        if (window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
+        if (!window.__htuCmsP) {
+          var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
+          window.__htuCmsP = fetch(ep, { credentials: 'omit' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; });
+        }
+        return window.__htuCmsP;
+      }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function loadVimeoApi() {
+        if (window.Vimeo && window.Vimeo.Player) return Promise.resolve();
+        if (window.__nwVimeoP) return window.__nwVimeoP;
+        window.__nwVimeoP = new Promise(function (resolve) {
+          var s = document.createElement('script');
+          s.src = 'https://player.vimeo.com/api/player.js';
+          s.onload = resolve;
+          s.onerror = resolve;
+          document.head.appendChild(s);
+        });
+        return window.__nwVimeoP;
+      }
+
+      /* 스크롤 힌트 → 다음 섹션으로 */
+      root.querySelector('.scrollHint').addEventListener('click', function () {
+        var r = root.getBoundingClientRect();
+        window.scrollTo({ top: r.bottom + window.pageYOffset, behavior: 'smooth' });
+      });
+
+      htuCms().then(function (data) {
+        data = data || {};
+        var st = (data.settings && data.settings.intro) || {};
+        var list = data.intro || [];
+        if (!list.length) { root.setAttribute('data-empty', ''); return; }
+        if (st.video_pos) root.setAttribute('data-video-pos', st.video_pos);
+        if (st.show_scroll_hint === false) root.querySelector('.scrollHint').style.display = 'none';
+        render(list);
+        var needVimeo = list.some(function (s) { return s.type === 'video'; });
+        (needVimeo ? loadVimeoApi() : Promise.resolve()).then(function () { start(Number(st.duration) || 6000); });
+      });
+
+      function render(list) {
+        root.querySelector('.slides').innerHTML = list.map(function (s, n) {
+          var frame = '';
+          if (s.type === 'local-video') {
+            frame = '<video muted playsinline webkit-playsinline autoplay loop preload="auto" style="width:100%;height:100%;object-fit: cover;"></video>';
+          } else if (s.type === 'video') {
+            frame = '<iframe src="https://player.vimeo.com/video/' + esc(s.vimeo_id) +
+              '?background=1&mute=1&muted=1&autoplay=1&loop=1&playsinline=1&autopause=0" allow="autoplay; fullscreen" title="' + esc(s.eyebrow || 'video') + ' ' + (n + 1) + '"></iframe>';
+          }
+          return '<div class="slide" data-type="' + esc(s.type) + '" data-poster="' + esc(s.poster_url || '') + '"' +
+            (s.type === 'local-video' ? ' data-local-src="' + esc(s.video_url) + '"' : '') + '>' +
+            '<div class="media"><div class="vimeoCover">' +
+              '<div class="vimeoPoster" aria-hidden="true"></div>' +
+              '<div class="vimeoFrame" aria-hidden="true">' + frame + '</div>' +
+            '</div></div></div>';
+        }).join('');
+
+        var slideEls = root.querySelectorAll('.slide');
+        list.forEach(function (s, n) {
+          slideEls[n].dataset.eyebrow = s.eyebrow ? esc(s.eyebrow) : '';
+          slideEls[n].dataset.title = s.title_html || '';
+          /* 이미지 슬라이드: 포스터를 바로 보이게 */
+          if (s.type === 'image') slideEls[n].dataset.videoReadyOnce = '0';
+        });
+      }
+
+      /* ===== 아래부터 원본 슬라이드 로직 (재생 감시 포함) ===== */
+      function start(DUR) {
+        var slides = Array.from(root.querySelectorAll('.slide'));
+        var content = root.querySelector('.content');
+        var eyebrow = root.querySelector('.eyebrow');
+        var title = root.querySelector('.title');
+
+        var i = 0;
+        var timer = null;
+        var playerMap = new Map();
+        var localVideoMap = new Map();
+        var userUnlocked = false;
+        var watchdog = null;
+        var lastKick = 0;
+
+        function isVisible() { return document.visibilityState === 'visible' && !document.hidden; }
+
+        function injectPreloadVideoOnce(href) {
+          try {
+            if (!href) return;
+            var head = document.head || document.getElementsByTagName('head')[0];
+            if (!head) return;
+            var key = 'nw-preload-' + href;
+            if (document.getElementById(key)) return;
+            var link = document.createElement('link');
+            link.id = key; link.rel = 'preload'; link.as = 'video'; link.href = href; link.type = 'video/mp4';
+            link.setAttribute('fetchpriority', 'high');
+            head.appendChild(link);
+          } catch (e) { }
+        }
+
+        function updateText(slide) {
+          eyebrow.innerHTML = slide.dataset.eyebrow || '';
+          title.innerHTML = slide.dataset.title || '';
+          content.classList.remove('text-in');
+          void content.offsetWidth;
+          content.classList.add('text-in');
+        }
+
+        function setPoster(slide) {
+          var posterUrl = slide.dataset.poster || '';
+          var posterEl = slide.querySelector('.vimeoPoster');
+          if (posterEl && posterUrl && !posterEl.style.backgroundImage) {
+            posterEl.style.backgroundImage = 'url("' + posterUrl.replace(/"/g, '%22') + '")';
+          }
+        }
+
+        function markVideoReadyOnce(slide) {
+          slide.dataset.videoReadyOnce = '1';
+          slide.classList.add('video-ready');
+        }
+
+        function ensureLocalVideo(slide) {
+          if (localVideoMap.has(slide)) return localVideoMap.get(slide);
+          var video = slide.querySelector('video');
+          if (!video) return null;
+
+          video.muted = true; video.defaultMuted = true; video.playsInline = true;
+          video.loop = true; video.autoplay = true; video.preload = 'auto';
+          video.setAttribute('playsinline', ''); video.setAttribute('webkit-playsinline', '');
+          video.setAttribute('muted', ''); video.setAttribute('autoplay', ''); video.setAttribute('loop', '');
+          video.setAttribute('preload', 'auto'); video.setAttribute('fetchpriority', 'high');
+          video.setAttribute('x5-playsinline', ''); video.setAttribute('x-webkit-airplay', 'deny');
+          try { video.disablePictureInPicture = true; } catch (e) { }
+
+          var src = slide.dataset.localSrc || '';
+          if (src && !video.getAttribute('src')) video.setAttribute('src', src);
+
+          var onReady = function () { markVideoReadyOnce(slide); };
+          try {
+            if (typeof video.requestVideoFrameCallback === 'function') {
+              video.requestVideoFrameCallback(function () { markVideoReadyOnce(slide); });
+            }
+          } catch (e) { }
+          video.addEventListener('loadeddata', onReady, { once: true });
+          video.addEventListener('canplay', onReady, { once: true });
+          video.addEventListener('playing', onReady, { once: true });
+
+          video.addEventListener('pause', function () {
+            if (!slide.classList.contains('active')) return;
+            if (!isVisible()) return;
+            var now = Date.now();
+            if (now - lastKick < 600) return;
+            lastKick = now;
+            tryPlayLocal({ video: video }).catch(function () { });
+          });
+
+          try { video.load(); } catch (e) { }
+          var entry = { video: video };
+          localVideoMap.set(slide, entry);
+          return entry;
+        }
+
+        function tryPlayLocal(entry) {
+          return new Promise(function (resolve) {
+            try {
+              if (entry.video && entry.video.readyState < 2) { try { entry.video.load(); } catch (e) { } }
+              var p = entry.video.play();
+              if (p && typeof p.then === 'function') p.then(function () { resolve(true); }, function () { resolve(false); });
+              else resolve(true);
+            } catch (e) { resolve(false); }
+          });
+        }
+
+        function playLocalVideo(slide) {
+          if (slide.dataset.videoReadyOnce === '1') slide.classList.add('video-ready');
+          else setPoster(slide);
+          var src = slide.dataset.localSrc || '';
+          if (src) injectPreloadVideoOnce(src);
+          var entry = ensureLocalVideo(slide);
+          if (entry) tryPlayLocal(entry);
+        }
+
+        function pauseLocalVideo(slide) {
+          var entry = localVideoMap.get(slide);
+          if (entry && entry.video) { try { entry.video.pause(); } catch (e) { } }
+          if (slide.dataset.videoReadyOnce !== '1') slide.classList.remove('video-ready');
+        }
+
+        function ensureVimeoPlayer(slide) {
+          if (playerMap.has(slide)) return playerMap.get(slide);
+          var iframe = slide.querySelector('iframe');
+          if (!iframe || !window.Vimeo) return null;
+          var player = new Vimeo.Player(iframe);
+          player.setVolume(0).catch(function () { });
+          player.on('playing', function () { markVideoReadyOnce(slide); });
+          var entry = { player: player, readyPromise: player.ready().catch(function () { return null; }) };
+          playerMap.set(slide, entry);
+          return entry;
+        }
+
+        function tryPlayVimeo(entry, slide) {
+          return entry.player.play().then(function () {
+            entry.player.getPaused().then(function (paused) { if (!paused) markVideoReadyOnce(slide); });
+            return true;
+          }, function () { return false; });
+        }
+
+        function playVimeo(slide) {
+          if (slide.dataset.videoReadyOnce === '1') slide.classList.add('video-ready');
+          else setPoster(slide);
+          var entry = ensureVimeoPlayer(slide);
+          if (!entry) return;
+          entry.readyPromise.then(function () { tryPlayVimeo(entry, slide); });
+        }
+
+        function pauseVimeo(slide) {
+          var entry = playerMap.get(slide);
+          if (entry) entry.player.pause().catch(function () { });
+          if (slide.dataset.videoReadyOnce !== '1') slide.classList.remove('video-ready');
+        }
+
+        function playSlide(s) {
+          if (s.dataset.type === 'local-video') playLocalVideo(s);
+          else if (s.dataset.type === 'video') playVimeo(s);
+          else setPoster(s);
+        }
+        function pauseSlide(s) {
+          if (s.dataset.type === 'local-video') pauseLocalVideo(s);
+          else if (s.dataset.type === 'video') pauseVimeo(s);
+        }
+
+        function show(n) {
+          i = (n + slides.length) % slides.length;
+          slides.forEach(function (s, idx) {
+            var active = (idx === i);
+            s.classList.toggle('active', active);
+            if (active) { updateText(s); playSlide(s); }
+            else pauseSlide(s);
+          });
+        }
+
+        function nextSlide() { show(i + 1); }
+
+        function unlockAndPlay() {
+          if (userUnlocked) return;
+          userUnlocked = true;
+          var active = slides[i];
+          if (active) playSlide(active);
+        }
+
+        function startWatchdog() {
+          if (watchdog) clearInterval(watchdog);
+          watchdog = setInterval(function () {
+            if (!isVisible()) return;
+            var active = slides[i];
+            if (!active || !active.classList.contains('active')) return;
+            if (active.dataset.type === 'local-video') {
+              var entry = localVideoMap.get(active) || ensureLocalVideo(active);
+              if (!entry || !entry.video) return;
+              var v = entry.video;
+              var shouldResume = v.paused && !v.ended && !v.seeking && (v.currentTime > 0 || v.readyState >= 2);
+              if (shouldResume) {
+                var now = Date.now();
+                if (now - lastKick < 900) return;
+                lastKick = now;
+                tryPlayLocal(entry);
+              }
+            }
+          }, 900);
+        }
+
+        slides.forEach(function (s, idx) {
+          setPoster(s);
+          if (s.dataset.type === 'local-video') {
+            var src = s.dataset.localSrc || '';
+            if (src) injectPreloadVideoOnce(src);
+            var entry = ensureLocalVideo(s);
+            if (entry && entry.video && idx === 0) {
+              try { entry.video.load(); } catch (e) { }
+              tryPlayLocal(entry);
+            }
+          } else if (s.dataset.type === 'video') {
+            ensureVimeoPlayer(s);
+          }
+        });
+
+        show(0);
+        if (slides.length > 1) timer = setInterval(nextSlide, DUR);
+        startWatchdog();
+
+        root.addEventListener('touchstart', unlockAndPlay, { passive: true, once: true });
+        root.addEventListener('pointerdown', unlockAndPlay, { passive: true, once: true });
+        root.addEventListener('click', unlockAndPlay, { passive: true, once: true });
+
+        function resume() { var a = slides[i]; if (a) playSlide(a); }
+        window.addEventListener('pageshow', resume);
+        window.addEventListener('focus', resume);
+        document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') resume(); });
+      }
+    })();
+  </script>
+</section>
+
+
 <section id="mainSliderPack" aria-label="Main Slider Pack">
   <style>    /* =========================
     Main Slider (Scope Pack)
@@ -5412,119 +6113,630 @@
 </section>
 
 
-<section id="htuLayerPopup" aria-label="메인 팝업">
+<section id="medicalPopupNoticeSection" class="mps-hidden" aria-label="이미지 팝업 섹션">
   <style>
-    #htuLayerPopup { position: relative; z-index: 100000; font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', sans-serif; }
-    #htuLayerPopup * { box-sizing: border-box; }
-    #htuLayerPopup .hlp-backdrop {
-      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-      padding: 20px; background: rgba(6, 18, 16, .45);
-      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-      opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s ease;
+    #medicalPopupNoticeSection{
+      --mps-ease:cubic-bezier(.22,1,.36,1);
+
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      overflow:auto;
+      isolation:isolate;
+      z-index:99999;
+      font-family:"Pretendard","Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      box-sizing:border-box;
     }
-    #htuLayerPopup.is-open .hlp-backdrop { opacity: 1; visibility: visible; }
-    #htuLayerPopup .hlp-rail {
-      display: flex; gap: 16px; max-width: 100%; overflow-x: auto; scroll-snap-type: x mandatory;
-      scrollbar-width: none; padding: 4px;
+
+    #medicalPopupNoticeSection *,
+    #medicalPopupNoticeSection *::before,
+    #medicalPopupNoticeSection *::after{
+      box-sizing:border-box;
     }
-    #htuLayerPopup .hlp-rail::-webkit-scrollbar { display: none; }
-    #htuLayerPopup .hlp-card {
-      flex: 0 0 auto; width: min(400px, calc(100vw - 48px)); max-height: calc(100dvh - 48px);
-      display: flex; flex-direction: column; overflow: hidden; scroll-snap-align: center;
-      background: #fff; border-radius: 20px; box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
-      transform: translateY(14px); transition: transform .4s cubic-bezier(.22, 1, .36, 1);
+
+    #medicalPopupNoticeSection .mps-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.58);
+      pointer-events:auto;
+      opacity:0;
+      animation:mps_backdropIn .5s var(--mps-ease) forwards;
     }
-    #htuLayerPopup.is-open .hlp-card { transform: none; }
-    #htuLayerPopup .hlp-media { display: block; background: #f2f4f2; }
-    #htuLayerPopup .hlp-media img { display: block; width: 100%; height: auto; max-height: 60dvh; object-fit: contain; }
-    #htuLayerPopup .hlp-body { padding: 20px 22px 18px; overflow-y: auto; }
-    #htuLayerPopup .hlp-title { margin: 0 0 8px; font-size: 19px; font-weight: 900; letter-spacing: -.02em; color: #0b1220; }
-    #htuLayerPopup .hlp-text { margin: 0; font-size: 14px; line-height: 1.7; color: rgba(11, 18, 32, .72); word-break: keep-all; }
-    #htuLayerPopup .hlp-link {
-      display: inline-flex; margin-top: 14px; padding: 10px 16px; border-radius: 999px; text-decoration: none;
-      font-size: 13px; font-weight: 800; color: #fff; background: linear-gradient(135deg, #0a4f30, #0a6a62);
+
+    #medicalPopupNoticeSection .mps-overlay{
+      position:relative;
+      width:100%;
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      padding:24px 24px 24px 48px;
+      pointer-events:none;
     }
-    #htuLayerPopup .hlp-foot { display: flex; border-top: 1px solid rgba(15, 23, 42, .08); margin-top: auto; }
-    #htuLayerPopup .hlp-foot button {
-      flex: 1; height: 48px; border: 0; background: #fafbfa; cursor: pointer; font: inherit;
-      font-size: 13.5px; font-weight: 700; color: rgba(11, 18, 32, .72);
+
+    #medicalPopupNoticeSection .mps-dialog{
+      pointer-events:auto;
+      animation:mps_fadeInUp .7s var(--mps-ease) both;
+      background:transparent;
+      border:0;
+      border-radius:0;
+      box-shadow:none;
+      overflow:visible;
+      display:block;
+      margin:0;
     }
-    #htuLayerPopup .hlp-foot button + button { border-left: 1px solid rgba(15, 23, 42, .08); color: #0b1220; }
-    #htuLayerPopup .hlp-foot button:hover { background: #f0f3f1; }
+
+    #medicalPopupNoticeSection .mps-topbar{
+      display:none;
+    }
+
+    #medicalPopupNoticeSection .mps-slider-wrap{
+      overflow:hidden;
+      touch-action:pan-y pinch-zoom;
+      cursor:default;
+      display:block;
+      margin:0;
+      padding:0;
+      line-height:0;
+    }
+
+    #medicalPopupNoticeSection .mps-track{
+      display:flex;
+      gap:0;
+      transition:transform .5s var(--mps-ease);
+      will-change:transform;
+      margin:0;
+      padding:0;
+    }
+
+    #medicalPopupNoticeSection .mps-track.is-dragging{
+      transition:none;
+      cursor:grabbing;
+    }
+
+    #medicalPopupNoticeSection .mps-slider-wrap.is-dragging{
+      cursor:grabbing;
+    }
+
+    #medicalPopupNoticeSection .mps-track img{
+      -webkit-user-drag:none;
+      user-select:none;
+      pointer-events:none;
+    }
+
+    #medicalPopupNoticeSection .mps-card{
+      flex:0 0 100%;
+      min-width:0;
+      overflow:visible;
+      background:transparent;
+      transform:translateY(10px);
+      opacity:0;
+      animation:mps_fadeInUp .6s var(--mps-ease) forwards;
+      margin:0;
+      padding:0;
+      line-height:0;
+      display:flex;
+      justify-content:flex-start;
+      align-items:flex-start;
+    }
+
+    #medicalPopupNoticeSection .mps-card-frame{
+      overflow:hidden;
+      display:block;
+      line-height:0;
+      margin:0;
+      padding:0;
+    }
+
+    #medicalPopupNoticeSection .mps-card-link{
+      display:block;
+      width:100%;
+      text-decoration:none;
+      margin:0;
+      padding:0;
+      line-height:0;
+      overflow:hidden;
+    }
+
+    #medicalPopupNoticeSection .mps-card-image{
+      display:block;
+      width:100%;
+      height:auto;
+      background:transparent;
+      margin:0;
+      padding:0;
+      border:0;
+    }
+
+    #medicalPopupNoticeSection .mps-footer{
+      width:100%;
+      margin:0;
+      padding:0 18px;
+      background:#000;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      color:#fff;
+      line-height:1;
+      box-sizing:border-box;
+    }
+
+    #medicalPopupNoticeSection .mps-footer-left,
+    #medicalPopupNoticeSection .mps-footer-right{
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      line-height:1;
+    }
+
+    #medicalPopupNoticeSection .mps-footer-center{
+      flex:1 1 auto;
+      min-width:0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:-0.04em;
+      line-height:1.2;
+      padding:0 6px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn,
+    #medicalPopupNoticeSection .mps-close-btn{
+      border:0;
+      background:transparent;
+      color:inherit;
+      padding:8px 0;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight:600;
+      letter-spacing:-.04em;
+      transition:opacity .24s ease, transform .24s var(--mps-ease);
+      appearance:none;
+      -webkit-appearance:none;
+      outline:none;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      white-space:nowrap;
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn:hover,
+    #medicalPopupNoticeSection .mps-close-btn:hover{
+      opacity:.86;
+      transform:translateY(-1px);
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn{
+      font-size:13px;
+    }
+
+    #medicalPopupNoticeSection .mps-close-btn{
+      font-size:0;
+      gap:0;
+    }
+
+    #medicalPopupNoticeSection .mps-check-circle{
+      width:20px;
+      height:20px;
+      flex:0 0 20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    #medicalPopupNoticeSection .mps-check-circle svg{
+      width:100%;
+      height:100%;
+      display:block;
+      overflow:visible;
+    }
+
+    #medicalPopupNoticeSection .mps-check-circle .ck-ring{
+      fill:none;
+      stroke:rgba(255,255,255,.75);
+      stroke-width:2;
+      transition:stroke .28s var(--mps-ease), fill .28s var(--mps-ease);
+    }
+
+    #medicalPopupNoticeSection .mps-check-circle .ck-mark{
+      fill:none;
+      stroke:rgba(255,255,255,.35);
+      stroke-width:2.2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      stroke-dasharray:18;
+      stroke-dashoffset:18;
+      transition:stroke-dashoffset .36s var(--mps-ease), stroke .28s var(--mps-ease);
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn.is-checked .ck-ring{
+      fill:#fff;
+      stroke:#fff;
+    }
+
+    #medicalPopupNoticeSection .mps-hide-btn.is-checked .ck-mark{
+      stroke:#111;
+      stroke-dashoffset:0;
+    }
+
+    #medicalPopupNoticeSection .mps-hide-label{
+      display:inline-flex;
+      align-items:center;
+      line-height:1.1;
+    }
+
+    #medicalPopupNoticeSection .mps-close-icon{
+      width:24px;
+      height:24px;
+      position:relative;
+      flex:0 0 auto;
+      color:#fff;
+    }
+
+    #medicalPopupNoticeSection .mps-close-icon::before,
+    #medicalPopupNoticeSection .mps-close-icon::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:26px;
+      height:2px;
+      background:currentColor;
+      border-radius:999px;
+      transform-origin:center;
+    }
+
+    #medicalPopupNoticeSection .mps-close-icon::before{
+      transform:translate(-50%,-50%) rotate(45deg);
+    }
+
+    #medicalPopupNoticeSection .mps-close-icon::after{
+      transform:translate(-50%,-50%) rotate(-45deg);
+    }
+
+    #medicalPopupNoticeSection.mps-hidden{
+      display:none !important;
+    }
+
+    #medicalPopupNoticeSection.mps-closing .mps-backdrop{
+      animation:mps_backdropOut .36s var(--mps-ease) forwards;
+    }
+
+    #medicalPopupNoticeSection.mps-closing .mps-dialog{
+      animation:mps_fadeOutDown .36s var(--mps-ease) forwards;
+    }
+
+    @keyframes mps_fadeInUp{
+      from{opacity:0;transform:translateY(26px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+    @keyframes mps_fadeOutDown{
+      from{opacity:1;transform:translateY(0);}
+      to{opacity:0;transform:translateY(30px);}
+    }
+
+    @keyframes mps_backdropIn{
+      from{opacity:0;}
+      to{opacity:1;}
+    }
+
+    @keyframes mps_backdropOut{
+      from{opacity:1;}
+      to{opacity:0;}
+    }
+
+    /* 모바일 overlay 중앙 정렬 */
+    @media (max-width: 860px){
+      #medicalPopupNoticeSection .mps-overlay{
+        padding:20px;
+        align-items:center;
+        justify-content:center;
+      }
+      #medicalPopupNoticeSection .mps-card{
+        justify-content:center;
+      }
+      #medicalPopupNoticeSection .mps-footer{
+        padding:0 10px;
+        gap:8px;
+      }
+      #medicalPopupNoticeSection .mps-hide-btn{
+        font-size:11px;
+        gap:6px;
+        padding:6px 0;
+      }
+      #medicalPopupNoticeSection .mps-check-circle{
+        width:16px;
+        height:16px;
+        flex-basis:16px;
+      }
+      #medicalPopupNoticeSection .mps-close-btn{
+        padding:6px 0 6px 6px;
+      }
+      #medicalPopupNoticeSection .mps-close-icon{
+        width:18px;
+        height:18px;
+      }
+      #medicalPopupNoticeSection .mps-close-icon::before,
+      #medicalPopupNoticeSection .mps-close-icon::after{
+        width:18px;
+      }
+    }
+
+    @media (max-width: 420px){
+      #medicalPopupNoticeSection .mps-footer{
+        padding:0 8px;
+        gap:6px;
+      }
+      #medicalPopupNoticeSection .mps-hide-btn{
+        font-size:10px;
+        gap:5px;
+      }
+      #medicalPopupNoticeSection .mps-close-icon{
+        width:16px;
+        height:16px;
+      }
+      #medicalPopupNoticeSection .mps-close-icon::before,
+      #medicalPopupNoticeSection .mps-close-icon::after{
+        width:16px;
+      }
+    }
+
+    /* ===== CMS 추가 ===== */
+    #medicalPopupNoticeSection[data-align="center"] .mps-overlay { justify-content: center; padding: 24px; }
+    #medicalPopupNoticeSection[data-align="center"] .mps-card { justify-content: center; }
+    #medicalPopupNoticeSection .mps-footer-center { color: rgba(255,255,255,.72); font-weight: 700; font-size: 12px; letter-spacing: .04em; }
+    #medicalPopupNoticeSection .mps-footer-center:empty { visibility: hidden; }
+    #medicalPopupNoticeSection .mps-text {
+      display: block; background: #fff; color: #0b1220; line-height: 1.6; padding: 28px 24px; overflow-y: auto;
+      font-size: 14px; word-break: keep-all; text-decoration: none;
+    }
+    #medicalPopupNoticeSection .mps-text h3 { margin: 0 0 10px; font-size: 20px; font-weight: 900; letter-spacing: -.03em; line-height: 1.3; }
+    #medicalPopupNoticeSection .mps-text p { margin: 0; color: rgba(11,18,32,.72); }
+    #medicalPopupNoticeSection .mps-text .mps-more { display: inline-block; margin-top: 14px; font-weight: 800; color: #0a6a62; }
   </style>
-  <div class="hlp-backdrop"><div class="hlp-rail"></div></div>
+
+  <div class="mps-backdrop" aria-hidden="true"></div>
+
+  <div class="mps-overlay">
+    <div class="mps-dialog" data-mps-dialog role="dialog" aria-modal="true" aria-label="공지 팝업">
+      <div class="mps-slider-wrap">
+        <div class="mps-track" data-mps-track></div>
+      </div>
+    </div>
+  </div>
 
   <script>
-    (function () {
-      var root = document.getElementById('htuLayerPopup');
-      if (!root || root.__htuInit) return;
-      root.__htuInit = true;
+    (function(){
+      var S = document.getElementById('medicalPopupNoticeSection');
+      if(!S || S.__mpsBound) return;
+      S.__mpsBound = true;
 
-      function htuCms() {
-        if (window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
-        if (!window.__htuCmsP) {
+      function htuCms(){
+        if(window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
+        if(!window.__htuCmsP){
           var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
-          window.__htuCmsP = fetch(ep, { credentials: 'omit' })
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .catch(function () { return null; });
+          window.__htuCmsP = fetch(ep, { credentials:'omit' })
+            .then(function(r){ return r.ok ? r.json() : null; })
+            .catch(function(){ return null; });
         }
         return window.__htuCmsP;
       }
-      function esc(s) {
-        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      function esc(s){
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+          return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
         });
       }
-      function today() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
-      function hidden(id) { try { return localStorage.getItem('htu_popup_hide_' + id) === today(); } catch (e) { return false; } }
-      function hideToday(id) { try { localStorage.setItem('htu_popup_hide_' + id, today()); } catch (e) {} }
 
-      htuCms().then(function (data) {
+      var KEY = 'medicalPopupNoticeSectionHideUntil';
+      function isHiddenToday(){
+        try{ var v = localStorage.getItem(KEY); return v && Number(v) > Date.now(); }catch(e){ return false; }
+      }
+      if(isHiddenToday()) return;
+
+      htuCms().then(function(data){
+        data = data || {};
+        var st = (data.settings && data.settings.popup) || {};
         var now = Date.now();
-        var list = ((data && data.popups) || []).filter(function (p) {
-          if (p.starts_at && new Date(p.starts_at).getTime() > now) return false;
-          if (p.ends_at && new Date(p.ends_at).getTime() < now) return false;
-          return !hidden(p.id);
+        var list = (data.popups || []).filter(function(p){
+          if(p.starts_at && new Date(p.starts_at).getTime() > now) return false;
+          if(p.ends_at && new Date(p.ends_at).getTime() < now) return false;
+          return true;
         });
-        if (!list.length) return;
+        if(!list.length) return;
+        build(list, st);
+      });
 
-        var rail = root.querySelector('.hlp-rail');
-        rail.innerHTML = list.map(function (p) {
+      function build(list, st){
+        S.setAttribute('data-align', st.align === 'center' ? 'center' : 'left');
+        var CHECK = '<span class="mps-check-circle" aria-hidden="true"><svg viewBox="0 0 34 34"><circle class="ck-ring" cx="17" cy="17" r="15.5"></circle><polyline class="ck-mark" points="10.5,17.5 14.8,22 23.5,12.5"></polyline></svg></span>';
+
+        S.querySelector('[data-mps-track]').innerHTML = list.map(function(p, n){
           var target = p.link_new_tab ? ' target="_blank" rel="noopener noreferrer"' : '';
-          var media = '';
-          if (p.image_url) {
-            var img = '<img src="' + esc(p.image_url) + '" alt="' + esc(p.title || '팝업 이미지') + '">';
-            media = p.link_url ? '<a class="hlp-media" href="' + esc(p.link_url) + '"' + target + '>' + img + '</a>' : '<div class="hlp-media">' + img + '</div>';
+          var media;
+          if(p.image_url){
+            var img = '<img class="mps-card-image" src="' + esc(p.image_url) + '" alt="' + esc(p.title || ('팝업 이미지 ' + (n + 1))) + '" data-mps-img>';
+            media = p.link_url
+              ? '<a class="mps-card-link" href="' + esc(p.link_url) + '"' + target + ' aria-label="' + esc(p.title || '팝업') + '">' + img + '</a>'
+              : '<div class="mps-card-link">' + img + '</div>';
+          }else{
+            var inner = (p.title ? '<h3>' + esc(p.title) + '</h3>' : '') + (p.body_html ? '<p>' + p.body_html + '</p>' : '') +
+              (p.link_url ? '<span class="mps-more">' + esc(p.link_label || '자세히 보기') + ' →</span>' : '');
+            media = p.link_url
+              ? '<a class="mps-text" data-mps-text href="' + esc(p.link_url) + '"' + target + '>' + inner + '</a>'
+              : '<div class="mps-text" data-mps-text>' + inner + '</div>';
           }
-          var body = '';
-          if (p.title || p.body_html || (p.link_url && !p.image_url)) {
-            body = '<div class="hlp-body">' +
-              (p.title ? '<h3 class="hlp-title">' + esc(p.title) + '</h3>' : '') +
-              (p.body_html ? '<p class="hlp-text">' + p.body_html + '</p>' : '') +
-              (p.link_url ? '<a class="hlp-link" href="' + esc(p.link_url) + '"' + target + '>' + esc(p.link_label || '자세히 보기') + '</a>' : '') +
-              '</div>';
-          }
-          return '<div class="hlp-card" role="dialog" aria-label="' + esc(p.title || '공지 팝업') + '" data-id="' + esc(p.id) + '">' + media + body +
-            '<div class="hlp-foot"><button type="button" data-act="today">오늘 하루 보지 않기</button><button type="button" data-act="close">닫기</button></div></div>';
+          return '<article class="mps-card"><div class="mps-card-frame" data-mps-frame>' + media +
+            '<div class="mps-footer">' +
+              '<div class="mps-footer-left"><button class="mps-hide-btn" type="button" data-mps-hide aria-pressed="false" title="오늘 하루 팝업 보지 않기">' + CHECK + '<span class="mps-hide-label">오늘 보지 않기</span></button></div>' +
+              '<div class="mps-footer-center">' + (list.length > 1 ? (n + 1) + ' / ' + list.length : '') + '</div>' +
+              '<div class="mps-footer-right"><button class="mps-close-btn" type="button" data-mps-close aria-label="닫기"><span class="mps-close-icon" aria-hidden="true"></span></button></div>' +
+            '</div></div></article>';
         }).join('');
 
-        function closeCard(card) {
-          card.remove();
-          if (!rail.children.length) root.classList.remove('is-open');
+        init(st);
+      }
+
+      /* ===== 아래부터 원본 팝업 로직 ===== */
+      function init(st){
+        var CFG = window.MPS_CONFIG || {
+          PC:     { maxW: Number(st.pc_max_w) || 540, maxH: Number(st.pc_max_h) || 720, footerH: 88 },
+          TABLET: { maxW: 340, maxH: 490, footerH: 72 },
+          MOBILE: { maxW: 320, maxH: 630, footerH: 70 }
+        };
+        var PC = CFG.PC, TABLET = CFG.TABLET, MOBILE = CFG.MOBILE;
+        function getSize(){
+          var w = window.innerWidth;
+          if(w <= 420) return MOBILE;
+          if(w <= 860) return TABLET;
+          return PC;
         }
-        rail.addEventListener('click', function (e) {
-          var btn = e.target.closest('button[data-act]');
-          if (!btn) return;
-          var card = btn.closest('.hlp-card');
-          if (btn.getAttribute('data-act') === 'today') hideToday(card.getAttribute('data-id'));
-          closeCard(card);
+
+        var track    = S.querySelector('[data-mps-track]');
+        var cards    = [].slice.call(S.querySelectorAll('.mps-card'));
+        var hideBtns = [].slice.call(S.querySelectorAll('[data-mps-hide]'));
+        var closeBtns= [].slice.call(S.querySelectorAll('[data-mps-close]'));
+        var backdrop = S.querySelector('.mps-backdrop');
+        var idx = 0, perView = 1, maxIdx = 0, hideChecked = false;
+
+        function fitFrames(){
+          var size = getSize();
+          var maxW = size.maxW, footerH = size.footerH, imgMaxH = size.maxH - footerH;
+          [].slice.call(S.querySelectorAll('[data-mps-frame]')).forEach(function(frame){
+            var img    = frame.querySelector('[data-mps-img]');
+            var text   = frame.querySelector('[data-mps-text]');
+            var footer = frame.querySelector('.mps-footer');
+            if(footer) footer.style.height = footerH + 'px';
+            if(text){
+              frame.style.width = maxW + 'px';
+              text.style.maxHeight = imgMaxH + 'px';
+              return;
+            }
+            if(!img) return;
+            var nw = img.naturalWidth  || maxW;
+            var nh = img.naturalHeight || imgMaxH;
+            var ratio = nw / nh;
+            var fitW = maxW, fitH = fitW / ratio;
+            if(fitH > imgMaxH){ fitH = imgMaxH; fitW = fitH * ratio; }
+            fitW = Math.floor(fitW); fitH = Math.floor(fitH);
+            frame.style.width = fitW + 'px';
+            img.style.width   = fitW + 'px';
+            img.style.height  = fitH + 'px';
+          });
+        }
+
+        function waitImagesAndFit(){
+          var imgs = [].slice.call(S.querySelectorAll('[data-mps-img]'));
+          var loaded = 0, total = imgs.length;
+          function done(){ fitFrames(); render(); S.classList.remove('mps-hidden'); }
+          if(total === 0){ done(); return; }
+          function check(){ loaded++; if(loaded >= total) done(); }
+          imgs.forEach(function(img){
+            if(img.complete && img.naturalWidth > 0) check();
+            else{ img.addEventListener('load', check, {once:true}); img.addEventListener('error', check, {once:true}); }
+          });
+        }
+
+        function saveHideToday(){
+          try{ var d = new Date(); d.setHours(23,59,59,999); localStorage.setItem(KEY, String(d.getTime())); }catch(e){}
+        }
+        function closePopup(){
+          if(hideChecked) saveHideToday();
+          S.classList.add('mps-closing');
+          setTimeout(function(){ S.classList.remove('mps-closing'); S.classList.add('mps-hidden'); }, 360);
+        }
+        function calc(){ perView = 1; maxIdx = Math.max(0, cards.length - perView); if(idx > maxIdx) idx = maxIdx; }
+        function render(){
+          calc();
+          var w = cards[0] ? cards[0].getBoundingClientRect().width : 0;
+          track.style.transform = 'translate3d(' + (-(w) * idx) + 'px,0,0)';
+        }
+
+        var sliderWrap = S.querySelector('.mps-slider-wrap');
+        var dragState = { active:false, startX:0, startY:0, currentX:0, baseOffset:0, dirLocked:false, isHorizontal:false, moved:false };
+        var SWIPE_THRESHOLD = 40;
+        function getBaseOffset(){ var w = cards[0] ? cards[0].getBoundingClientRect().width : 0; return -(w) * idx; }
+        function setTrackPos(px){ track.style.transform = 'translate3d(' + px + 'px,0,0)'; }
+
+        function onDragStart(x, y){
+          if(cards.length <= 1) return;
+          dragState.active = true; dragState.startX = x; dragState.startY = y; dragState.currentX = x;
+          dragState.baseOffset = getBaseOffset(); dragState.dirLocked = false; dragState.isHorizontal = false; dragState.moved = false;
+          track.classList.add('is-dragging'); sliderWrap.classList.add('is-dragging');
+        }
+        function onDragMove(x, y, evt){
+          if(!dragState.active) return;
+          var dx = x - dragState.startX, dy = y - dragState.startY;
+          if(!dragState.dirLocked && (Math.abs(dx) > 8 || Math.abs(dy) > 8)){
+            dragState.dirLocked = true; dragState.isHorizontal = Math.abs(dx) >= Math.abs(dy);
+          }
+          if(dragState.dirLocked && !dragState.isHorizontal) return;
+          if(dragState.dirLocked && dragState.isHorizontal){ dragState.moved = true; if(evt.cancelable) evt.preventDefault(); }
+          dragState.currentX = x;
+          var raw = dx;
+          if((idx <= 0 && raw > 0) || (idx >= maxIdx && raw < 0)) raw = raw * 0.3;
+          setTrackPos(dragState.baseOffset + raw);
+        }
+        function onDragEnd(){
+          if(!dragState.active) return;
+          dragState.active = false;
+          track.classList.remove('is-dragging'); sliderWrap.classList.remove('is-dragging');
+          var dx = dragState.currentX - dragState.startX;
+          if(Math.abs(dx) > SWIPE_THRESHOLD){
+            if(dx < 0 && idx < maxIdx) idx++;
+            else if(dx > 0 && idx > 0) idx--;
+          }
+          render();
+        }
+
+        sliderWrap.addEventListener('touchstart', function(e){ if(e.touches.length !== 1) return; onDragStart(e.touches[0].clientX, e.touches[0].clientY); }, {passive:true});
+        sliderWrap.addEventListener('touchmove', function(e){ if(e.touches.length !== 1) return; onDragMove(e.touches[0].clientX, e.touches[0].clientY, e); }, {passive:false});
+        sliderWrap.addEventListener('touchend', onDragEnd, {passive:true});
+        sliderWrap.addEventListener('touchcancel', onDragEnd, {passive:true});
+        sliderWrap.addEventListener('mousedown', function(e){
+          if(cards.length <= 1 || e.target.closest('button')) return;
+          e.preventDefault(); onDragStart(e.clientX, e.clientY);
         });
-        root.querySelector('.hlp-backdrop').addEventListener('click', function (e) {
-          if (e.target === e.currentTarget) root.classList.remove('is-open');
+        document.addEventListener('mousemove', function(e){ if(!dragState.active) return; onDragMove(e.clientX, e.clientY, e); });
+        document.addEventListener('mouseup', onDragEnd);
+        /* 드래그 직후 링크 클릭 방지 */
+        track.addEventListener('click', function(e){
+          if(dragState.moved && e.target.closest('a')){ e.preventDefault(); dragState.moved = false; }
+        }, true);
+
+        if(backdrop) backdrop.addEventListener('click', function(e){ e.preventDefault(); closePopup(); });
+
+        /* '오늘 보지 않기' 는 모든 카드에서 같은 상태로 동기화 */
+        hideBtns.forEach(function(btn){
+          btn.addEventListener('click', function(e){
+            e.preventDefault(); e.stopPropagation();
+            hideChecked = !hideChecked;
+            hideBtns.forEach(function(b){
+              b.classList.toggle('is-checked', hideChecked);
+              b.setAttribute('aria-pressed', hideChecked ? 'true' : 'false');
+            });
+          });
         });
-        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') root.classList.remove('is-open'); });
-        setTimeout(function () { root.classList.add('is-open'); }, 400);
-      });
+        closeBtns.forEach(function(btn){ btn.addEventListener('click', function(e){ e.preventDefault(); closePopup(); }); });
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !S.classList.contains('mps-hidden')) closePopup(); });
+
+        var resizeTimer;
+        window.addEventListener('resize', function(){
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function(){ fitFrames(); render(); }, 100);
+        }, {passive:true});
+
+        waitImagesAndFit();
+      }
     })();
   </script>
 </section>

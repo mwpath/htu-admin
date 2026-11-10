@@ -1,0 +1,705 @@
+<!--
+  [HTU CMS 섹션] intro-hero.html
+  다른 사이트(아임웹/카페24/정적 HTML 등)에 붙여넣을 때는 이 섹션들보다 위쪽에 아래 한 줄을 1회만 넣어주세요.
+  <script>window.HTU_CMS_ENDPOINT = 'https://관리자-배포-도메인';</script>
+  내용 수정은 관리자 페이지(/admin)에서 하면 자동 반영됩니다.
+-->
+<section id="nwHero" aria-label="HTU Intro Hero" data-video-pos="center">
+  <style>
+    /* ================= Scope: #nwHero only ================= */
+    #nwHero {
+      --ink: #ffffff;
+      --muted: rgba(255, 255, 255, .88);
+      --slideDur: 8000ms;
+      font-family: Pretendard, "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+      background: #000;
+    }
+
+    /* ✅ Slides */
+    #nwHero .slides {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      z-index: 1;
+    }
+
+    #nwHero .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 900ms ease;
+      overflow: hidden;
+      background: #000;
+      z-index: 1;
+    }
+
+    #nwHero .slide.active {
+      opacity: 1;
+      z-index: 2;
+    }
+
+    /* ✅ Media */
+    #nwHero .media {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    /* Images */
+    #nwHero .slide img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      animation: none;
+      transform-origin: center;
+    }
+
+    /* ===== Cover (Vimeo + Local Video 공용) ===== */
+    #nwHero .vimeoCover {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #nwHero .vimeoPoster {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center center;
+      opacity: 1;
+      transform: scale(1.05);
+      transition: opacity 140ms ease;
+      will-change: opacity, transform;
+      z-index: 3;
+    }
+
+    #nwHero .slide.active .vimeoPoster {
+      animation: nwPosterZoom 3.5s ease-out forwards;
+    }
+
+    @keyframes nwPosterZoom {
+      from {
+        transform: scale(1.05);
+      }
+
+      to {
+        transform: scale(1.18);
+      }
+    }
+
+    #nwHero .vimeoFrame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 160ms ease;
+      will-change: opacity;
+      background: #000;
+    }
+
+    /* ✅ Vimeo iframe */
+    #nwHero .vimeoFrame iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vw;
+      height: 56.25vw;
+      min-width: 177.78vh;
+      min-height: 100vh;
+      border: 0;
+      pointer-events: none;
+    }
+
+    /* ✅ Local video */
+    #nwHero .vimeoFrame video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #000;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    /* pos */
+    #nwHero[data-video-pos="left"] .vimeoFrame iframe {
+      left: 35%;
+    }
+
+    #nwHero[data-video-pos="center"] .vimeoFrame iframe {
+      left: 50%;
+    }
+
+    #nwHero[data-video-pos="right"] .vimeoFrame iframe {
+      left: 65%;
+    }
+
+    #nwHero[data-video-pos="left"] .vimeoPoster {
+      background-position: 20% 50%;
+    }
+
+    #nwHero[data-video-pos="center"] .vimeoPoster {
+      background-position: 50% 50%;
+    }
+
+    #nwHero[data-video-pos="right"] .vimeoPoster {
+      background-position: 80% 50%;
+    }
+
+    /* ✅ ready */
+    #nwHero .slide.video-ready .vimeoPoster {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #nwHero .slide.video-ready .vimeoFrame {
+      opacity: 1;
+    }
+
+    /* ===== Vignette ===== */
+    #nwHero .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    #nwHero .vignette::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120% 100% at 20% 60%,
+          rgba(0, 0, 0, .45) 0%,
+          rgba(0, 0, 0, .25) 45%,
+          rgba(0, 0, 0, .08) 70%,
+          rgba(0, 0, 0, 0) 100%);
+    }
+
+    /* ===== Text ===== */
+    #nwHero .content {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      max-width: min(820px, 78vw);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    #nwHero .eyebrow,
+    #nwHero .title {
+      opacity: 0;
+      transform: translateY(30px);
+      will-change: opacity, transform;
+    }
+
+    #nwHero .title {
+      transform: translateY(40px);
+      text-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    }
+
+    #nwHero .eyebrow {
+      font-family: 'Presentation-5';
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    #nwHero .title {
+      font-size: 3.3rem;
+      font-weight: 800;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    #nwHero .content.text-in .eyebrow {
+      animation: textFadeEyebrow 1s ease forwards;
+    }
+
+    #nwHero .content.text-in .title {
+      animation: textFadeTitle 1.2s ease forwards;
+    }
+
+    @keyframes textFadeEyebrow {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes textFadeTitle {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ✅ Dock 비활성화 */
+    #nwHero .dock {
+      display: none !important;
+    }
+
+    /* ✅ Scroll Indicator - 3 arrows only */
+    #nwHero .scrollHint {
+      position: absolute;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%);
+      z-index: 12;
+      width: 44px;
+      height: 78px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      user-select: none;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      padding: 0;
+      opacity: 1;
+      transition: opacity .35s ease, transform .35s ease;
+    }
+
+    #nwHero .scrollHint:hover {
+      transform: translateX(-50%) translateY(2px);
+    }
+
+    #nwHero .scrollHint .arrow {
+      width: 24px;
+      height: 14px;
+      display: block;
+      opacity: .28;
+      animation: nwChevronCascade 1.8s ease-in-out infinite;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .28));
+    }
+
+    #nwHero .scrollHint .arrow svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      stroke: rgba(255, 255, 255, .96);
+      stroke-width: 2.2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #nwHero .scrollHint .arrow:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    #nwHero .scrollHint .arrow:nth-child(2) {
+      animation-delay: .18s;
+    }
+
+    #nwHero .scrollHint .arrow:nth-child(3) {
+      animation-delay: .36s;
+    }
+
+    @keyframes nwChevronCascade {
+      0% {
+        opacity: .12;
+        transform: translateY(-4px);
+      }
+
+      25% {
+        opacity: .95;
+        transform: translateY(0);
+      }
+
+      50% {
+        opacity: .45;
+        transform: translateY(4px);
+      }
+
+      100% {
+        opacity: .12;
+        transform: translateY(8px);
+      }
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width:768px) {
+      #nwHero .title {
+        font-size: 1.55rem;
+        padding-top: 20px;
+      }
+
+      #nwHero .scrollHint {
+        bottom: 20px;
+        width: 40px;
+        height: 70px;
+      }
+
+      #nwHero .scrollHint .arrow {
+        width: 22px;
+        height: 12px;
+      }
+    }
+
+    /* ===== CMS 추가 ===== */
+    #nwHero[data-empty] { display: none; }
+  </style>
+
+  <div class="slides"></div>
+
+  <div class="vignette"></div>
+  <div class="content">
+    <span class="eyebrow"></span>
+    <h2 class="title"></h2>
+  </div>
+
+  <button class="scrollHint" type="button" aria-label="아래로 스크롤">
+    <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 12"><path d="M3 2l9 8 9-8"></path></svg></span>
+    <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 12"><path d="M3 2l9 8 9-8"></path></svg></span>
+    <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 12"><path d="M3 2l9 8 9-8"></path></svg></span>
+  </button>
+
+  <script>
+    (function () {
+      var root = document.querySelector('#nwHero');
+      if (!root || root.__htuInit) return;
+      root.__htuInit = true;
+
+      function htuCms() {
+        if (window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
+        if (!window.__htuCmsP) {
+          var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
+          window.__htuCmsP = fetch(ep, { credentials: 'omit' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; });
+        }
+        return window.__htuCmsP;
+      }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function loadVimeoApi() {
+        if (window.Vimeo && window.Vimeo.Player) return Promise.resolve();
+        if (window.__nwVimeoP) return window.__nwVimeoP;
+        window.__nwVimeoP = new Promise(function (resolve) {
+          var s = document.createElement('script');
+          s.src = 'https://player.vimeo.com/api/player.js';
+          s.onload = resolve;
+          s.onerror = resolve;
+          document.head.appendChild(s);
+        });
+        return window.__nwVimeoP;
+      }
+
+      /* 스크롤 힌트 → 다음 섹션으로 */
+      root.querySelector('.scrollHint').addEventListener('click', function () {
+        var r = root.getBoundingClientRect();
+        window.scrollTo({ top: r.bottom + window.pageYOffset, behavior: 'smooth' });
+      });
+
+      htuCms().then(function (data) {
+        data = data || {};
+        var st = (data.settings && data.settings.intro) || {};
+        var list = data.intro || [];
+        if (!list.length) { root.setAttribute('data-empty', ''); return; }
+        if (st.video_pos) root.setAttribute('data-video-pos', st.video_pos);
+        if (st.show_scroll_hint === false) root.querySelector('.scrollHint').style.display = 'none';
+        render(list);
+        var needVimeo = list.some(function (s) { return s.type === 'video'; });
+        (needVimeo ? loadVimeoApi() : Promise.resolve()).then(function () { start(Number(st.duration) || 6000); });
+      });
+
+      function render(list) {
+        root.querySelector('.slides').innerHTML = list.map(function (s, n) {
+          var frame = '';
+          if (s.type === 'local-video') {
+            frame = '<video muted playsinline webkit-playsinline autoplay loop preload="auto" style="width:100%;height:100%;object-fit: cover;"></video>';
+          } else if (s.type === 'video') {
+            frame = '<iframe src="https://player.vimeo.com/video/' + esc(s.vimeo_id) +
+              '?background=1&mute=1&muted=1&autoplay=1&loop=1&playsinline=1&autopause=0" allow="autoplay; fullscreen" title="' + esc(s.eyebrow || 'video') + ' ' + (n + 1) + '"></iframe>';
+          }
+          return '<div class="slide" data-type="' + esc(s.type) + '" data-poster="' + esc(s.poster_url || '') + '"' +
+            (s.type === 'local-video' ? ' data-local-src="' + esc(s.video_url) + '"' : '') + '>' +
+            '<div class="media"><div class="vimeoCover">' +
+              '<div class="vimeoPoster" aria-hidden="true"></div>' +
+              '<div class="vimeoFrame" aria-hidden="true">' + frame + '</div>' +
+            '</div></div></div>';
+        }).join('');
+
+        var slideEls = root.querySelectorAll('.slide');
+        list.forEach(function (s, n) {
+          slideEls[n].dataset.eyebrow = s.eyebrow ? esc(s.eyebrow) : '';
+          slideEls[n].dataset.title = s.title_html || '';
+          /* 이미지 슬라이드: 포스터를 바로 보이게 */
+          if (s.type === 'image') slideEls[n].dataset.videoReadyOnce = '0';
+        });
+      }
+
+      /* ===== 아래부터 원본 슬라이드 로직 (재생 감시 포함) ===== */
+      function start(DUR) {
+        var slides = Array.from(root.querySelectorAll('.slide'));
+        var content = root.querySelector('.content');
+        var eyebrow = root.querySelector('.eyebrow');
+        var title = root.querySelector('.title');
+
+        var i = 0;
+        var timer = null;
+        var playerMap = new Map();
+        var localVideoMap = new Map();
+        var userUnlocked = false;
+        var watchdog = null;
+        var lastKick = 0;
+
+        function isVisible() { return document.visibilityState === 'visible' && !document.hidden; }
+
+        function injectPreloadVideoOnce(href) {
+          try {
+            if (!href) return;
+            var head = document.head || document.getElementsByTagName('head')[0];
+            if (!head) return;
+            var key = 'nw-preload-' + href;
+            if (document.getElementById(key)) return;
+            var link = document.createElement('link');
+            link.id = key; link.rel = 'preload'; link.as = 'video'; link.href = href; link.type = 'video/mp4';
+            link.setAttribute('fetchpriority', 'high');
+            head.appendChild(link);
+          } catch (e) { }
+        }
+
+        function updateText(slide) {
+          eyebrow.innerHTML = slide.dataset.eyebrow || '';
+          title.innerHTML = slide.dataset.title || '';
+          content.classList.remove('text-in');
+          void content.offsetWidth;
+          content.classList.add('text-in');
+        }
+
+        function setPoster(slide) {
+          var posterUrl = slide.dataset.poster || '';
+          var posterEl = slide.querySelector('.vimeoPoster');
+          if (posterEl && posterUrl && !posterEl.style.backgroundImage) {
+            posterEl.style.backgroundImage = 'url("' + posterUrl.replace(/"/g, '%22') + '")';
+          }
+        }
+
+        function markVideoReadyOnce(slide) {
+          slide.dataset.videoReadyOnce = '1';
+          slide.classList.add('video-ready');
+        }
+
+        function ensureLocalVideo(slide) {
+          if (localVideoMap.has(slide)) return localVideoMap.get(slide);
+          var video = slide.querySelector('video');
+          if (!video) return null;
+
+          video.muted = true; video.defaultMuted = true; video.playsInline = true;
+          video.loop = true; video.autoplay = true; video.preload = 'auto';
+          video.setAttribute('playsinline', ''); video.setAttribute('webkit-playsinline', '');
+          video.setAttribute('muted', ''); video.setAttribute('autoplay', ''); video.setAttribute('loop', '');
+          video.setAttribute('preload', 'auto'); video.setAttribute('fetchpriority', 'high');
+          video.setAttribute('x5-playsinline', ''); video.setAttribute('x-webkit-airplay', 'deny');
+          try { video.disablePictureInPicture = true; } catch (e) { }
+
+          var src = slide.dataset.localSrc || '';
+          if (src && !video.getAttribute('src')) video.setAttribute('src', src);
+
+          var onReady = function () { markVideoReadyOnce(slide); };
+          try {
+            if (typeof video.requestVideoFrameCallback === 'function') {
+              video.requestVideoFrameCallback(function () { markVideoReadyOnce(slide); });
+            }
+          } catch (e) { }
+          video.addEventListener('loadeddata', onReady, { once: true });
+          video.addEventListener('canplay', onReady, { once: true });
+          video.addEventListener('playing', onReady, { once: true });
+
+          video.addEventListener('pause', function () {
+            if (!slide.classList.contains('active')) return;
+            if (!isVisible()) return;
+            var now = Date.now();
+            if (now - lastKick < 600) return;
+            lastKick = now;
+            tryPlayLocal({ video: video }).catch(function () { });
+          });
+
+          try { video.load(); } catch (e) { }
+          var entry = { video: video };
+          localVideoMap.set(slide, entry);
+          return entry;
+        }
+
+        function tryPlayLocal(entry) {
+          return new Promise(function (resolve) {
+            try {
+              if (entry.video && entry.video.readyState < 2) { try { entry.video.load(); } catch (e) { } }
+              var p = entry.video.play();
+              if (p && typeof p.then === 'function') p.then(function () { resolve(true); }, function () { resolve(false); });
+              else resolve(true);
+            } catch (e) { resolve(false); }
+          });
+        }
+
+        function playLocalVideo(slide) {
+          if (slide.dataset.videoReadyOnce === '1') slide.classList.add('video-ready');
+          else setPoster(slide);
+          var src = slide.dataset.localSrc || '';
+          if (src) injectPreloadVideoOnce(src);
+          var entry = ensureLocalVideo(slide);
+          if (entry) tryPlayLocal(entry);
+        }
+
+        function pauseLocalVideo(slide) {
+          var entry = localVideoMap.get(slide);
+          if (entry && entry.video) { try { entry.video.pause(); } catch (e) { } }
+          if (slide.dataset.videoReadyOnce !== '1') slide.classList.remove('video-ready');
+        }
+
+        function ensureVimeoPlayer(slide) {
+          if (playerMap.has(slide)) return playerMap.get(slide);
+          var iframe = slide.querySelector('iframe');
+          if (!iframe || !window.Vimeo) return null;
+          var player = new Vimeo.Player(iframe);
+          player.setVolume(0).catch(function () { });
+          player.on('playing', function () { markVideoReadyOnce(slide); });
+          var entry = { player: player, readyPromise: player.ready().catch(function () { return null; }) };
+          playerMap.set(slide, entry);
+          return entry;
+        }
+
+        function tryPlayVimeo(entry, slide) {
+          return entry.player.play().then(function () {
+            entry.player.getPaused().then(function (paused) { if (!paused) markVideoReadyOnce(slide); });
+            return true;
+          }, function () { return false; });
+        }
+
+        function playVimeo(slide) {
+          if (slide.dataset.videoReadyOnce === '1') slide.classList.add('video-ready');
+          else setPoster(slide);
+          var entry = ensureVimeoPlayer(slide);
+          if (!entry) return;
+          entry.readyPromise.then(function () { tryPlayVimeo(entry, slide); });
+        }
+
+        function pauseVimeo(slide) {
+          var entry = playerMap.get(slide);
+          if (entry) entry.player.pause().catch(function () { });
+          if (slide.dataset.videoReadyOnce !== '1') slide.classList.remove('video-ready');
+        }
+
+        function playSlide(s) {
+          if (s.dataset.type === 'local-video') playLocalVideo(s);
+          else if (s.dataset.type === 'video') playVimeo(s);
+          else setPoster(s);
+        }
+        function pauseSlide(s) {
+          if (s.dataset.type === 'local-video') pauseLocalVideo(s);
+          else if (s.dataset.type === 'video') pauseVimeo(s);
+        }
+
+        function show(n) {
+          i = (n + slides.length) % slides.length;
+          slides.forEach(function (s, idx) {
+            var active = (idx === i);
+            s.classList.toggle('active', active);
+            if (active) { updateText(s); playSlide(s); }
+            else pauseSlide(s);
+          });
+        }
+
+        function nextSlide() { show(i + 1); }
+
+        function unlockAndPlay() {
+          if (userUnlocked) return;
+          userUnlocked = true;
+          var active = slides[i];
+          if (active) playSlide(active);
+        }
+
+        function startWatchdog() {
+          if (watchdog) clearInterval(watchdog);
+          watchdog = setInterval(function () {
+            if (!isVisible()) return;
+            var active = slides[i];
+            if (!active || !active.classList.contains('active')) return;
+            if (active.dataset.type === 'local-video') {
+              var entry = localVideoMap.get(active) || ensureLocalVideo(active);
+              if (!entry || !entry.video) return;
+              var v = entry.video;
+              var shouldResume = v.paused && !v.ended && !v.seeking && (v.currentTime > 0 || v.readyState >= 2);
+              if (shouldResume) {
+                var now = Date.now();
+                if (now - lastKick < 900) return;
+                lastKick = now;
+                tryPlayLocal(entry);
+              }
+            }
+          }, 900);
+        }
+
+        slides.forEach(function (s, idx) {
+          setPoster(s);
+          if (s.dataset.type === 'local-video') {
+            var src = s.dataset.localSrc || '';
+            if (src) injectPreloadVideoOnce(src);
+            var entry = ensureLocalVideo(s);
+            if (entry && entry.video && idx === 0) {
+              try { entry.video.load(); } catch (e) { }
+              tryPlayLocal(entry);
+            }
+          } else if (s.dataset.type === 'video') {
+            ensureVimeoPlayer(s);
+          }
+        });
+
+        show(0);
+        if (slides.length > 1) timer = setInterval(nextSlide, DUR);
+        startWatchdog();
+
+        root.addEventListener('touchstart', unlockAndPlay, { passive: true, once: true });
+        root.addEventListener('pointerdown', unlockAndPlay, { passive: true, once: true });
+        root.addEventListener('click', unlockAndPlay, { passive: true, once: true });
+
+        function resume() { var a = slides[i]; if (a) playSlide(a); }
+        window.addEventListener('pageshow', resume);
+        window.addEventListener('focus', resume);
+        document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') resume(); });
+      }
+    })();
+  </script>
+</section>

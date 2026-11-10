@@ -1,6 +1,7 @@
 'use client';
 import PageHead from '@/components/admin/PageHead';
 import CollectionEditor from '@/components/admin/CollectionEditor';
+import SettingsForm from '@/components/admin/SettingsForm';
 
 const period = (r) => {
   const f = (d) => (d ? new Date(d).toLocaleDateString('ko-KR') : '');
@@ -12,6 +13,7 @@ export default function PopupsPage() {
   return (
     <>
       <PageHead title="메인 팝업" desc="홈페이지 접속 시 뜨는 레이어 팝업입니다. 여러 개를 동시에 띄울 수 있고, 방문자는 '오늘 하루 보지 않기'를 선택할 수 있습니다." />
+      <SettingsForm keys={['popup']} compact />
       <section className="adm-card">
         <CollectionEditor
           table="popups"
@@ -32,7 +34,7 @@ export default function PopupsPage() {
           }}
           fields={[
             { name: 'title', label: '팝업 제목', type: 'text', required: true },
-            { name: 'image_url', label: '팝업 이미지', type: 'image', folder: 'popups', help: '이미지만 있는 팝업도 가능합니다. (가로 800px 권장)' },
+            { name: 'image_url', label: '팝업 이미지', type: 'image', folder: 'popups', help: '이미지 팝업 권장 (세로형 포스터 OK). 이미지가 없으면 제목·문구 카드로 표시됩니다.' },
             { name: 'body', label: '팝업 문구', type: 'lite', rows: 4 },
             { name: 'link_url', label: '링크 주소', type: 'url', half: true, placeholder: 'https:// 또는 /notice/...' },
             { name: 'link_label', label: '링크 버튼 문구', type: 'text', half: true },
