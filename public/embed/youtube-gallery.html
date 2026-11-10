@@ -1,0 +1,822 @@
+<!--
+  [HTU CMS 섹션] youtube-gallery.html
+  다른 사이트(아임웹/카페24/정적 HTML 등)에 붙여넣을 때는 이 섹션들보다 위쪽에 아래 한 줄을 1회만 넣어주세요.
+  <script>window.HTU_CMS_ENDPOINT = 'https://관리자-배포-도메인';</script>
+  내용 수정은 관리자 페이지(/admin)에서 하면 자동 반영됩니다.
+-->
+<section id="youtubePopupGallerySection" aria-label="유튜브 영상 갤러리 섹션" style="position: relative;">
+  <style>    /* ===============================
+   Scope: #youtubePopupGallerySection ONLY
+   =============================== */
+    #youtubePopupGallerySection {
+      --bg: #ffffff;
+      --card: #ffffff;
+      --ink: #0b0b0b;
+      --muted: rgba(11, 11, 11, .62);
+      --subtle: rgba(11, 11, 11, .08);
+      --line: rgba(11, 11, 11, .10);
+      --accent: #0b5fff;
+      --radius: 18px;
+      --radius2: 14px;
+      --gap: 18px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .08);
+      --shadow2: 0 8px 22px rgba(0, 0, 0, .06);
+      font-family: Pretendard, "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      padding: 86px 20px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    #youtubePopupGallerySection * {
+      box-sizing: border-box;
+    }
+
+    #youtubePopupGallerySection .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    #youtubePopupGallerySection .head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    #youtubePopupGallerySection .head-left {
+      min-width: 0;
+    }
+
+    #youtubePopupGallerySection .head-left h2 {
+      margin: 0;
+      font-size: 34px;
+      font-weight: 950;
+      letter-spacing: -.04em;
+      line-height: 1.12;
+    }
+
+    #youtubePopupGallerySection .head-left p {
+      margin: 10px 0 0;
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.55;
+      max-width: 740px;
+    }
+
+    #youtubePopupGallerySection .head-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #youtubePopupGallerySection .head-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .92);
+      color: rgba(11, 11, 11, .86);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, .06);
+      transition: transform .14s ease, background .14s ease, border-color .14s ease, box-shadow .14s ease, opacity .14s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #youtubePopupGallerySection .head-btn svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    #youtubePopupGallerySection .head-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(11, 11, 11, .16);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, .08);
+    }
+
+    #youtubePopupGallerySection .head-btn:active {
+      transform: translateY(0px) scale(.98);
+    }
+
+    #youtubePopupGallerySection .head-btn[disabled] {
+      opacity: .35;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    #youtubePopupGallerySection .slider {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      border: 1px solid var(--subtle);
+      background: rgba(0, 0, 0, .015);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    #youtubePopupGallerySection .track {
+      position: relative;
+      min-height: 1px;
+      overflow: hidden;
+    }
+
+    #youtubePopupGallerySection .track.is-mobile {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--gap);
+    }
+
+    #youtubePopupGallerySection .page {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--gap);
+      min-height: 1px;
+      will-change: transform;
+      transition: transform .72s cubic-bezier(.22, .61, .36, 1);
+      backface-visibility: hidden;
+      transform: translate3d(0, 0, 0);
+    }
+
+    #youtubePopupGallerySection .page.is-abs {
+      position: absolute;
+      inset: 0;
+    }
+
+    #youtubePopupGallerySection .slide {
+      min-width: 0;
+    }
+
+    #youtubePopupGallerySection .slide-btn {
+      display: block;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      color: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #youtubePopupGallerySection .slide-btn:focus {
+      outline: 2px solid rgba(11, 95, 255, .42);
+      outline-offset: 2px;
+      border-radius: var(--radius2);
+    }
+
+    #youtubePopupGallerySection .video-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--card);
+      border: 1px solid var(--subtle);
+      border-radius: var(--radius2);
+      overflow: hidden;
+      color: inherit;
+      box-shadow: var(--shadow2);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    #youtubePopupGallerySection .video-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(11, 11, 11, .12);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .10);
+    }
+
+    #youtubePopupGallerySection .thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #youtubePopupGallerySection .thumb img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      object-position: center center;
+      transform: scale(1.001);
+      transition: transform .6s ease;
+    }
+
+    #youtubePopupGallerySection .video-card:hover .thumb img {
+      transform: scale(1.05);
+    }
+
+    #youtubePopupGallerySection .thumb::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, .02), rgba(0, 0, 0, .18));
+      pointer-events: none;
+    }
+
+    #youtubePopupGallerySection .play-badge {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 68px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(255, 0, 0, .92);
+      box-shadow: 0 18px 30px rgba(0, 0, 0, .18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    #youtubePopupGallerySection .play-badge::before {
+      content: "";
+      display: block;
+      margin-left: 3px;
+      width: 0;
+      height: 0;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 16px solid #fff;
+    }
+
+    #youtubePopupGallerySection .text {
+      padding: 18px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    #youtubePopupGallerySection .title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 950;
+      line-height: 1.42;
+      letter-spacing: -.02em;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    #youtubePopupGallerySection .excerpt {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.68;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    #youtubePopupGallerySection .more-wrap {
+      display: none;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    #youtubePopupGallerySection .more-btn {
+      min-width: 160px;
+      padding: 14px 20px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, .06);
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, opacity .16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #youtubePopupGallerySection .more-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(11, 11, 11, .16);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, .08);
+    }
+
+    #youtubePopupGallerySection .more-btn:active {
+      transform: translateY(0) scale(.98);
+    }
+
+    #youtubePopupGallerySection .more-btn[hidden] {
+      display: none !important;
+    }
+
+    #youtubePopupGallerySection .popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .78);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .24s ease, visibility .24s ease;
+      z-index: 9999;
+    }
+
+    #youtubePopupGallerySection .popup.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    #youtubePopupGallerySection .popup-dialog {
+      position: relative;
+      width: min(1100px, 100%);
+      background: #0b0b0b;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .38);
+      transform: translateY(10px) scale(.985);
+      transition: transform .24s ease;
+    }
+
+    #youtubePopupGallerySection .popup.is-open .popup-dialog {
+      transform: translateY(0) scale(1);
+    }
+
+    #youtubePopupGallerySection .popup-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 3;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      background: rgba(0, 0, 0, .55);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #youtubePopupGallerySection .popup-close svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    #youtubePopupGallerySection .popup-frame-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+
+    #youtubePopupGallerySection .popup-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      background: #000;
+    }
+
+    @media (max-width: 900px) {
+      #youtubePopupGallerySection {
+        padding: 68px 16px;
+      }
+
+      #youtubePopupGallerySection .head-left h2 {
+        font-size: 28px;
+      }
+
+      #youtubePopupGallerySection .slider {
+        padding: 12px;
+      }
+
+      #youtubePopupGallerySection .page {
+        grid-template-columns: 1fr;
+      }
+
+      #youtubePopupGallerySection .more-wrap {
+        display: flex;
+      }
+
+      #youtubePopupGallerySection .head-right {
+        display: none;
+      }
+
+      #youtubePopupGallerySection .popup {
+        padding: 14px;
+      }
+
+      #youtubePopupGallerySection .popup-dialog {
+        border-radius: 16px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      #youtubePopupGallerySection .head {
+        align-items: flex-start;
+      }
+
+      #youtubePopupGallerySection .head-left p {
+        margin-top: 8px;
+        font-size: 14px;
+      }
+
+      #youtubePopupGallerySection .head-btn {
+        width: 38px;
+        height: 38px;
+      }
+
+      #youtubePopupGallerySection .head-btn svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      #youtubePopupGallerySection .popup-close {
+        width: 38px;
+        height: 38px;
+        top: 10px;
+        right: 10px;
+      }
+
+      #youtubePopupGallerySection .play-badge {
+        width: 62px;
+        height: 44px;
+      }
+    }
+</style>
+  <style>
+    #youtubePopupGallerySection .video-card .text[hidden] { display: none; }
+  </style>
+
+  <div class="wrap">
+    <div class="head">
+      <div class="head-left">
+        <h2 data-cms="title">YouTube Video</h2>
+      </div>
+      <div class="head-right" aria-label="유튜브 영상 슬라이드 버튼">
+        <button type="button" class="head-btn prev" id="ytPopupPrev" aria-label="이전 영상 페이지">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M14.5 5.5L8 12l6.5 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button type="button" class="head-btn next" id="ytPopupNext" aria-label="다음 영상 페이지">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9.5 18.5L16 12 9.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="slider" aria-label="유튜브 영상 카드 슬라이더">
+      <div class="track" id="ytPopupTrack"></div>
+    </div>
+
+    <div class="more-wrap">
+      <button type="button" class="more-btn" id="ytPopupMoreBtn">더 보기</button>
+    </div>
+
+    <template id="ytPopupTemplate">
+      <div class="slide">
+        <button type="button" class="slide-btn" aria-label="유튜브 영상 열기">
+          <div class="video-card">
+            <div class="thumb">
+              <img src="" alt="">
+              <span class="play-badge" aria-hidden="true"></span>
+            </div>
+            <div class="text" hidden>
+              <h3 class="title"></h3>
+              <p class="excerpt"></p>
+            </div>
+          </div>
+        </button>
+      </div>
+    </template>
+  </div>
+
+  <div class="popup" id="ytPopupModal" aria-hidden="true">
+    <div class="popup-dialog" role="dialog" aria-modal="true" aria-label="유튜브 영상 팝업">
+      <button type="button" class="popup-close" id="ytPopupClose" aria-label="영상 닫기">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+      <div class="popup-frame-wrap">
+        <iframe id="ytPopupFrame" class="popup-frame" src="" title="YouTube video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var section = document.getElementById('youtubePopupGallerySection');
+      if (!section || section.__htuInit) return;
+      section.__htuInit = true;
+
+      function htuCms() {
+        if (window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
+        if (!window.__htuCmsP) {
+          var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
+          window.__htuCmsP = fetch(ep, { credentials: 'omit' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; });
+        }
+        return window.__htuCmsP;
+      }
+      function getYoutubeId(url) {
+        if (!url) return '';
+        var str = String(url).trim();
+        if (/^[a-zA-Z0-9_-]{11}$/.test(str)) return str;
+        var m = str.match(/youtu\.be\/([^?&/]+)/i); if (m && m[1]) return m[1];
+        m = str.match(/[?&]v=([^?&/]+)/i); if (m && m[1]) return m[1];
+        m = str.match(/youtube\.com\/embed\/([^?&/]+)/i); if (m && m[1]) return m[1];
+        m = str.match(/youtube\.com\/shorts\/([^?&/]+)/i); if (m && m[1]) return m[1];
+        m = str.match(/youtube\.com\/live\/([^?&/]+)/i); if (m && m[1]) return m[1];
+        return '';
+      }
+      function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+        return a;
+      }
+
+      htuCms().then(function (data) {
+        data = data || {};
+        var st = (data.settings && data.settings.gallery) || {};
+        var items = (data.gallery || []).filter(function (v) { return getYoutubeId(v.youtube_url); });
+        if (!items.length) { section.style.display = 'none'; return; }
+        if (st.shuffle) items = shuffle(items);
+        section.querySelector('[data-cms="title"]').textContent = st.title || 'YouTube Video';
+        init(items, st);
+      });
+
+      function init(items, st) {
+        var track = section.querySelector('#ytPopupTrack');
+        var tpl = section.querySelector('#ytPopupTemplate');
+        var btnPrev = section.querySelector('#ytPopupPrev');
+        var btnNext = section.querySelector('#ytPopupNext');
+        var moreBtn = section.querySelector('#ytPopupMoreBtn');
+        var popup = section.querySelector('#ytPopupModal');
+        var popupClose = section.querySelector('#ytPopupClose');
+        var popupFrame = section.querySelector('#ytPopupFrame');
+        var mobileMq = window.matchMedia('(max-width: 900px)');
+        var showTitle = !!st.show_title;
+        var interval = Number(st.auto_interval) || 4200;
+
+        var currentPage = 0;
+        var pageCount = 1;
+        var autoTimer = null;
+        var mobileVisibleCount = 5;
+        var dragStartX = 0;
+        var isDragging = false;
+        var dragMoved = false;
+        var isAnimating = false;
+
+        function isMobile() { return mobileMq.matches; }
+        function getPageSize() { return 6; }
+        function getThumbUrl(id) { return id ? 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg' : ''; }
+        function getEmbedUrl(id) { return id ? 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1' : ''; }
+
+        function buildSlide(item) {
+          var videoId = getYoutubeId(item.youtube_url);
+          if (!videoId) return null;
+          var node = tpl.content.cloneNode(true);
+          var slide = node.querySelector('.slide');
+          var btn = node.querySelector('.slide-btn');
+          var img = node.querySelector('img');
+          img.src = getThumbUrl(videoId);
+          img.alt = item.title ? item.title : 'youtube thumbnail';
+          btn.setAttribute('data-video-id', videoId);
+          btn.setAttribute('aria-label', (item.title ? item.title + ' - ' : '') + '유튜브 영상 열기');
+          if (showTitle && (item.title || item.excerpt)) {
+            var text = node.querySelector('.text');
+            text.hidden = false;
+            text.querySelector('.title').textContent = item.title || '';
+            text.querySelector('.excerpt').textContent = item.excerpt || '';
+          }
+          btn.addEventListener('click', function () {
+            if (dragMoved) return;
+            openPopup(videoId, item.title || '');
+          });
+          return slide;
+        }
+
+        function buildPage(pageIndex) {
+          var start = pageIndex * getPageSize();
+          var page = document.createElement('div');
+          page.className = 'page';
+          items.slice(start, start + getPageSize()).forEach(function (item) {
+            var s = buildSlide(item);
+            if (s) page.appendChild(s);
+          });
+          return page;
+        }
+
+        function setTrackHeightFrom(el) {
+          if (!el) return;
+          var h = el.offsetHeight;
+          if (h > 0) track.style.height = h + 'px';
+        }
+
+        function syncButtons() {
+          var multi = Math.ceil(items.length / getPageSize()) > 1;
+          if (isMobile() || !multi) {
+            if (btnPrev) btnPrev.style.display = 'none';
+            if (btnNext) btnNext.style.display = 'none';
+            return;
+          }
+          if (btnPrev) { btnPrev.style.display = ''; btnPrev.disabled = isAnimating; }
+          if (btnNext) { btnNext.style.display = ''; btnNext.disabled = isAnimating; }
+        }
+
+        function syncMoreButton() {
+          if (!moreBtn) return;
+          if (!isMobile()) { moreBtn.hidden = true; return; }
+          moreBtn.hidden = mobileVisibleCount >= items.length;
+        }
+
+        function renderMobile() {
+          isAnimating = false;
+          track.classList.add('is-mobile');
+          track.innerHTML = '';
+          items.slice(0, mobileVisibleCount).forEach(function (item) {
+            var s = buildSlide(item);
+            if (s) track.appendChild(s);
+          });
+          track.style.height = '';
+          syncButtons();
+          syncMoreButton();
+        }
+
+        function renderDesktopInitial() {
+          track.classList.remove('is-mobile');
+          pageCount = Math.max(1, Math.ceil(items.length / getPageSize()));
+          if (currentPage > pageCount - 1) currentPage = pageCount - 1;
+          if (currentPage < 0) currentPage = 0;
+          track.innerHTML = '';
+          var page = buildPage(currentPage);
+          page.classList.add('is-active');
+          track.appendChild(page);
+          requestAnimationFrame(function () { setTrackHeightFrom(page); });
+          syncButtons();
+          syncMoreButton();
+        }
+
+        function transitionToPage(nextPageIndex, direction) {
+          if (isMobile() || isAnimating) return;
+          pageCount = Math.max(1, Math.ceil(items.length / getPageSize()));
+          nextPageIndex = Math.max(0, Math.min(pageCount - 1, nextPageIndex));
+          var currentEl = track.querySelector('.page.is-active');
+          if (!currentEl) { currentPage = nextPageIndex; renderDesktopInitial(); return; }
+          if (nextPageIndex === currentPage) { syncButtons(); return; }
+
+          isAnimating = true;
+          syncButtons();
+          var nextEl = buildPage(nextPageIndex);
+          nextEl.classList.add('is-abs');
+          var enterFrom = direction === 1 ? '100%' : '-100%';
+          var leaveTo = direction === 1 ? '-100%' : '100%';
+          currentEl.classList.add('is-abs');
+          currentEl.style.transform = 'translate3d(0,0,0)';
+          nextEl.style.transform = 'translate3d(' + enterFrom + ',0,0)';
+          track.appendChild(nextEl);
+          track.style.height = Math.max(currentEl.offsetHeight || 0, nextEl.offsetHeight || 0) + 'px';
+
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              currentEl.style.transform = 'translate3d(' + leaveTo + ',0,0)';
+              nextEl.style.transform = 'translate3d(0,0,0)';
+            });
+          });
+
+          var done = false;
+          function cleanup() {
+            if (done) return;
+            done = true;
+            currentPage = nextPageIndex;
+            currentEl.remove();
+            nextEl.classList.remove('is-abs');
+            nextEl.classList.add('is-active');
+            nextEl.style.transform = 'translate3d(0,0,0)';
+            nextEl.style.position = '';
+            nextEl.style.inset = '';
+            setTrackHeightFrom(nextEl);
+            isAnimating = false;
+            syncButtons();
+            syncMoreButton();
+          }
+          nextEl.addEventListener('transitionend', function onEnd(e) {
+            if (e.propertyName !== 'transform') return;
+            nextEl.removeEventListener('transitionend', onEnd);
+            cleanup();
+          });
+          setTimeout(cleanup, 900);
+        }
+
+        function render() { if (isMobile()) renderMobile(); else renderDesktopInitial(); }
+        function next() {
+          if (isMobile() || isAnimating || pageCount < 2) return;
+          transitionToPage(currentPage >= pageCount - 1 ? 0 : currentPage + 1, 1);
+        }
+        function prev() {
+          if (isMobile() || isAnimating || pageCount < 2) return;
+          transitionToPage(currentPage <= 0 ? pageCount - 1 : currentPage - 1, -1);
+        }
+        function stopAuto() { if (autoTimer) clearInterval(autoTimer); autoTimer = null; }
+        function startAuto() {
+          stopAuto();
+          if (isMobile() || interval <= 0) return;
+          autoTimer = setInterval(function () { if (!isAnimating) next(); }, interval);
+        }
+        function onMore() { mobileVisibleCount += 5; renderMobile(); }
+
+        function openPopup(videoId, title) {
+          popupFrame.src = getEmbedUrl(videoId);
+          popup.classList.add('is-open');
+          popup.setAttribute('aria-hidden', 'false');
+          if (title) popupFrame.setAttribute('title', title);
+          document.documentElement.style.overflow = 'hidden';
+          stopAuto();
+        }
+        function closePopup() {
+          popup.classList.remove('is-open');
+          popup.setAttribute('aria-hidden', 'true');
+          popupFrame.src = '';
+          document.documentElement.style.overflow = '';
+        }
+
+        function onPointerDown(e) {
+          if (isMobile() || isAnimating) return;
+          dragStartX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+          isDragging = true;
+          dragMoved = false;
+        }
+        function onPointerMove(e) {
+          if (!isDragging || isMobile()) return;
+          var x = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+          if (Math.abs(x - dragStartX) > 12) dragMoved = true;
+        }
+        function onPointerUp(e) {
+          if (!isDragging || isMobile() || isAnimating) return;
+          var endX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX) || 0;
+          var diff = endX - dragStartX;
+          if (Math.abs(diff) > 60) { if (diff < 0) next(); else prev(); }
+          isDragging = false;
+          setTimeout(function () { dragMoved = false; }, 0);
+        }
+
+        if (btnPrev) btnPrev.addEventListener('click', prev);
+        if (btnNext) btnNext.addEventListener('click', next);
+        if (moreBtn) moreBtn.addEventListener('click', onMore);
+        if (popupClose) popupClose.addEventListener('click', closePopup);
+        popup.addEventListener('click', function (e) { if (e.target === popup) closePopup(); });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && popup.classList.contains('is-open')) closePopup();
+        });
+        section.addEventListener('mouseenter', stopAuto);
+        section.addEventListener('mouseleave', startAuto);
+        track.addEventListener('mousedown', onPointerDown);
+        track.addEventListener('mousemove', onPointerMove);
+        track.addEventListener('touchstart', onPointerDown, { passive: true });
+        track.addEventListener('touchmove', onPointerMove, { passive: true });
+        window.addEventListener('mouseup', onPointerUp);
+        window.addEventListener('touchend', onPointerUp);
+
+        var resizeTimer = null;
+        var wasMobile = isMobile();
+        window.addEventListener('resize', function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () {
+            var nowMobile = isMobile();
+            if (nowMobile && !wasMobile) mobileVisibleCount = 5;
+            wasMobile = nowMobile;
+            isAnimating = false;
+            render();
+            startAuto();
+          }, 120);
+        });
+
+        render();
+        startAuto();
+      }
+    })();
+  </script>
+</section>

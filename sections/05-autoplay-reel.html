@@ -1,0 +1,205 @@
+<section id="yt-autoplay-reel" class="yt-autoplay-reel" aria-label="영상 소개">
+  <div class="yar-inner yar-anim">
+    <div class="yar-stage">
+      <div class="yar-ratio">
+        <div id="yar-player"></div>
+      </div>
+
+      <button class="yar-sound" type="button" aria-label="소리 켜기" data-muted="true">
+        <span class="yar-sound-ico" aria-hidden="true">
+          <svg class="yar-ico is-muted" viewBox="0 0 24 24" fill="none">
+            <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/>
+            <path d="M16 9l5 5M21 9l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg class="yar-ico is-unmuted" viewBox="0 0 24 24" fill="none">
+            <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/>
+            <path d="M16.5 8.5a5 5 0 0 1 0 7M18.8 6a8 8 0 0 1 0 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="yar-sound-txt">소리 켜기</span>
+      </button>
+
+      <div class="yar-dots" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <style>/*@include css/reel.css*/</style>
+
+  <script>
+  (function(){
+    "use strict";
+
+    var section = document.getElementById("yt-autoplay-reel");
+    if(!section || section.__htuInit) return;
+    section.__htuInit = true;
+
+    function htuCms(){
+      if(window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
+      if(!window.__htuCmsP){
+        var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
+        window.__htuCmsP = fetch(ep, { credentials:'omit' })
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .catch(function(){ return null; });
+      }
+      return window.__htuCmsP;
+    }
+
+    // 유튜브 URL/ID → videoId
+    function extractId(input){
+      if(!input) return null;
+      input = String(input).trim();
+      if(/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
+      var m;
+      m = input.match(/[?&]v=([a-zA-Z0-9_-]{11})/);    if(m) return m[1];
+      m = input.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/); if(m) return m[1];
+      m = input.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);  if(m) return m[1];
+      m = input.match(/\/embed\/([a-zA-Z0-9_-]{11})/);   if(m) return m[1];
+      m = input.match(/\/live\/([a-zA-Z0-9_-]{11})/);    if(m) return m[1];
+      return null;
+    }
+
+    function shuffle(arr){
+      var a = arr.slice();
+      for(var i = a.length - 1; i > 0; i--){
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      return a;
+    }
+
+    htuCms().then(function(data){
+      data = data || {};
+      var st = (data.settings && data.settings.reel) || {};
+      var list = (data.reel || []).map(function(v){ return extractId(v.youtube_url); }).filter(Boolean);
+      if(st.enabled === false || !list.length){ section.style.display = 'none'; return; }
+      start(st, list);
+    });
+
+    function start(st, baseIds){
+      var useShuffle = !!st.shuffle;
+      var reshuffleEachLoop = st.reshuffle_each_loop !== false;
+      var ids = useShuffle ? shuffle(baseIds) : baseIds.slice();
+
+      var player = null;
+      var current = 0;
+      var userWantsSound = false;
+
+      var soundBtn = section.querySelector(".yar-sound");
+      var soundTxt = section.querySelector(".yar-sound-txt");
+      var dotsWrap = section.querySelector(".yar-dots");
+
+      var dotEls = [];
+      if(dotsWrap){
+        dotsWrap.innerHTML = '';
+        for(var i = 0; i < ids.length; i++){
+          var d = document.createElement("span");
+          d.className = "yar-dot" + (i === 0 ? " is-active" : "");
+          dotsWrap.appendChild(d);
+          dotEls.push(d);
+        }
+      }
+      function updateDots(){
+        for(var i = 0; i < dotEls.length; i++) dotEls[i].classList.toggle("is-active", i === current);
+      }
+
+      /* 다음 영상 결정: 한 바퀴 돌면(랜덤 모드) 다시 섞되 방금 본 영상이 연속되지 않게 */
+      function nextId(){
+        current++;
+        if(current >= ids.length){
+          current = 0;
+          if(useShuffle && reshuffleEachLoop && ids.length > 1){
+            var lastPlayed = ids[ids.length - 1];
+            var next = shuffle(baseIds);
+            if(next[0] === lastPlayed){ var t = next[0]; next[0] = next[next.length - 1]; next[next.length - 1] = t; }
+            ids = next;
+          }
+        }
+        updateDots();
+        return ids[current];
+      }
+
+      function loadYTApi(cb){
+        if(window.YT && window.YT.Player){ cb(); return; }
+        window.__yarApiQueue = window.__yarApiQueue || [];
+        window.__yarApiQueue.push(cb);
+        if(!window.__yarApiHooked){
+          window.__yarApiHooked = true;
+          var prev = window.onYouTubeIframeAPIReady;
+          window.onYouTubeIframeAPIReady = function(){
+            if(typeof prev === "function"){ try{ prev(); }catch(e){} }
+            var q = window.__yarApiQueue || [];
+            window.__yarApiQueue = [];
+            for(var i = 0; i < q.length; i++){ try{ q[i](); }catch(e){} }
+          };
+        }
+        if(!document.getElementById("__yar_yt_api")){
+          var tag = document.createElement("script");
+          tag.id = "__yar_yt_api";
+          tag.src = "https://www.youtube.com/iframe_api";
+          var first = document.getElementsByTagName("script")[0];
+          if(first && first.parentNode) first.parentNode.insertBefore(tag, first);
+          else document.head.appendChild(tag);
+        }
+      }
+
+      function applySoundState(){
+        if(!player) return;
+        if(userWantsSound){ try{ player.unMute(); player.setVolume(100); }catch(e){} }
+        else{ try{ player.mute(); }catch(e){} }
+        if(soundBtn){
+          soundBtn.setAttribute("data-muted", userWantsSound ? "false" : "true");
+          soundBtn.setAttribute("aria-label", userWantsSound ? "음소거" : "소리 켜기");
+        }
+        if(soundTxt) soundTxt.textContent = userWantsSound ? "음소거" : "소리 켜기";
+      }
+
+      function buildPlayer(){
+        player = new YT.Player("yar-player", {
+          videoId: ids[0],
+          playerVars: { autoplay:1, mute:1, controls:0, rel:0, playsinline:1, modestbranding:1, disablekb:1, fs:0, iv_load_policy:3 },
+          events: {
+            onReady: function(e){
+              try{ e.target.mute(); }catch(err){}
+              try{ e.target.playVideo(); }catch(err){}
+              applySoundState();
+            },
+            onStateChange: function(e){
+              if(e.data === YT.PlayerState.ENDED){
+                try{ player.loadVideoById(nextId()); }catch(err){}
+                setTimeout(applySoundState, 250);
+              }
+            },
+            onError: function(){
+              // 재생 불가(삭제/비공개) 영상은 건너뜀
+              try{ player.loadVideoById(nextId()); }catch(err){}
+            }
+          }
+        });
+      }
+
+      if(soundBtn){
+        soundBtn.addEventListener("click", function(){
+          userWantsSound = !userWantsSound;
+          applySoundState();
+        });
+      }
+
+      var animEl = section.querySelector(".yar-anim");
+      if(animEl){
+        if("IntersectionObserver" in window){
+          var io = new IntersectionObserver(function(entries){
+            entries.forEach(function(en){
+              if(en.isIntersecting){ en.target.classList.add("is-in"); io.unobserve(en.target); }
+            });
+          }, { threshold: 0.18 });
+          io.observe(animEl);
+        }else{
+          animEl.classList.add("is-in");
+        }
+      }
+
+      loadYTApi(buildPlayer);
+    }
+  })();
+  </script>
+</section>

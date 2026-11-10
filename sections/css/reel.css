@@ -1,0 +1,185 @@
+    /* ===== 스코프 루트 ===== */
+    #yt-autoplay-reel{
+      container-type: inline-size;
+      container-name: yarwrap;
+      display: block;
+      position:relative;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background: #e7e5e1;
+      line-height: 0;            /* 비디오 하단 여백 제거 */
+      font-family: "Noto Sans KR", "Pretendard", system-ui, -apple-system, sans-serif;
+    }
+    #yt-autoplay-reel *{ box-sizing: border-box; }
+
+    #yt-autoplay-reel .yar-inner{
+      width: 100%;
+      max-width: 1200px;
+      margin:0 auto;
+      position: relative;
+    }
+
+    /* ===== 등장 애니메이션 (영상 재생과 독립) ===== */
+    #yt-autoplay-reel .yar-anim{
+      opacity: 0;
+      transform: translateY(7cqw);
+      will-change: opacity, transform;
+    }
+    #yt-autoplay-reel .yar-anim.is-in{
+      animation: yar-fadeInUp 1s cubic-bezier(.16,.84,.34,1) forwards;
+    }
+    @keyframes yar-fadeInUp{
+      from{ opacity: 0; transform: translateY(7cqw); }
+      to{ opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== 무대 ===== */
+    #yt-autoplay-reel .yar-stage{
+      position: relative;       /* 내부 absolute의 기준 → 외부 레이아웃 영향 없음 */
+      width: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* 16:9 반응형 비율 박스 */
+    #yt-autoplay-reel .yar-ratio{
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;      /* 16:9 = 9/16 */
+      background: #000;
+    }
+    #yt-autoplay-reel .yar-ratio > iframe,
+    #yt-autoplay-reel .yar-ratio > #yar-player{
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+    /* 호버 시 미세하게 떠오르는 그라데이션 (버튼 가독성 확보) */
+    #yt-autoplay-reel .yar-stage::after{
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 28cqw;
+      max-height: 160px;
+      background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0));
+      opacity: 0;
+      transition: opacity .35s ease;
+      pointer-events: none;
+      z-index: 2;
+    }
+    #yt-autoplay-reel .yar-stage:hover::after{ opacity: 1; }
+
+    /* ===== 소리 켜기 버튼 ===== */
+    #yt-autoplay-reel .yar-sound{
+      position: absolute;
+      right: 3cqw;
+      bottom: 3cqw;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      gap: 1.4cqw;
+      padding: 1.6cqw 2.6cqw;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 999px;
+      background: rgba(15,15,18,.62);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #fff;
+      cursor: pointer;
+      line-height: 1;
+      font-family: inherit;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      opacity: 0;
+      transform: translateY(1.4cqw);
+      transition: opacity .35s ease, transform .35s ease, background .2s ease, border-color .2s ease;
+    }
+    #yt-autoplay-reel .yar-stage:hover .yar-sound{
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #yt-autoplay-reel .yar-sound:hover{
+      background: rgba(15,15,18,.85);
+      border-color: rgba(255,255,255,.7);
+    }
+    #yt-autoplay-reel .yar-sound:focus-visible{
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #yt-autoplay-reel .yar-sound-ico{
+      display: inline-flex;
+      width: 4.4cqw;
+      height: 4.4cqw;
+      min-width: 16px; min-height: 16px;
+      max-width: 26px; max-height: 26px;
+    }
+    #yt-autoplay-reel .yar-ico{ width: 100%; height: 100%; }
+    #yt-autoplay-reel .yar-ico.is-unmuted{ display: none; }
+    /* 음소거 해제 상태 */
+    #yt-autoplay-reel .yar-sound[data-muted="false"] .yar-ico.is-muted{ display: none; }
+    #yt-autoplay-reel .yar-sound[data-muted="false"] .yar-ico.is-unmuted{ display: block; }
+
+    #yt-autoplay-reel .yar-sound-txt{
+      font-size: 3.2cqw;
+      white-space: nowrap;
+    }
+    /* 데스크톱 상한 (큰 화면에서 버튼이 과대해지는 것 방지) */
+    @container yarwrap (min-width: 760px){
+      #yt-autoplay-reel .yar-sound{
+        right: 22px; bottom: 22px;
+        gap: 9px; padding: 11px 18px;
+      }
+      #yt-autoplay-reel .yar-sound-txt{ font-size: 15px; }
+    }
+
+    /* ===== 진행 점 인디케이터 ===== */
+    #yt-autoplay-reel .yar-dots{
+      position: absolute;
+      left: 3cqw;
+      bottom: 3.6cqw;
+      z-index: 3;
+      display: flex;
+      gap: 1.4cqw;
+      opacity: 0;
+      transition: opacity .35s ease;
+      pointer-events: none;
+    }
+    #yt-autoplay-reel .yar-stage:hover .yar-dots{ opacity: 1; }
+    #yt-autoplay-reel .yar-dot{
+      width: 1.8cqw; height: 1.8cqw;
+      min-width: 7px; min-height: 7px;
+      max-width: 10px; max-height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.4);
+      transition: background .25s ease, transform .25s ease;
+    }
+    #yt-autoplay-reel .yar-dot.is-active{
+      background: #fff;
+      transform: scale(1.25);
+    }
+    @container yarwrap (min-width: 760px){
+      #yt-autoplay-reel .yar-dots{ left: 22px; bottom: 24px; gap: 8px; }
+    }
+
+    /* ===== 터치 기기: 호버 불가 → 버튼 항상 노출 ===== */
+    @media (hover: none){
+      #yt-autoplay-reel .yar-sound{ opacity: 1; transform: none; }
+      #yt-autoplay-reel .yar-stage::after{ opacity: 1; }
+    }
+
+    /* ===== 모션 최소화 선호 존중 ===== */
+    @media (prefers-reduced-motion: reduce){
+      #yt-autoplay-reel .yar-anim{ opacity: 1; transform: none; animation: none; }
+      #yt-autoplay-reel .yar-sound,
+      #yt-autoplay-reel .yar-stage::after,
+      #yt-autoplay-reel .yar-dots{ transition: none; }
+    }

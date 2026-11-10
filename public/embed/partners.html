@@ -1,0 +1,997 @@
+<!--
+  [HTU CMS 섹션] partners.html
+  다른 사이트(아임웹/카페24/정적 HTML 등)에 붙여넣을 때는 이 섹션들보다 위쪽에 아래 한 줄을 1회만 넣어주세요.
+  <script>window.HTU_CMS_ENDPOINT = 'https://관리자-배포-도메인';</script>
+  내용 수정은 관리자 페이지(/admin)에서 하면 자동 반영됩니다.
+-->
+<section id="partner-logo-slider-section" aria-label="파트너 로고 슬라이더 섹션" style="position:relative;">
+  <div class="pls-wrap">
+    <h2 class="pls-title" data-cms="title"></h2>
+
+    <!-- 1) 무한 롤링 (팝업 X) -->
+    <div class="pls-rolling" aria-label="협력사 로고 무한 롤링">
+      <div class="pls-viewport">
+        <div class="pls-track track-left" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- 2) 고정 로고 그리드 (팝업 / 링크) -->
+    <div class="pls-fixed" aria-label="협력사 로고 고정 바">
+      <div class="pls-fixed-grid"></div>
+    </div>
+  </div>
+
+  <style>    /* =========================================================
+     Scope: #partner-logo-slider-section ONLY
+     ========================================================= */
+    #partner-logo-slider-section {
+      --bg: #ffffff;
+      --ink: #0b1220;
+
+      /* 카드/라인 */
+      --card: #f7f8f9;
+      --card2: #ffffff;
+      --line: rgba(15, 23, 42, .10);
+      --shadow: 0 10px 28px rgba(15, 23, 42, .08);
+
+      /* ✅ 포인트 컬러(그린) */
+      --green: #0a6a62;
+      --green2: #18b39a;
+
+      /* 사이즈 */
+      --rolling-card-w: 250px;
+      --rolling-card-h: 140px;
+
+      --fixed-card-h: 140px;
+      --fixed-gap: 14px;
+
+      padding: 100px 0;
+      background: var(--bg);
+      font-family: 'Pretendard', -apple-system, system-ui, Segoe UI, Roboto, sans-serif;
+      overflow: hidden;
+    }
+
+    #partner-logo-slider-section * {
+      box-sizing: border-box;
+    }
+
+    #partner-logo-slider-section .pls-wrap {
+      width: min(1200px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    #partner-logo-slider-section .pls-title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.4;
+      margin: 0 0 60px;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+
+    /* ======================
+     1) Rolling slider
+     ====================== */
+    #partner-logo-slider-section .pls-rolling {
+      margin-bottom: 22px;
+    }
+
+    #partner-logo-slider-section .pls-viewport {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    #partner-logo-slider-section .pls-track {
+      display: flex;
+      width: fit-content;
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    #partner-logo-slider-section .pls-group {
+      display: flex;
+      gap: 20px;
+      padding-right: 20px;
+    }
+
+    #partner-logo-slider-section .track-left {
+      animation: pls-scroll-left 40s linear infinite;
+    }
+
+    @keyframes pls-scroll-left {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    #partner-logo-slider-section .pls-track:hover {
+      animation-play-state: paused;
+    }
+
+    /* ======================
+     Card style (공용)
+     ====================== */
+    #partner-logo-slider-section .pls-card {
+      width: var(--rolling-card-w);
+      height: var(--rolling-card-h);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 14px 18px;
+      overflow: hidden;
+      position: relative;
+      outline: none;
+      transform: translateZ(0);
+    }
+
+    /* ✅ 롤링 영역은 클릭감 제거 (팝업은 고정 로고만) */
+    #partner-logo-slider-section .pls-rolling .pls-card {
+      cursor: default;
+    }
+
+    /* ✅ 고정 로고만 클릭감/호버 */
+    #partner-logo-slider-section .pls-fixed-grid .pls-card {
+      cursor: pointer;
+    }
+
+    #partner-logo-slider-section .pls-fixed-grid .pls-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      pointer-events: none;
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, .08);
+      transition: box-shadow .22s ease, transform .22s ease;
+    }
+
+    #partner-logo-slider-section .pls-fixed-grid .pls-card:hover::after {
+      box-shadow: 0 14px 34px rgba(15, 23, 42, .14), 0 0 0 1px rgba(15, 23, 42, .10);
+    }
+
+    #partner-logo-slider-section .pls-fixed-grid .pls-card:focus-visible::after {
+      box-shadow: 0 0 0 3px rgba(10, 106, 98, .18), 0 0 0 1px rgba(15, 23, 42, .12);
+    }
+
+    #partner-logo-slider-section .pls-fixed-grid .pls-card:active {
+      transform: scale(.992);
+    }
+
+    #partner-logo-slider-section .pls-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* ======================
+     2) Fixed grid
+     ====================== */
+    #partner-logo-slider-section .pls-fixed {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 0;
+      overflow: visible;
+    }
+
+    #partner-logo-slider-section .pls-fixed-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--fixed-gap);
+      align-items: stretch;
+    }
+
+    #partner-logo-slider-section .pls-fixed-grid .pls-card {
+      width: 100%;
+      height: var(--fixed-card-h);
+      padding: 14px 18px;
+    }
+
+    /* ======================
+     Responsive
+     ====================== */
+    @media (max-width: 768px) {
+      #partner-logo-slider-section {
+        padding: 72px 0;
+        --rolling-card-h: 120px;
+        --fixed-card-h: 120px;
+        --fixed-gap: 12px;
+      }
+
+      #partner-logo-slider-section .pls-wrap {
+        width: calc(100% - 24px);
+      }
+
+      #partner-logo-slider-section .pls-title {
+        font-size: 24px;
+        margin-bottom: 34px;
+        padding: 0 6px;
+      }
+
+      #partner-logo-slider-section .pls-rolling {
+        margin-bottom: 16px;
+      }
+
+      #partner-logo-slider-section .pls-group {
+        gap: 14px;
+        padding-right: 14px;
+      }
+
+      #partner-logo-slider-section .pls-viewport {
+        gap: 14px;
+      }
+
+      #partner-logo-slider-section .pls-fixed-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      #partner-logo-slider-section .pls-card {
+        border-radius: 14px;
+        padding: 12px 14px;
+      }
+
+      #partner-logo-slider-section .pls-fixed-grid .pls-card {
+        border-radius: 14px;
+        padding: 0px;
+      }
+
+      #partner-logo-slider-section .pls-fixed-grid .pls-card::after {
+        border-radius: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #partner-logo-slider-section .track-left {
+        animation: none !important;
+        transform: none !important;
+      }
+    }
+
+    /* =========================================================
+     ✅ White + Green Premium Popup
+     - 모바일 최적화
+     - 상단 안 잘리게
+     - X 버튼 항상 보이게
+     - 내부 스크롤 가능 / 스크롤바 숨김
+     ========================================================= */
+    #partner-logo-slider-section {
+      --pop-bg: rgba(6, 18, 16, .34);
+      --pop-card: rgba(255, 255, 255, .92);
+      --pop-line: rgba(15, 23, 42, .10);
+      --pop-ink: #0b1220;
+      --pop-muted: rgba(11, 18, 32, .68);
+      --pop-shadow: 0 34px 120px rgba(0, 0, 0, .25);
+    }
+
+    #partner-logo-slider-section .pls-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100dvh;
+      min-height: -webkit-fill-available;
+      z-index: 99999;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding:
+        max(20px, env(safe-area-inset-top))
+        18px
+        max(20px, env(safe-area-inset-bottom));
+      background: var(--pop-bg);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .18s ease, visibility .18s ease;
+    }
+
+    #partner-logo-slider-section .pls-modal.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      animation: plsModalFadeIn .18s ease-out both;
+    }
+
+    #partner-logo-slider-section .pls-modal::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    #partner-logo-slider-section .pls-modal {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    @keyframes plsModalFadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    #partner-logo-slider-section .pls-panel {
+      width: min(980px, 100%);
+      max-height: calc(100dvh - max(40px, env(safe-area-inset-top)) - max(40px, env(safe-area-inset-bottom)));
+      min-height: 0;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      box-shadow: var(--pop-shadow);
+      background: var(--pop-card);
+      border: 1px solid rgba(255, 255, 255, .60);
+      display: flex;
+      flex-direction: column;
+      margin: auto 0;
+      isolation: isolate;
+      align-self: flex-start;
+
+      /* 모바일 Safari에서 패널이 안 보이는 문제 방지 */
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      will-change: transform, opacity;
+    }
+
+    #partner-logo-slider-section .pls-modal.is-open .pls-panel {
+      animation: plsPanelIn .22s ease-out .02s both;
+    }
+
+    @keyframes plsPanelIn {
+      from {
+        transform: translateY(10px) scale(.99);
+        opacity: 0.001;
+      }
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    #partner-logo-slider-section .pls-panel-hero {
+      position: relative;
+      height: 500px;
+      background: #eff6f4;
+      overflow: hidden;
+      border-bottom: 1px solid var(--pop-line);
+      flex: 0 0 auto;
+    }
+
+    #partner-logo-slider-section .pls-hero-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      transform: scale(1.02);
+      filter: saturate(1.02) contrast(1.02) brightness(0.9);
+    }
+
+    #partner-logo-slider-section .pls-hero-vignette {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(70% 60% at 20% 20%, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 70%),
+        linear-gradient(180deg, rgba(10, 106, 98, .06), rgba(10, 106, 98, .22));
+      pointer-events: none;
+    }
+
+    #partner-logo-slider-section .pls-hero-content {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 18px 22px 18px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 1;
+    }
+
+    #partner-logo-slider-section .pls-brand {
+      min-width: 0;
+      padding-right: 64px;
+    }
+
+    #partner-logo-slider-section .pls-brand-name {
+      margin: 0;
+      color: #fff;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+      font-weight: 950;
+      line-height: 1.12;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #partner-logo-slider-section .pls-brand-sub {
+      margin-top: 8px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      line-height: 1.35;
+      max-width: 620px;
+      word-break: keep-all;
+    }
+
+    #partner-logo-slider-section .pls-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid rgba(15, 23, 42, .10);
+      background: rgba(255, 255, 255, .88);
+      color: rgba(11, 18, 32, .84);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      z-index: 20;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, .10);
+      flex: 0 0 auto;
+    }
+
+    #partner-logo-slider-section .pls-close:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, .96);
+      border-color: rgba(10, 106, 98, .22);
+    }
+
+    #partner-logo-slider-section .pls-close:focus-visible {
+      outline: 2px solid rgba(10, 106, 98, .35);
+      outline-offset: 2px;
+    }
+
+    #partner-logo-slider-section .pls-x {
+      width: 18px;
+      height: 18px;
+      position: relative;
+    }
+
+    #partner-logo-slider-section .pls-x::before,
+    #partner-logo-slider-section .pls-x::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 18px;
+      height: 2px;
+      background: rgba(11, 18, 32, .72);
+      border-radius: 99px;
+      transform-origin: center;
+    }
+
+    #partner-logo-slider-section .pls-x::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    #partner-logo-slider-section .pls-x::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    #partner-logo-slider-section .pls-body {
+      padding: 18px 22px 22px;
+      display: block;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      min-height: 0;
+      flex: 1 1 auto;
+    }
+
+    #partner-logo-slider-section .pls-body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    #partner-logo-slider-section .pls-body {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    #partner-logo-slider-section .pls-desc {
+      border-radius: 18px;
+      border: 1px solid rgba(15, 23, 42, .10);
+      background: rgba(255, 255, 255, .88);
+      padding: 18px 18px;
+    }
+
+    #partner-logo-slider-section .pls-desc h3 {
+      margin: 0 0 10px;
+      color: rgba(11, 18, 32, .92);
+      font-size: 15px;
+      letter-spacing: -0.02em;
+      font-weight: 950;
+    }
+
+    #partner-logo-slider-section .pls-desc p {
+      margin: 0;
+      color: rgba(11, 18, 32, .70);
+      font-size: 14px;
+      line-height: 1.68;
+      letter-spacing: -0.01em;
+      white-space: pre-line;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    #partner-logo-slider-section .pls-home {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    #partner-logo-slider-section .pls-home a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--green), var(--green2));
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: -.01em;
+      text-decoration: none;
+      box-shadow: 0 16px 40px rgba(10, 106, 98, .24);
+      border: 1px solid rgba(10, 106, 98, .30);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      user-select: none;
+    }
+
+    #partner-logo-slider-section .pls-home a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 50px rgba(10, 106, 98, .32);
+      filter: saturate(1.03);
+    }
+
+    #partner-logo-slider-section .pls-home a:active {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 820px) {
+      #partner-logo-slider-section .pls-modal {
+        padding:
+          max(10px, env(safe-area-inset-top))
+          10px
+          max(12px, env(safe-area-inset-bottom));
+      }
+
+      #partner-logo-slider-section .pls-panel {
+        width: 100%;
+        max-height: calc(100dvh - max(20px, env(safe-area-inset-top)) - max(22px, env(safe-area-inset-bottom)));
+        border-radius: 20px;
+        align-self: flex-start;
+      }
+
+      #partner-logo-slider-section .pls-panel-hero {
+        height: clamp(180px, 34vh, 280px);
+      }
+
+      #partner-logo-slider-section .pls-hero-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 16px 16px 14px;
+      }
+
+      #partner-logo-slider-section .pls-brand {
+        width: 100%;
+        padding-right: 58px;
+      }
+
+      #partner-logo-slider-section .pls-brand-name {
+        font-size: 20px;
+        line-height: 1.18;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: initial;
+        word-break: keep-all;
+      }
+
+      #partner-logo-slider-section .pls-brand-sub {
+        max-width: 100%;
+        font-size: 12.5px;
+        line-height: 1.45;
+      }
+
+      #partner-logo-slider-section .pls-close {
+        top: 10px;
+        right: 10px;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+      }
+
+      #partner-logo-slider-section .pls-body {
+        padding: 14px 14px 16px;
+      }
+
+      #partner-logo-slider-section .pls-desc {
+        padding: 15px 14px 16px;
+        border-radius: 16px;
+      }
+
+      #partner-logo-slider-section .pls-desc h3 {
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      #partner-logo-slider-section .pls-desc p {
+        font-size: 13.5px;
+        line-height: 1.72;
+      }
+
+      #partner-logo-slider-section .pls-home {
+        margin-top: 12px;
+      }
+
+      #partner-logo-slider-section .pls-home a {
+        width: 100%;
+        min-height: 46px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13.5px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #partner-logo-slider-section .pls-panel {
+        border-radius: 18px;
+      }
+
+      #partner-logo-slider-section .pls-panel-hero {
+        height: clamp(160px, 30vh, 220px);
+      }
+
+      #partner-logo-slider-section .pls-brand-name {
+        font-size: 18px;
+      }
+
+      #partner-logo-slider-section .pls-brand-sub {
+        font-size: 12px;
+      }
+
+      #partner-logo-slider-section .pls-desc p {
+        font-size: 13px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #partner-logo-slider-section .pls-panel,
+      #partner-logo-slider-section .pls-modal.is-open,
+      #partner-logo-slider-section .pls-modal.is-open .pls-panel {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+</style>
+  <style>
+    /* =========================================================
+       CMS 추가: 고정 로고 클릭 인디케이터 (팝업 / 링크)
+       ========================================================= */
+    #partner-logo-slider-section .pls-fixed-grid .pls-card { text-decoration: none; color: inherit; }
+    #partner-logo-slider-section .pls-fixed-grid .pls-card.is-static { cursor: default; }
+    #partner-logo-slider-section .pls-rolling[data-empty] { display: none; }
+
+    #partner-logo-slider-section .pls-ind {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .92);
+      border: 1px solid rgba(10, 106, 98, .18);
+      box-shadow:
+        0 6px 18px rgba(6, 40, 30, .10),
+        inset 0 1px 0 rgba(255, 255, 255, .9);
+      color: var(--green);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+      transition: background .32s cubic-bezier(.22,1,.36,1), color .32s ease, border-color .32s ease, box-shadow .32s ease;
+    }
+    #partner-logo-slider-section .pls-ind-label {
+      max-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      line-height: 1;
+      opacity: 0;
+      transition: max-width .38s cubic-bezier(.22,1,.36,1), opacity .25s ease, margin .38s cubic-bezier(.22,1,.36,1);
+    }
+    #partner-logo-slider-section .pls-ind-ico {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
+      display: block;
+      transition: transform .38s cubic-bezier(.22,1,.36,1);
+    }
+    #partner-logo-slider-section .pls-ind::before {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: inherit;
+      border: 1px solid rgba(10, 106, 98, .14);
+      opacity: 0;
+      transform: scale(.85);
+      transition: opacity .4s ease, transform .4s cubic-bezier(.22,1,.36,1);
+    }
+
+    @media (hover: hover) {
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:hover .pls-ind,
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:focus-visible .pls-ind {
+        background: linear-gradient(135deg, #0a4f30 0%, var(--green) 55%, #0f8a7a 100%);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 10px 26px rgba(10, 106, 98, .32), inset 0 1px 0 rgba(255, 255, 255, .22);
+      }
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:hover .pls-ind::before { opacity: 1; transform: scale(1); }
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:hover .pls-ind-label,
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:focus-visible .pls-ind-label {
+        max-width: 96px;
+        opacity: 1;
+        margin: 0 6px 0 5px;
+      }
+      #partner-logo-slider-section .pls-card:hover .pls-ind[data-kind="popup"] .pls-ind-ico { transform: rotate(90deg); }
+      #partner-logo-slider-section .pls-card:hover .pls-ind[data-kind="link"] .pls-ind-ico { transform: translate(1.5px, -1.5px); }
+    }
+
+    @media (max-width: 768px) {
+      #partner-logo-slider-section .pls-ind { top: 8px; right: 8px; height: 26px; padding: 0 5px; }
+      #partner-logo-slider-section .pls-ind-ico { width: 14px; height: 14px; flex-basis: 14px; }
+    }
+  </style>
+
+  <!-- 팝업 (공용 1개) -->
+  <div class="pls-modal" id="plsSponsorModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="파트너 소개 팝업">
+    <div class="pls-panel" role="document">
+      <button class="pls-close" type="button" aria-label="팝업 닫기" data-pls-close>
+        <span class="pls-x" aria-hidden="true"></span>
+      </button>
+      <div class="pls-panel-hero">
+        <img class="pls-hero-img" id="plsHeroImg" alt="" src="" />
+        <div class="pls-hero-vignette" aria-hidden="true"></div>
+        <div class="pls-hero-content">
+          <div class="pls-brand">
+            <h2 class="pls-brand-name" id="plsBrandName">파트너</h2>
+            <div class="pls-brand-sub" id="plsBrandSub"></div>
+          </div>
+        </div>
+      </div>
+      <div class="pls-body" id="plsModalBody">
+        <div class="pls-desc">
+          <h3 id="plsHeadline">파트너 소개</h3>
+          <p id="plsDescription"></p>
+          <div class="pls-home" aria-label="홈페이지 링크">
+            <a href="#" target="_blank" rel="noopener" id="plsHomepageBtn">공식 홈페이지 바로가기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.getElementById('partner-logo-slider-section');
+      if (!root || root.__htuInit) return;
+      root.__htuInit = true;
+
+      function htuCms() {
+        if (window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
+        if (!window.__htuCmsP) {
+          var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
+          window.__htuCmsP = fetch(ep, { credentials: 'omit' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; });
+        }
+        return window.__htuCmsP;
+      }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      var ICON = {
+        popup: '<svg class="pls-ind-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 6.5v11M6.5 12h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+        link: '<svg class="pls-ind-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 16 16 8M9.5 8H16v6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      };
+
+      htuCms().then(function (data) {
+        data = data || {};
+        var st = (data.settings && data.settings.partners) || {};
+        var p = data.partners || {};
+        render(st, p.rolling || [], p.fixed || []);
+        initModal(p.fixed || []);
+      });
+
+      function logoCard(item, extra) {
+        return '<img class="pls-logo" src="' + esc(item.logo_url) + '" alt="' + esc(item.alt || item.name || '') + '" loading="lazy" decoding="async">' + (extra || '');
+      }
+
+      function render(st, rolling, fixed) {
+        var title = root.querySelector('[data-cms="title"]');
+        if (title) title.innerHTML = st.title_html || '';
+
+        /* 롤링: 그룹 A + 복제 그룹 B → translateX(-50%) 무한 루프가 끊김 없이 이어짐 */
+        var track = root.querySelector('.pls-track');
+        if (!rolling.length) {
+          root.querySelector('.pls-rolling').setAttribute('data-empty', '');
+        } else {
+          var seq = rolling.slice();
+          while (seq.length < 8) seq = seq.concat(rolling);
+          var groupHtml = seq.map(function (it) { return '<div class="pls-card">' + logoCard(it) + '</div>'; }).join('');
+          track.innerHTML = '<div class="pls-group">' + groupHtml + '</div><div class="pls-group">' + groupHtml + '</div>';
+          var speed = Number(st.rolling_speed) || 40;
+          track.style.animationDuration = Math.max(10, speed * (seq.length / 14)) + 's';
+        }
+
+        /* 고정 그리드 */
+        var popupLabel = st.popup_label || '자세히 보기';
+        var linkLabel = st.link_label || '바로가기';
+        var grid = root.querySelector('.pls-fixed-grid');
+        grid.innerHTML = fixed.map(function (it, i) {
+          var action = it.action || 'popup';
+          if (action === 'link' && !it.homepage_url) action = 'none';
+          if (action === 'link') {
+            return '<a class="pls-card is-fixed" href="' + esc(it.homepage_url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc((it.name || '') + ' 홈페이지로 이동') + '">' +
+              logoCard(it, '<span class="pls-ind" data-kind="link"><span class="pls-ind-label">' + esc(linkLabel) + '</span>' + ICON.link + '</span>') + '</a>';
+          }
+          if (action === 'popup') {
+            return '<div class="pls-card is-fixed" role="button" tabindex="0" data-idx="' + i + '" aria-label="' + esc((it.name || '') + ' 소개 팝업 열기') + '">' +
+              logoCard(it, '<span class="pls-ind" data-kind="popup"><span class="pls-ind-label">' + esc(popupLabel) + '</span>' + ICON.popup + '</span>') + '</div>';
+          }
+          return '<div class="pls-card is-fixed is-static">' + logoCard(it) + '</div>';
+        }).join('');
+      }
+
+      function initModal(fixed) {
+        var modal = root.querySelector('#plsSponsorModal');
+        var panel = modal ? modal.querySelector('.pls-panel') : null;
+        if (!modal || !panel) return;
+
+        var heroImg = modal.querySelector('#plsHeroImg');
+        var brandName = modal.querySelector('#plsBrandName');
+        var brandSub = modal.querySelector('#plsBrandSub');
+        var headline = modal.querySelector('#plsHeadline');
+        var desc = modal.querySelector('#plsDescription');
+        var homepageBtn = modal.querySelector('#plsHomepageBtn');
+        var homeWrap = modal.querySelector('.pls-home');
+        var modalBody = modal.querySelector('#plsModalBody');
+        var lastFocus = null;
+
+        function lockScroll() {
+          var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+          document.body.dataset.plsScrollY = String(y);
+          document.body.style.position = 'fixed';
+          document.body.style.top = '-' + y + 'px';
+          document.body.style.left = '0';
+          document.body.style.right = '0';
+          document.body.style.width = '100%';
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
+        }
+        function unlockScroll() {
+          var y = parseInt(document.body.dataset.plsScrollY || '0', 10) || 0;
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
+          document.body.style.right = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          delete document.body.dataset.plsScrollY;
+          window.scrollTo(0, y);
+        }
+        function resetModalScroll() {
+          modal.scrollTop = 0; panel.scrollTop = 0;
+          if (modalBody) modalBody.scrollTop = 0;
+        }
+        function forcePanelPaint() {
+          panel.style.display = 'flex';
+          panel.style.opacity = '1';
+          panel.style.transform = 'translateY(0) scale(1)';
+          panel.getBoundingClientRect();
+        }
+
+        function openModal(item) {
+          lastFocus = document.activeElement;
+          var name = item.name || 'Partner';
+          brandName.textContent = name;
+          brandSub.textContent = item.sub || '';
+          headline.textContent = item.headline || '파트너 소개';
+          desc.textContent = item.description || '';
+
+          if (item.hero_url) {
+            heroImg.style.display = '';
+            heroImg.src = item.hero_url;
+            heroImg.alt = name + ' 소개 이미지';
+          } else {
+            heroImg.style.display = 'none';
+            heroImg.src = '';
+            heroImg.alt = '';
+          }
+
+          if (item.homepage_url) {
+            homeWrap.style.display = '';
+            homepageBtn.href = item.homepage_url;
+            homepageBtn.textContent = item.button_label || '공식 홈페이지 바로가기';
+            homepageBtn.setAttribute('aria-label', name + ' 공식 홈페이지로 이동');
+          } else {
+            homeWrap.style.display = 'none';
+          }
+
+          modal.classList.add('is-open');
+          modal.setAttribute('aria-hidden', 'false');
+          lockScroll();
+          resetModalScroll();
+          forcePanelPaint();
+          var closeBtn = modal.querySelector('[data-pls-close]');
+          if (closeBtn) requestAnimationFrame(function () { closeBtn.focus({ preventScroll: true }); });
+        }
+
+        function closeModal() {
+          modal.classList.remove('is-open');
+          modal.setAttribute('aria-hidden', 'true');
+          unlockScroll();
+          if (lastFocus && typeof lastFocus.focus === 'function') {
+            requestAnimationFrame(function () { lastFocus.focus({ preventScroll: true }); });
+          }
+        }
+
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+        modal.querySelectorAll('[data-pls-close]').forEach(function (btn) { btn.addEventListener('click', closeModal); });
+        window.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && modal.classList.contains('is-open')) { e.preventDefault(); closeModal(); }
+        });
+
+        root.querySelectorAll('.pls-fixed-grid .pls-card[data-idx]').forEach(function (card) {
+          var item = fixed[+card.getAttribute('data-idx')];
+          card.addEventListener('click', function () { openModal(item); });
+          card.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(item); }
+          });
+        });
+
+        window.addEventListener('resize', function () {
+          if (modal.classList.contains('is-open')) { resetModalScroll(); forcePanelPaint(); }
+        });
+      }
+    })();
+  </script>
+</section>

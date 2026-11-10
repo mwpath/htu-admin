@@ -1,0 +1,319 @@
+<section id="partner-logo-slider-section" aria-label="파트너 로고 슬라이더 섹션" style="position:relative;">
+  <div class="pls-wrap">
+    <h2 class="pls-title" data-cms="title"></h2>
+
+    <!-- 1) 무한 롤링 (팝업 X) -->
+    <div class="pls-rolling" aria-label="협력사 로고 무한 롤링">
+      <div class="pls-viewport">
+        <div class="pls-track track-left" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- 2) 고정 로고 그리드 (팝업 / 링크) -->
+    <div class="pls-fixed" aria-label="협력사 로고 고정 바">
+      <div class="pls-fixed-grid"></div>
+    </div>
+  </div>
+
+  <style>/*@include css/partners.css*/</style>
+  <style>
+    /* =========================================================
+       CMS 추가: 고정 로고 클릭 인디케이터 (팝업 / 링크)
+       ========================================================= */
+    #partner-logo-slider-section .pls-fixed-grid .pls-card { text-decoration: none; color: inherit; }
+    #partner-logo-slider-section .pls-fixed-grid .pls-card.is-static { cursor: default; }
+    #partner-logo-slider-section .pls-rolling[data-empty] { display: none; }
+
+    #partner-logo-slider-section .pls-ind {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .92);
+      border: 1px solid rgba(10, 106, 98, .18);
+      box-shadow:
+        0 6px 18px rgba(6, 40, 30, .10),
+        inset 0 1px 0 rgba(255, 255, 255, .9);
+      color: var(--green);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+      transition: background .32s cubic-bezier(.22,1,.36,1), color .32s ease, border-color .32s ease, box-shadow .32s ease;
+    }
+    #partner-logo-slider-section .pls-ind-label {
+      max-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      line-height: 1;
+      opacity: 0;
+      transition: max-width .38s cubic-bezier(.22,1,.36,1), opacity .25s ease, margin .38s cubic-bezier(.22,1,.36,1);
+    }
+    #partner-logo-slider-section .pls-ind-ico {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
+      display: block;
+      transition: transform .38s cubic-bezier(.22,1,.36,1);
+    }
+    #partner-logo-slider-section .pls-ind::before {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: inherit;
+      border: 1px solid rgba(10, 106, 98, .14);
+      opacity: 0;
+      transform: scale(.85);
+      transition: opacity .4s ease, transform .4s cubic-bezier(.22,1,.36,1);
+    }
+
+    @media (hover: hover) {
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:hover .pls-ind,
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:focus-visible .pls-ind {
+        background: linear-gradient(135deg, #0a4f30 0%, var(--green) 55%, #0f8a7a 100%);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 10px 26px rgba(10, 106, 98, .32), inset 0 1px 0 rgba(255, 255, 255, .22);
+      }
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:hover .pls-ind::before { opacity: 1; transform: scale(1); }
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:hover .pls-ind-label,
+      #partner-logo-slider-section .pls-fixed-grid .pls-card:focus-visible .pls-ind-label {
+        max-width: 96px;
+        opacity: 1;
+        margin: 0 6px 0 5px;
+      }
+      #partner-logo-slider-section .pls-card:hover .pls-ind[data-kind="popup"] .pls-ind-ico { transform: rotate(90deg); }
+      #partner-logo-slider-section .pls-card:hover .pls-ind[data-kind="link"] .pls-ind-ico { transform: translate(1.5px, -1.5px); }
+    }
+
+    @media (max-width: 768px) {
+      #partner-logo-slider-section .pls-ind { top: 8px; right: 8px; height: 26px; padding: 0 5px; }
+      #partner-logo-slider-section .pls-ind-ico { width: 14px; height: 14px; flex-basis: 14px; }
+    }
+  </style>
+
+  <!-- 팝업 (공용 1개) -->
+  <div class="pls-modal" id="plsSponsorModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="파트너 소개 팝업">
+    <div class="pls-panel" role="document">
+      <button class="pls-close" type="button" aria-label="팝업 닫기" data-pls-close>
+        <span class="pls-x" aria-hidden="true"></span>
+      </button>
+      <div class="pls-panel-hero">
+        <img class="pls-hero-img" id="plsHeroImg" alt="" src="" />
+        <div class="pls-hero-vignette" aria-hidden="true"></div>
+        <div class="pls-hero-content">
+          <div class="pls-brand">
+            <h2 class="pls-brand-name" id="plsBrandName">파트너</h2>
+            <div class="pls-brand-sub" id="plsBrandSub"></div>
+          </div>
+        </div>
+      </div>
+      <div class="pls-body" id="plsModalBody">
+        <div class="pls-desc">
+          <h3 id="plsHeadline">파트너 소개</h3>
+          <p id="plsDescription"></p>
+          <div class="pls-home" aria-label="홈페이지 링크">
+            <a href="#" target="_blank" rel="noopener" id="plsHomepageBtn">공식 홈페이지 바로가기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.getElementById('partner-logo-slider-section');
+      if (!root || root.__htuInit) return;
+      root.__htuInit = true;
+
+      function htuCms() {
+        if (window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
+        if (!window.__htuCmsP) {
+          var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
+          window.__htuCmsP = fetch(ep, { credentials: 'omit' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; });
+        }
+        return window.__htuCmsP;
+      }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      var ICON = {
+        popup: '<svg class="pls-ind-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 6.5v11M6.5 12h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+        link: '<svg class="pls-ind-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 16 16 8M9.5 8H16v6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      };
+
+      htuCms().then(function (data) {
+        data = data || {};
+        var st = (data.settings && data.settings.partners) || {};
+        var p = data.partners || {};
+        render(st, p.rolling || [], p.fixed || []);
+        initModal(p.fixed || []);
+      });
+
+      function logoCard(item, extra) {
+        return '<img class="pls-logo" src="' + esc(item.logo_url) + '" alt="' + esc(item.alt || item.name || '') + '" loading="lazy" decoding="async">' + (extra || '');
+      }
+
+      function render(st, rolling, fixed) {
+        var title = root.querySelector('[data-cms="title"]');
+        if (title) title.innerHTML = st.title_html || '';
+
+        /* 롤링: 그룹 A + 복제 그룹 B → translateX(-50%) 무한 루프가 끊김 없이 이어짐 */
+        var track = root.querySelector('.pls-track');
+        if (!rolling.length) {
+          root.querySelector('.pls-rolling').setAttribute('data-empty', '');
+        } else {
+          var seq = rolling.slice();
+          while (seq.length < 8) seq = seq.concat(rolling);
+          var groupHtml = seq.map(function (it) { return '<div class="pls-card">' + logoCard(it) + '</div>'; }).join('');
+          track.innerHTML = '<div class="pls-group">' + groupHtml + '</div><div class="pls-group">' + groupHtml + '</div>';
+          var speed = Number(st.rolling_speed) || 40;
+          track.style.animationDuration = Math.max(10, speed * (seq.length / 14)) + 's';
+        }
+
+        /* 고정 그리드 */
+        var popupLabel = st.popup_label || '자세히 보기';
+        var linkLabel = st.link_label || '바로가기';
+        var grid = root.querySelector('.pls-fixed-grid');
+        grid.innerHTML = fixed.map(function (it, i) {
+          var action = it.action || 'popup';
+          if (action === 'link' && !it.homepage_url) action = 'none';
+          if (action === 'link') {
+            return '<a class="pls-card is-fixed" href="' + esc(it.homepage_url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc((it.name || '') + ' 홈페이지로 이동') + '">' +
+              logoCard(it, '<span class="pls-ind" data-kind="link"><span class="pls-ind-label">' + esc(linkLabel) + '</span>' + ICON.link + '</span>') + '</a>';
+          }
+          if (action === 'popup') {
+            return '<div class="pls-card is-fixed" role="button" tabindex="0" data-idx="' + i + '" aria-label="' + esc((it.name || '') + ' 소개 팝업 열기') + '">' +
+              logoCard(it, '<span class="pls-ind" data-kind="popup"><span class="pls-ind-label">' + esc(popupLabel) + '</span>' + ICON.popup + '</span>') + '</div>';
+          }
+          return '<div class="pls-card is-fixed is-static">' + logoCard(it) + '</div>';
+        }).join('');
+      }
+
+      function initModal(fixed) {
+        var modal = root.querySelector('#plsSponsorModal');
+        var panel = modal ? modal.querySelector('.pls-panel') : null;
+        if (!modal || !panel) return;
+
+        var heroImg = modal.querySelector('#plsHeroImg');
+        var brandName = modal.querySelector('#plsBrandName');
+        var brandSub = modal.querySelector('#plsBrandSub');
+        var headline = modal.querySelector('#plsHeadline');
+        var desc = modal.querySelector('#plsDescription');
+        var homepageBtn = modal.querySelector('#plsHomepageBtn');
+        var homeWrap = modal.querySelector('.pls-home');
+        var modalBody = modal.querySelector('#plsModalBody');
+        var lastFocus = null;
+
+        function lockScroll() {
+          var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+          document.body.dataset.plsScrollY = String(y);
+          document.body.style.position = 'fixed';
+          document.body.style.top = '-' + y + 'px';
+          document.body.style.left = '0';
+          document.body.style.right = '0';
+          document.body.style.width = '100%';
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
+        }
+        function unlockScroll() {
+          var y = parseInt(document.body.dataset.plsScrollY || '0', 10) || 0;
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
+          document.body.style.right = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          delete document.body.dataset.plsScrollY;
+          window.scrollTo(0, y);
+        }
+        function resetModalScroll() {
+          modal.scrollTop = 0; panel.scrollTop = 0;
+          if (modalBody) modalBody.scrollTop = 0;
+        }
+        function forcePanelPaint() {
+          panel.style.display = 'flex';
+          panel.style.opacity = '1';
+          panel.style.transform = 'translateY(0) scale(1)';
+          panel.getBoundingClientRect();
+        }
+
+        function openModal(item) {
+          lastFocus = document.activeElement;
+          var name = item.name || 'Partner';
+          brandName.textContent = name;
+          brandSub.textContent = item.sub || '';
+          headline.textContent = item.headline || '파트너 소개';
+          desc.textContent = item.description || '';
+
+          if (item.hero_url) {
+            heroImg.style.display = '';
+            heroImg.src = item.hero_url;
+            heroImg.alt = name + ' 소개 이미지';
+          } else {
+            heroImg.style.display = 'none';
+            heroImg.src = '';
+            heroImg.alt = '';
+          }
+
+          if (item.homepage_url) {
+            homeWrap.style.display = '';
+            homepageBtn.href = item.homepage_url;
+            homepageBtn.textContent = item.button_label || '공식 홈페이지 바로가기';
+            homepageBtn.setAttribute('aria-label', name + ' 공식 홈페이지로 이동');
+          } else {
+            homeWrap.style.display = 'none';
+          }
+
+          modal.classList.add('is-open');
+          modal.setAttribute('aria-hidden', 'false');
+          lockScroll();
+          resetModalScroll();
+          forcePanelPaint();
+          var closeBtn = modal.querySelector('[data-pls-close]');
+          if (closeBtn) requestAnimationFrame(function () { closeBtn.focus({ preventScroll: true }); });
+        }
+
+        function closeModal() {
+          modal.classList.remove('is-open');
+          modal.setAttribute('aria-hidden', 'true');
+          unlockScroll();
+          if (lastFocus && typeof lastFocus.focus === 'function') {
+            requestAnimationFrame(function () { lastFocus.focus({ preventScroll: true }); });
+          }
+        }
+
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+        modal.querySelectorAll('[data-pls-close]').forEach(function (btn) { btn.addEventListener('click', closeModal); });
+        window.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && modal.classList.contains('is-open')) { e.preventDefault(); closeModal(); }
+        });
+
+        root.querySelectorAll('.pls-fixed-grid .pls-card[data-idx]').forEach(function (card) {
+          var item = fixed[+card.getAttribute('data-idx')];
+          card.addEventListener('click', function () { openModal(item); });
+          card.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(item); }
+          });
+        });
+
+        window.addEventListener('resize', function () {
+          if (modal.classList.contains('is-open')) { resetModalScroll(); forcePanelPaint(); }
+        });
+      }
+    })();
+  </script>
+</section>
