@@ -2,13 +2,11 @@
 export const SETTING_GROUPS = [
   {
     key: 'site',
-    title: '사이트 기본 정보',
-    desc: '공지사항·내부 뉴스 페이지 상단 로고와 브라우저 제목에 사용됩니다.',
+    title: '기존 사이트 연결',
+    desc: '내부 뉴스 글·공지사항 링크와 관리자 미리보기에 사용됩니다.',
     fields: [
-      { name: 'name', label: '사이트 이름', type: 'text', default: 'HTU Global Holdings', half: true },
-      { name: 'home_url', label: '홈 링크', type: 'text', default: '/', half: true, help: '로고 클릭 시 이동할 주소. 기존 홈페이지 도메인을 넣어도 됩니다.' },
-      { name: 'logo_url', label: '사이트 로고', type: 'image', folder: 'logo' },
-      { name: 'meta_description', label: '검색 설명 (meta description)', type: 'textarea', rows: 2, default: '' },
+      { name: 'site_url', label: '기존 사이트 주소', type: 'url', default: 'https://htuglobal.com', half: true, help: '끝에 / 없이. 예) https://htuglobal.com' },
+      { name: 'name', label: '사이트 이름', type: 'text', default: 'HTU GLOBAL', half: true },
     ],
   },
   {
@@ -102,6 +100,35 @@ export const SETTING_GROUPS = [
       },
       { name: 'pc_max_w', label: 'PC 최대 가로 (px)', type: 'number', default: 540, half: true },
       { name: 'pc_max_h', label: 'PC 최대 세로 (px, 하단 바 포함)', type: 'number', default: 720, half: true },
+    ],
+  },
+  {
+    key: 'header',
+    title: '헤더 로고',
+    desc: '홈 첫 화면(영상 위)에서는 흰색 로고, 스크롤하거나 다른 페이지에서는 기본 로고가 표시됩니다.',
+    fields: [
+      { name: 'logo_url', label: '기본 로고 (흰 배경용, 어두운 색)', type: 'image', folder: 'logo' },
+      { name: 'logo_light_url', label: '흰색 로고 (영상 위)', type: 'image', folder: 'logo', help: '비워두면 기본 로고를 흰색으로 자동 변환합니다.' },
+      { name: 'logo_text', label: '로고 대체 텍스트', type: 'text', default: 'HTU GLOBAL', half: true, help: '로고 이미지가 없으면 이 글자가 표시됩니다.' },
+      { name: 'logo_height', label: '로고 높이 (px)', type: 'number', default: 34, half: true },
+    ],
+  },
+  {
+    key: 'footer',
+    title: '푸터 회사 정보',
+    fields: [
+      { name: 'logo_url', label: '푸터 로고 (어두운 배경용, 흰색)', type: 'image', folder: 'logo' },
+      { name: 'logo_text', label: '로고 대체 텍스트', type: 'text', default: 'HTU GLOBAL HOLDINGS', half: true },
+      { name: 'related_label', label: '관련 사이트 버튼 문구', type: 'text', default: 'FAMILY SITE', half: true },
+      { name: 'company', label: '상호', type: 'text', half: true },
+      { name: 'ceo', label: '대표자', type: 'text', half: true },
+      { name: 'address', label: '주소', type: 'text' },
+      { name: 'biz_no', label: '사업자등록번호', type: 'text', half: true },
+      { name: 'tel', label: '전화', type: 'text', half: true },
+      { name: 'fax', label: '팩스', type: 'text', half: true },
+      { name: 'email', label: '이메일', type: 'text', half: true },
+      { name: 'extra', label: '추가 문구 (통신판매업 신고번호 등)', type: 'textarea', rows: 2 },
+      { name: 'copyright', label: '저작권 문구', type: 'text', default: 'Copyright © HTU GLOBAL HOLDINGS. All rights reserved.' },
     ],
   },
 ];

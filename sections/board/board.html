@@ -1,0 +1,286 @@
+<section id="htuBoard" data-mode="__BOARD_MODE__" aria-label="게시판">
+  <style>
+    #htuBoard { --ink:#0b1220; --muted:rgba(11,18,32,.6); --line:rgba(15,23,42,.09); --green:#0a6a62; --green-d:#033b1e;
+      font-family:'Pretendard Variable','Pretendard','Noto Sans KR',system-ui,sans-serif; color:var(--ink);
+      background:#fff; padding:clamp(120px,14vw,180px) 0 120px; -webkit-font-smoothing:antialiased; }
+    #htuBoard *, #htuBoard *::before, #htuBoard *::after { box-sizing:border-box; }
+    #htuBoard .hb-wrap { width:min(1200px, calc(100% - 40px)); margin:0 auto; }
+    #htuBoard .hb-narrow { width:min(840px, calc(100% - 40px)); margin:0 auto; }
+    #htuBoard .hb-eyebrow { font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--green); margin:0 0 14px; }
+    #htuBoard .hb-h1 { margin:0; font-size:clamp(28px,3.6vw,44px); font-weight:900; letter-spacing:-.035em; line-height:1.25; word-break:keep-all; }
+    #htuBoard .hb-meta { margin-top:16px; padding-bottom:24px; border-bottom:1px solid var(--line); color:var(--muted); font-size:14px; display:flex; gap:14px; flex-wrap:wrap; }
+    #htuBoard .hb-lead { margin:28px 0 0; font-size:18px; line-height:1.75; color:rgba(11,18,32,.78); word-break:keep-all; }
+    #htuBoard .hb-cover { display:block; width:100%; height:auto; margin:28px 0 0; border-radius:16px; }
+    #htuBoard .hb-content { margin-top:32px; font-size:16.5px; line-height:1.9; color:rgba(11,18,32,.86); word-break:keep-all; overflow-wrap:break-word; }
+    #htuBoard .hb-content h2 { font-size:24px; margin:1.8em 0 .6em; letter-spacing:-.02em; }
+    #htuBoard .hb-content h3 { font-size:20px; margin:1.6em 0 .5em; }
+    #htuBoard .hb-content p { margin:0 0 1em; }
+    #htuBoard .hb-content img { max-width:100%; height:auto; border-radius:12px; }
+    #htuBoard .hb-content a { color:var(--green); }
+    #htuBoard .hb-content ul, #htuBoard .hb-content ol { padding-left:1.4em; }
+    #htuBoard .hb-content blockquote { margin:1.4em 0; padding:4px 0 4px 18px; border-left:3px solid var(--green); color:var(--muted); }
+    #htuBoard .hb-content hr { border:0; border-top:1px solid var(--line); margin:2em 0; }
+    #htuBoard .hb-content .yt-embed { position:relative; aspect-ratio:16/9; margin:1.4em 0; border-radius:14px; overflow:hidden; background:#000; }
+    #htuBoard .hb-content .yt-embed iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+    #htuBoard .hb-actions { margin-top:56px; padding-top:24px; border-top:1px solid var(--line); }
+    #htuBoard .hb-btn { display:inline-flex; align-items:center; gap:6px; padding:12px 20px; border-radius:999px; border:1px solid var(--line);
+      text-decoration:none; color:var(--ink); font-weight:800; font-size:14px; background:#fff; cursor:pointer; }
+    #htuBoard .hb-btn:hover { border-color:var(--green); color:var(--green); }
+
+    /* 공지 목록 */
+    #htuBoard .hb-list { list-style:none; margin:32px 0 0; padding:0; border-top:2px solid var(--ink); }
+    #htuBoard .hb-list li { border-bottom:1px solid var(--line); }
+    #htuBoard .hb-list a { display:grid; grid-template-columns:72px 1fr 120px; align-items:center; gap:12px; padding:18px 8px; text-decoration:none; color:var(--ink); }
+    #htuBoard .hb-list a:hover .hb-subject { color:var(--green); }
+    #htuBoard .hb-list .is-pinned { background:#f6f9f8; }
+    #htuBoard .hb-no { text-align:center; color:var(--muted); font-size:14px; }
+    #htuBoard .hb-no em { font-style:normal; display:inline-block; padding:4px 10px; border-radius:999px; background:var(--green); color:#fff; font-size:12px; font-weight:800; }
+    #htuBoard .hb-subject { font-weight:700; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    #htuBoard .hb-date { text-align:right; color:var(--muted); font-size:14px; }
+    #htuBoard .hb-empty { padding:70px 0; text-align:center; color:var(--muted); }
+    #htuBoard .hb-pager { display:flex; justify-content:center; gap:6px; margin-top:32px; }
+    #htuBoard .hb-pager a { min-width:36px; height:36px; display:grid; place-items:center; border-radius:10px; text-decoration:none; color:var(--ink); font-weight:700; border:1px solid var(--line); }
+    #htuBoard .hb-pager a.is-on { background:var(--ink); color:#fff; border-color:var(--ink); }
+
+    /* 뉴스 목록 */
+    #htuBoard .hb-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:22px; margin-top:36px; }
+    #htuBoard .hb-card { display:flex; flex-direction:column; text-decoration:none; color:inherit; border:1px solid var(--line); border-radius:18px; overflow:hidden; background:#fff;
+      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+    #htuBoard .hb-card:hover { transform:translateY(-3px); box-shadow:0 18px 40px rgba(0,0,0,.08); border-color:rgba(10,106,98,.25); }
+    #htuBoard .hb-thumb { position:relative; aspect-ratio:16/10; background:#f1f4f2; overflow:hidden; }
+    #htuBoard .hb-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    #htuBoard .hb-chip { position:absolute; left:12px; top:12px; height:26px; padding:0 11px; display:inline-flex; align-items:center; border-radius:999px;
+      font-size:11.5px; font-weight:800; background:rgba(255,255,255,.92); color:var(--ink); box-shadow:0 6px 16px rgba(0,0,0,.12); }
+    #htuBoard .hb-chip.is-internal { background:linear-gradient(135deg,#0a4f30,#0a6a62); color:#fff; }
+    #htuBoard .hb-card-body { padding:18px 18px 20px; }
+    #htuBoard .hb-card-title { margin:0; font-size:17px; font-weight:800; line-height:1.4; letter-spacing:-.02em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; word-break:keep-all; }
+    #htuBoard .hb-card-ex { margin:8px 0 0; font-size:14px; line-height:1.6; color:var(--muted); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    #htuBoard .hb-card-date { margin-top:12px; font-size:12.5px; color:var(--muted); }
+    #htuBoard .hb-loading { padding:80px 0; text-align:center; color:var(--muted); }
+
+    /* 첨부파일 */
+    #htuBoard .hb-files { margin-top:36px; padding:18px 20px; border-radius:14px; background:#f6f8f7; border:1px solid var(--line); }
+    #htuBoard .hb-files h4 { margin:0 0 10px; font-size:14px; font-weight:800; }
+    #htuBoard .hb-files ul { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
+    #htuBoard .hb-files a { display:inline-flex; align-items:center; gap:8px; color:var(--ink); text-decoration:none; font-size:14.5px; font-weight:600; word-break:break-all; }
+    #htuBoard .hb-files a:hover { color:var(--green); }
+    #htuBoard .hb-files svg { width:16px; height:16px; flex:0 0 16px; color:var(--green); }
+
+    /* 이벤트 */
+    #htuBoard .hb-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-top:28px; }
+    #htuBoard .hb-tabs button { height:40px; padding:0 18px; border-radius:999px; border:1px solid var(--line); background:#fff; cursor:pointer;
+      font:inherit; font-size:14px; font-weight:800; color:rgba(11,18,32,.7); }
+    #htuBoard .hb-tabs button.is-on { background:var(--ink); border-color:var(--ink); color:#fff; }
+    #htuBoard .hb-status { position:absolute; right:12px; top:12px; height:26px; padding:0 11px; display:inline-flex; align-items:center; border-radius:999px;
+      font-size:11.5px; font-weight:800; color:#fff; background:#0a6a62; box-shadow:0 6px 16px rgba(0,0,0,.14); }
+    #htuBoard .hb-status.is-soon { background:#2457c5; }
+    #htuBoard .hb-status.is-end { background:rgba(11,18,32,.6); }
+    #htuBoard .hb-card.is-end .hb-thumb img { filter:grayscale(.6); opacity:.8; }
+    #htuBoard .hb-card-meta { margin-top:12px; display:grid; gap:4px; font-size:13px; color:var(--muted); }
+    #htuBoard .hb-evinfo { margin-top:28px; display:grid; grid-template-columns:110px 1fr; gap:10px 16px; padding:20px 22px; border-radius:14px; background:#f6f8f7; border:1px solid var(--line); font-size:15px; }
+    #htuBoard .hb-evinfo dt { color:var(--muted); font-weight:700; }
+    #htuBoard .hb-evinfo dd { margin:0; font-weight:600; }
+    #htuBoard .hb-apply { display:inline-flex; align-items:center; gap:8px; margin-top:20px; height:50px; padding:0 26px; border-radius:999px; text-decoration:none;
+      font-size:15px; font-weight:800; color:#fff; background:linear-gradient(135deg,#0a4f30,#0a6a62); box-shadow:0 14px 34px rgba(10,106,98,.28); }
+    #htuBoard .hb-apply.is-disabled { background:#c9d1cd; box-shadow:none; pointer-events:none; }
+
+    @media (max-width:900px){ #htuBoard .hb-grid { grid-template-columns:repeat(2, minmax(0,1fr)); } }
+    @media (max-width:640px){
+      #htuBoard { padding-top:110px; }
+      #htuBoard .hb-grid { grid-template-columns:1fr; }
+      #htuBoard .hb-list a { grid-template-columns:52px 1fr; }
+      #htuBoard .hb-date { grid-column:2; text-align:left; font-size:12.5px; margin-top:-6px; }
+    }
+  </style>
+
+  <div class="hb-root"><div class="hb-loading">불러오는 중…</div></div>
+
+  <script>
+    (function(){
+      var root = document.getElementById('htuBoard');
+      if(!root || root.__htuInit) return;
+      root.__htuInit = true;
+
+      var API = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public';
+      var mode = root.getAttribute('data-mode');
+      if(mode !== 'news' && mode !== 'event') mode = 'notice';
+      var box = root.querySelector('.hb-root');
+      var qs = new URLSearchParams(location.search);
+      var id = qs.get('id');
+      var page = Math.max(1, parseInt(qs.get('page') || '1', 10) || 1);
+      var SITE = document.title.split('|').pop().trim() || 'HTU GLOBAL';
+
+      function esc(s){
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+          return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+        });
+      }
+      function fmt(d, long){
+        var t = new Date(d); if(isNaN(t)) return '';
+        return t.toLocaleDateString('ko-KR', long ? { year:'numeric', month:'long', day:'numeric' } : { year:'numeric', month:'2-digit', day:'2-digit' });
+      }
+      function get(path){
+        return fetch(API + path, { credentials:'omit' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+      }
+      function bump(table, rid){
+        var key = 'htu_view_' + table + '_' + rid;
+        try{ if(sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); }catch(e){}
+        fetch(API + '/view', { method:'POST', headers:{ 'Content-Type':'text/plain' }, body: JSON.stringify({ table:table, id:rid }), credentials:'omit' }).catch(function(){});
+      }
+      function notFound(back){
+        box.innerHTML = '<div class="hb-narrow"><div class="hb-empty">게시물을 찾을 수 없습니다.</div><div class="hb-actions"><a class="hb-btn" href="' + back + '">← 목록으로</a></div></div>';
+      }
+      var FILE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5 12.6 21a5.5 5.5 0 0 1-7.8-7.8l8.5-8.5a3.7 3.7 0 0 1 5.2 5.2l-8.5 8.5a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8"/></svg>';
+      function filesHtml(list){
+        list = (list || []).filter(function(f){ return f && f.url; });
+        if(!list.length) return '';
+        return '<div class="hb-files"><h4>첨부파일</h4><ul>' + list.map(function(f){
+          return '<li><a href="' + esc(f.url) + '" target="_blank" rel="noopener" download>' + FILE_ICO + esc(f.name || '파일') + '</a></li>';
+        }).join('') + '</ul></div>';
+      }
+      function article(d, eyebrow, back, extra){
+        document.title = d.title + ' | ' + SITE;
+        box.innerHTML =
+          '<article class="hb-narrow">' +
+            '<p class="hb-eyebrow">' + eyebrow + '</p>' +
+            '<h1 class="hb-h1">' + esc(d.title) + '</h1>' +
+            '<div class="hb-meta"><time datetime="' + esc(d.published_at) + '">' + fmt(d.published_at, true) + '</time></div>' +
+            (d.excerpt ? '<p class="hb-lead">' + esc(d.excerpt) + '</p>' : '') +
+            (extra || '') +
+            (d.thumbnail_url ? '<img class="hb-cover" src="' + esc(d.thumbnail_url) + '" alt="">' : '') +
+            '<div class="hb-content">' + (d.content_html || '') + '</div>' +   /* 서버에서 허용 태그만 남기고 정화된 HTML */
+            filesHtml(d.attachments) +
+            '<div class="hb-actions"><a class="hb-btn" href="' + back + '">← 목록으로</a></div>' +
+          '</article>';
+      }
+
+      /* ---------- 공지사항 ---------- */
+      if(mode === 'notice'){
+        if(id){
+          get('/notices/' + encodeURIComponent(id)).then(function(d){
+            if(!d || d.error) return notFound('notice.html');
+            article(d, 'Notice', 'notice.html');
+            bump('notices', d.id);
+          });
+          return;
+        }
+        get('/notices?page=' + page).then(function(d){
+          d = d || { rows:[], count:0, per:15 };
+          d.count = Math.max(d.count || 0, (page - 1) * (d.per || 15) + d.rows.length);
+          d.per = d.per || 15;
+          var pages = Math.max(1, Math.ceil(d.count / d.per));
+          var rows = d.rows.map(function(r, i){
+            return '<li class="' + (r.pinned ? 'is-pinned' : '') + '"><a href="notice.html?id=' + esc(r.id) + '">' +
+              '<span class="hb-no">' + (r.pinned ? '<em>공지</em>' : (d.count - ((page - 1) * d.per + i))) + '</span>' +
+              '<span class="hb-subject">' + esc(r.title) + '</span>' +
+              '<span class="hb-date">' + fmt(r.published_at) + '</span></a></li>';
+          }).join('');
+          var pager = '';
+          if(pages > 1){
+            for(var p = 1; p <= pages; p++) pager += '<a href="notice.html?page=' + p + '"' + (p === page ? ' class="is-on"' : '') + '>' + p + '</a>';
+            pager = '<nav class="hb-pager">' + pager + '</nav>';
+          }
+          document.title = '공지사항 | ' + SITE;
+          box.innerHTML = '<div class="hb-narrow"><p class="hb-eyebrow">Notice</p><h1 class="hb-h1">공지사항</h1>' +
+            '<ul class="hb-list">' + (rows || '<li class="hb-empty">등록된 공지사항이 없습니다.</li>') + '</ul>' + pager + '</div>';
+        });
+        return;
+      }
+
+      /* ---------- 이벤트 ---------- */
+      if(mode === 'event'){
+        var today = new Date(); today.setHours(0,0,0,0);
+        function day(v){ if(!v) return null; var p = String(v).slice(0,10).split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+        function status(e){
+          var s0 = day(e.start_date), s1 = day(e.end_date) || s0;
+          if(s0 && today < s0) return { key:'soon', label:'예정' };
+          if(s1 && today > s1) return { key:'end', label:'종료' };
+          return { key:'on', label:'진행중' };
+        }
+        function period(e){
+          var a = e.start_date ? fmt(e.start_date) : '', b = e.end_date ? fmt(e.end_date) : '';
+          return a && b && a !== b ? a + ' ~ ' + b : (a || b);
+        }
+        if(id){
+          get('/events/' + encodeURIComponent(id)).then(function(d){
+            if(!d || d.error) return notFound('event.html');
+            if(d.link_type === 'external' && d.external_url){ location.replace(d.external_url); return; }
+            var stt = status(d);
+            var info = '<dl class="hb-evinfo">' +
+              '<dt>상태</dt><dd>' + stt.label + '</dd>' +
+              (period(d) ? '<dt>기간</dt><dd>' + period(d) + '</dd>' : '') +
+              (d.location ? '<dt>장소</dt><dd>' + esc(d.location) + '</dd>' : '') + '</dl>' +
+              (d.apply_url ? '<a class="hb-apply' + (stt.key === 'end' ? ' is-disabled' : '') + '" href="' + esc(d.apply_url) + '" target="_blank" rel="noopener noreferrer">' +
+                (stt.key === 'end' ? '마감되었습니다' : esc(d.apply_label || '신청하기') + ' ↗') + '</a>' : '');
+            d.excerpt = d.summary;
+            article(d, 'Event', 'event.html', info);
+            bump('events', d.id);
+          });
+          return;
+        }
+        get('/events').then(function(d){
+          var rows = (d && d.rows) || [];
+          document.title = '이벤트 | ' + SITE;
+          var filter = qs.get('status') || 'all';
+          function render(){
+            var list = rows.filter(function(e){ return filter === 'all' || status(e).key === filter; });
+            var cards = list.map(function(e){
+              var stt = status(e);
+              var external = e.link_type === 'external' && e.external_url;
+              var href = external ? esc(e.external_url) : 'event.html?id=' + esc(e.id);
+              return '<a class="hb-card' + (stt.key === 'end' ? ' is-end' : '') + '" href="' + href + '"' + (external ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' +
+                '<div class="hb-thumb">' + (e.thumbnail_url ? '<img src="' + esc(e.thumbnail_url) + '" alt="" loading="lazy">' : '') +
+                  '<span class="hb-status is-' + stt.key + '">' + stt.label + '</span>' + (external ? '<span class="hb-chip">외부 링크 ↗</span>' : '') + '</div>' +
+                '<div class="hb-card-body"><h3 class="hb-card-title">' + esc(e.title) + '</h3>' +
+                  (e.summary ? '<p class="hb-card-ex">' + esc(e.summary) + '</p>' : '') +
+                  '<div class="hb-card-meta">' + (period(e) ? '<span>📅 ' + period(e) + '</span>' : '') + (e.location ? '<span>📍 ' + esc(e.location) + '</span>' : '') + '</div>' +
+                '</div></a>';
+            }).join('');
+            var tabs = [['all','전체'],['on','진행중'],['soon','예정'],['end','종료']].map(function(t){
+              return '<button type="button" data-st="' + t[0] + '"' + (t[0] === filter ? ' class="is-on"' : '') + '>' + t[1] + '</button>';
+            }).join('');
+            box.innerHTML = '<div class="hb-wrap"><p class="hb-eyebrow">Event</p><h1 class="hb-h1">이벤트</h1><div class="hb-tabs">' + tabs + '</div>' +
+              (cards ? '<div class="hb-grid">' + cards + '</div>' : '<div class="hb-empty">해당하는 이벤트가 없습니다.</div>') + '</div>';
+            box.querySelectorAll('.hb-tabs button').forEach(function(b){
+              b.addEventListener('click', function(){
+                filter = b.getAttribute('data-st');
+                history.replaceState(null, '', filter === 'all' ? 'event.html' : 'event.html?status=' + filter);
+                render();
+              });
+            });
+          }
+          render();
+        });
+        return;
+      }
+
+      /* ---------- News & Event ---------- */
+      if(id){
+        get('/news/' + encodeURIComponent(id)).then(function(d){
+          if(!d || d.error) return notFound('news.html');
+          if(d.type === 'external' && d.external_url){ location.replace(d.external_url); return; }
+          article(d, 'News &amp; Event', 'news.html');
+          bump('news', d.id);
+        });
+        return;
+      }
+      get('/news').then(function(d){
+        var rows = (d && d.rows) || [];
+        document.title = 'News & Event | ' + SITE;
+        var cards = rows.map(function(n){
+          var internal = n.type === 'internal';
+          var href = internal ? 'news.html?id=' + esc(n.id) : esc(n.external_url || '#');
+          var target = internal ? '' : ' target="_blank" rel="noopener noreferrer"';
+          return '<a class="hb-card" href="' + href + '"' + target + '>' +
+            '<div class="hb-thumb">' + (n.thumbnail_url ? '<img src="' + esc(n.thumbnail_url) + '" alt="" loading="lazy">' : '') +
+              '<span class="hb-chip' + (internal ? ' is-internal' : '') + '">' + (internal ? 'HTU 소식' : '외부 기사 ↗') + '</span></div>' +
+            '<div class="hb-card-body"><h3 class="hb-card-title">' + esc(n.title) + '</h3>' +
+              (n.excerpt ? '<p class="hb-card-ex">' + esc(n.excerpt) + '</p>' : '') +
+              '<div class="hb-card-date">' + fmt(n.published_at) + '</div></div></a>';
+        }).join('');
+        box.innerHTML = '<div class="hb-wrap"><p class="hb-eyebrow">News &amp; Event</p><h1 class="hb-h1">News &amp; Event</h1>' +
+          (cards ? '<div class="hb-grid">' + cards + '</div>' : '<div class="hb-empty">등록된 소식이 없습니다.</div>') + '</div>';
+      });
+    })();
+  </script>
+</section>

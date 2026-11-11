@@ -26,6 +26,7 @@ export default function CollectionEditor({
   itemLabel = '항목',
   emptyText = '등록된 항목이 없습니다.',
   maxItems,
+  onRowsChange,
 }) {
   const sb = supabaseBrowser();
   const [rows, setRows] = useState([]);
@@ -40,12 +41,13 @@ export default function CollectionEditor({
   const load = useCallback(async () => {
     setLoading(true);
     let q = sb.from(table).select('*');
-    Object.entries(filter).forEach(([k, v]) => (q = q.eq(k, v)));
+    Object.entries(filter).forEach(([k, v]) => (q = v === null ? q.is(k, null) : q.eq(k, v)));
     orderBy.forEach((o) => (q = q.order(o.col, { ascending: o.asc !== false })));
     const { data, error } = await q;
     if (error) toast(errMsg(error), 'err');
     setRows(data || []);
     setLoading(false);
+    onRowsChange?.(data || []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table, filterKey]);
 
@@ -121,7 +123,7 @@ export default function CollectionEditor({
   };
 
   const duplicate = async (row) => {
-    const { id, created_at, updated_at, view_count, ...rest } = row;
+    const { id, created_at, updated_at, view_count, ...rest } = row; // eslint-disable-line no-unused-vars
     const sorts = rows.map((r) => r.sort ?? 0);
     const { error } = await sb.from(table).insert({ ...rest, active: false, sort: sorts.length ? Math.max(...sorts) + 1 : 0 });
     if (error) return toast(errMsg(error), 'err');

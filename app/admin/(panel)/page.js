@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import PageHead from '@/components/admin/PageHead';
 import RefreshButton from '@/components/admin/RefreshButton';
+import SiteConnect from '@/components/admin/SiteConnect';
 
 const CARDS = [
   { table: 'intro_slides', label: '인트로 영상', href: '/admin/intro' },
@@ -13,6 +14,8 @@ const CARDS = [
   { table: 'videos', label: '영상', href: '/admin/videos' },
   { table: 'news', label: 'News & Event', href: '/admin/news' },
   { table: 'notices', label: '공지사항', href: '/admin/notices' },
+  { table: 'events', label: '이벤트', href: '/admin/events' },
+  { table: 'menu_items', label: '메뉴 · 링크', href: '/admin/menu' },
   { table: 'popups', label: '메인 팝업', href: '/admin/popups' },
 ];
 
@@ -28,14 +31,14 @@ export default async function Dashboard() {
     })
   );
   const { data: recent } = await sb.from('news').select('id,title,type,updated_at').order('updated_at', { ascending: false }).limit(5);
-  const site = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/+$/, '') || '(배포 도메인)';
 
   return (
     <>
-      <PageHead title="대시보드" desc="홈페이지의 모든 섹션을 여기서 관리합니다. 저장하면 1분 이내 홈페이지에 반영됩니다.">
+      <PageHead title="대시보드" desc="홈페이지의 모든 섹션을 여기서 관리합니다. 저장하면 약 30초 안에 기존 사이트에 반영됩니다.">
         <RefreshButton />
-        <a className="adm-btn" href="/" target="_blank" rel="noreferrer">홈페이지 보기 ↗</a>
       </PageHead>
+
+      <SiteConnect />
 
       <div className="adm-stats">
         {counts.map((c) => (
@@ -62,19 +65,16 @@ export default async function Dashboard() {
           </ul>
         </section>
         <section className="adm-card">
-          <div className="adm-card-head"><h3>다른 사이트에 섹션 붙여넣기</h3></div>
-          <ol className="adm-guide">
-            <li>
-              섹션보다 위에 한 줄 추가:
-              <code>{`<script>window.HTU_CMS_ENDPOINT='${site}';</script>`}</code>
-            </li>
-            <li>
-              <a href="/embed/all-sections.html" target="_blank" rel="noreferrer">/embed/all-sections.html</a> 또는 섹션별 파일(
-              <a href="/embed/main-slider.html" target="_blank" rel="noreferrer">main-slider</a>,{' '}
-              <a href="/embed/partners.html" target="_blank" rel="noreferrer">partners</a> …) 코드를 그대로 붙여넣기
-            </li>
-            <li>이후 내용 수정은 이 관리자에서만 하면 자동 반영됩니다.</li>
-          </ol>
+          <div className="adm-card-head"><h3>바로가기</h3></div>
+          <ul className="adm-mini-list">
+            <li><Link href="/admin/intro">⓪ 인트로 영상 수정</Link></li>
+            <li><Link href="/admin/news">News &amp; Event 글쓰기</Link></li>
+            <li><Link href="/admin/notices">공지사항 작성</Link></li>
+            <li><Link href="/admin/events">이벤트 등록</Link></li>
+            <li><Link href="/admin/menu">헤더 메뉴 편집</Link></li>
+            <li><Link href="/admin/footer">푸터 · 관련 사이트 편집</Link></li>
+            <li><Link href="/admin/popups">메인 팝업 관리</Link></li>
+          </ul>
         </section>
       </div>
     </>

@@ -12,10 +12,12 @@
        ===================================================================== -->
   <script>
     window.HTU_CMS_ENDPOINT = '__HTU_CMS_ENDPOINT__';
+    /*PREFETCH*/
     /* 페이지 로딩과 동시에 콘텐츠를 미리 불러옵니다 (모든 섹션이 공유) */
     window.__htuCmsP = fetch(String(window.HTU_CMS_ENDPOINT).replace(/\/+$/, '') + '/api/public/content', { credentials: 'omit' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; });
+    /*/PREFETCH*/
   </script>
   <link rel="preconnect" href="https://player.vimeo.com" crossorigin>
   <link rel="preconnect" href="https://i.ytimg.com" crossorigin>
@@ -69,7 +71,5 @@
 </head>
 
 <body>
-  <div id="menu_navi"></div>
-
-  <script src="./menu3.js"></script>
+  <!-- 메뉴/푸터는 관리자(메뉴 관리 · 푸터 관리)에서 수정합니다. 기존 menu3.js / footer.js 는 사용하지 않습니다. -->
 

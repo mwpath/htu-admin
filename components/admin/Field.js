@@ -94,6 +94,47 @@ function VideoField({ value, onChange, folder }) {
   );
 }
 
+function FilesField({ value, onChange, folder }) {
+  const ref = useRef(null);
+  const [busy, setBusy] = useState(false);
+  const list = Array.isArray(value) ? value : [];
+  const upload = async (files) => {
+    if (!files?.length) return;
+    setBusy(true);
+    try {
+      const added = [];
+      for (const file of Array.from(files)) {
+        const url = await uploadFile(file, folder || 'files', 30);
+        added.push({ name: file.name, url });
+      }
+      onChange([...list, ...added]);
+      toast(`${added.length}개 파일을 첨부했습니다.`);
+    } catch (e) {
+      toast(errMsg(e), 'err');
+    } finally {
+      setBusy(false);
+    }
+  };
+  const rename = (i, name) => onChange(list.map((f, j) => (j === i ? { ...f, name } : f)));
+  const remove = (i) => onChange(list.filter((_, j) => j !== i));
+  return (
+    <div className="adm-files-field">
+      {list.map((f, i) => (
+        <div key={f.url + i} className="adm-file-row">
+          <span className="adm-file-ico">📎</span>
+          <input className="adm-input sm" value={f.name || ''} onChange={(e) => rename(i, e.target.value)} />
+          <a className="adm-icon" href={f.url} target="_blank" rel="noreferrer" title="열기">↗</a>
+          <button type="button" className="adm-icon danger" onClick={() => remove(i)} title="삭제">✕</button>
+        </div>
+      ))}
+      <button type="button" className="adm-btn sm" onClick={() => ref.current?.click()} disabled={busy}>
+        {busy ? '업로드 중…' : '+ 파일 첨부 (PDF·한글·워드·엑셀·이미지, 30MB 이하)'}
+      </button>
+      <input ref={ref} type="file" multiple hidden onChange={(e) => { upload(e.target.files); e.target.value = ''; }} />
+    </div>
+  );
+}
+
 function YoutubeField({ value, onChange }) {
   const id = youtubeId(value);
   return (
@@ -168,6 +209,23 @@ export default function Field({ field, value, onChange, form }) {
     case 'image':
       input = <ImageField value={value} onChange={onChange} folder={f.folder} />;
       break;
+    case 'files':
+      input = <FilesField value={value} onChange={onChange} folder={f.folder} />;
+      break;
+    case 'link': {
+      const listId = `dl-${f.name}`;
+      input = (
+        <>
+          <input className="adm-input" list={listId} value={value ?? ''} onChange={(e) => onChange(e.target.value)} placeholder={f.placeholder} />
+          <datalist id={listId}>
+            {(f.suggestions || []).map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </datalist>
+        </>
+      );
+      break;
+    }
     case 'video':
       input = <VideoField value={value} onChange={onChange} folder={f.folder} />;
       break;
@@ -179,6 +237,9 @@ export default function Field({ field, value, onChange, form }) {
         <textarea className="adm-input" rows={f.rows || 3} value={(value || []).join('\n')}
           onChange={(e) => onChange(e.target.value.split('\n'))} placeholder="한 줄에 하나씩 입력" />
       );
+      break;
+    case 'date':
+      input = <input className="adm-input" type="date" value={value ? String(value).slice(0, 10) : ''} onChange={(e) => onChange(e.target.value || null)} />;
       break;
     case 'datetime':
       input = <input className="adm-input" type="datetime-local" value={toLocalInput(value)} onChange={(e) => onChange(fromLocalInput(e.target.value))} />;
@@ -204,6 +265,7 @@ export default function Field({ field, value, onChange, form }) {
 
 // 저장 직전 값 정리
 export function cleanValue(field, v) {
+  if (field.type === 'files') return (Array.isArray(v) ? v : []).filter((x) => x && x.url).map((x) => ({ name: String(x.name || '파일').trim(), url: x.url }));
   if (field.type === 'tags') return (v || []).map((s) => String(s).trim()).filter(Boolean);
   if (field.type === 'number') return v === '' || v == null ? null : Number(v);
   if (field.type === 'checkbox') return !!v;

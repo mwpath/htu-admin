@@ -49,3 +49,8 @@ where not exists (select 1 from public.intro_slides);
 insert into public.popups (sort, active, title, image_url, link_url, link_new_tab)
 select 0, false, '10회 컨퍼런스 포스터', './img/10-poster.jpg', 'https://mindwellpath.co.kr/conference-10-htu.html', false
 where not exists (select 1 from public.popups where image_url = './img/10-poster.jpg');
+
+-- ---------- 기존 사이트 주소 (내부 뉴스/공지 링크용) ----------
+update public.site_settings
+   set value = value || jsonb_build_object('site_url', 'https://htuglobal.com')
+ where key = 'site' and not (value ? 'site_url');

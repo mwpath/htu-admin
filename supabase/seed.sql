@@ -6,10 +6,8 @@
 -- ---------- 섹션 공통 문구/설정 ----------
 insert into public.site_settings (key, value) values
 ('site', jsonb_build_object(
-  'name', 'HTU Global Holdings',
-  'logo_url', '',
-  'home_url', '/',
-  'meta_description', 'HTU는 건강하고 아름다운 세상을 만들어갑니다.'
+  'name', 'HTU GLOBAL',
+  'site_url', 'https://htuglobal.com'
 )),
 ('hero', jsonb_build_object(
   'intro_title', E'HTU는\n건강하고 아름다운\n세상을 만들어갑니다',
@@ -226,6 +224,59 @@ where not exists (select 1 from public.intro_slides);
 insert into public.popups (sort, active, title, image_url, link_url, link_new_tab)
 select 0, false, '10회 컨퍼런스 포스터', './img/10-poster.jpg', 'https://mindwellpath.co.kr/conference-10-htu.html', false
 where not exists (select 1 from public.popups where image_url = './img/10-poster.jpg');
+
+-- ---------- 헤더 / 푸터 설정 ----------
+insert into public.site_settings (key, value) values
+('header', jsonb_build_object(
+  'logo_url', '', 'logo_light_url', '', 'logo_text', 'HTU GLOBAL', 'logo_height', 34
+)),
+('footer', jsonb_build_object(
+  'logo_url', '', 'logo_text', 'HTU GLOBAL HOLDINGS',
+  'company', '(주)에이치티유 글로벌 홀딩스', 'ceo', '', 'address', '', 'biz_no', '',
+  'tel', '', 'fax', '', 'email', '', 'extra', '',
+  'copyright', 'Copyright © HTU GLOBAL HOLDINGS. All rights reserved.',
+  'related_label', 'FAMILY SITE'
+))
+on conflict (key) do nothing;
+
+-- ---------- 기본 메뉴 (관리자 > 메뉴 관리에서 자유롭게 수정) ----------
+do $$
+declare h1 uuid; h2 uuid; h3 uuid; h4 uuid; f1 uuid; f2 uuid; f3 uuid;
+begin
+  if exists (select 1 from public.menu_items) then return; end if;
+
+  insert into public.menu_items (location, sort, label, link_type, url) values ('header', 0, 'HTU 소개', 'internal', '#mainSliderPack') returning id into h1;
+  insert into public.menu_items (location, sort, label, link_type, url) values ('header', 1, '파트너', 'internal', '#partner-logo-slider-section') returning id into h2;
+  insert into public.menu_items (location, sort, label, link_type, url) values ('header', 2, '출간·연재', 'none', null) returning id into h3;
+  insert into public.menu_items (location, sort, label, link_type, url) values ('header', 3, '소식', 'none', null) returning id into h4;
+  insert into public.menu_items (location, parent_id, sort, label, link_type, url) values
+    ('header', h3, 0, '정기 출간물', 'internal', '#youtubeVideoSection'),
+    ('header', h3, 1, '전문가 연재', 'internal', '#bookshelf-gallery'),
+    ('header', h4, 0, 'News & Event', 'internal', './news.html'),
+    ('header', h4, 1, '이벤트', 'internal', './event.html'),
+    ('header', h4, 2, '공지사항', 'internal', './notice.html'),
+    ('header', h4, 3, 'YouTube', 'internal', '#youtubePopupGallerySection');
+
+  insert into public.menu_items (location, sort, label, link_type) values ('footer', 0, 'HTU', 'none') returning id into f1;
+  insert into public.menu_items (location, sort, label, link_type) values ('footer', 1, '미디어', 'none') returning id into f2;
+  insert into public.menu_items (location, sort, label, link_type) values ('footer', 2, '고객지원', 'none') returning id into f3;
+  insert into public.menu_items (location, parent_id, sort, label, link_type, url) values
+    ('footer', f1, 0, 'HTU 소개', 'internal', './index.html#mainSliderPack'),
+    ('footer', f1, 1, '파트너', 'internal', './index.html#partner-logo-slider-section'),
+    ('footer', f2, 0, 'News & Event', 'internal', './news.html'),
+    ('footer', f2, 1, '전문가 연재', 'internal', './index.html#bookshelf-gallery'),
+    ('footer', f3, 0, '공지사항', 'internal', './notice.html'),
+    ('footer', f3, 1, '이벤트', 'internal', './event.html');
+
+  insert into public.menu_items (location, sort, label, link_type, url, new_tab)
+  select 'related', row_number() over (order by g.sort, s.sort) - 1, s.title, 'external', s.href, true
+    from public.family_sites s join public.family_groups g on g.key = s.group_key
+   where s.href is not null and s.href <> '#' and s.href ~ '^https?://';
+
+  insert into public.menu_items (location, sort, label, link_type, url, active) values
+    ('policy', 0, '개인정보처리방침', 'internal', '#', false),
+    ('policy', 1, '이용약관', 'internal', '#', false);
+end $$;
 
 -- ---------- 관리자 계정 등록 ----------
 -- 1) Supabase Dashboard → Authentication → Users → "Add user" 로 이메일/비밀번호 계정 생성

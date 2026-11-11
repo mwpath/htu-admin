@@ -251,3 +251,23 @@ textarea.adm-input { resize: vertical; line-height: 1.6; }
   .adm-image { grid-template-columns: 1fr; }
   .adm-page-head { flex-direction: column; align-items: flex-start; }
 }
+
+/* ---------- Site connect ---------- */
+.adm-connect-status { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.adm-connect-status > div { display: grid; gap: 4px; padding: 12px 14px; border-radius: 12px; background: #f6f8f7; border: 1px solid var(--line); min-width: 0; }
+.adm-connect-status span { font-size: 12px; font-weight: 700; }
+.adm-connect-status code, .adm-connect-status a { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--g-700); text-decoration: none; }
+.adm-connect-status b.ok { color: var(--g-600); }
+.adm-connect-status b.err { color: var(--danger); }
+.adm-files { display: grid; gap: 8px; margin-bottom: 16px; }
+.adm-file { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.adm-file strong { display: block; font-size: 14px; }
+.adm-file small { color: var(--muted); font-size: 12.5px; }
+@media (max-width: 860px) { .adm-connect-status { grid-template-columns: 1fr; } .adm-file { flex-direction: column; align-items: flex-start; } }
+
+/* ---------- Files field ---------- */
+.adm-files-field { display: grid; gap: 8px; justify-items: start; }
+.adm-file-row { display: flex; align-items: center; gap: 6px; width: 100%; }
+.adm-file-row .adm-input.sm { flex: 1; width: auto; }
+.adm-file-ico { width: 24px; text-align: center; }
+.adm-tree-hint { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; background: #f3f7f5; color: #3c4a44; font-size: 13px; line-height: 1.6; }

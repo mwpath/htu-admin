@@ -1,0 +1,225 @@
+<header id="htuHeader" data-theme="__HEADER_THEME__" aria-label="사이트 메뉴">
+  <style>
+    #htuHeader { --hh-h: 78px; --hh-green: #0a6a62; --hh-green-d: #033b1e; --hh-ink: #0b1220;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9000; height: var(--hh-h);
+      font-family: 'Pretendard Variable','Pretendard','Noto Sans KR',system-ui,sans-serif; -webkit-font-smoothing: antialiased;
+      color: #fff; transition: background .35s ease, color .35s ease, box-shadow .35s ease, transform .35s ease; }
+    #htuHeader *, #htuHeader *::before, #htuHeader *::after { box-sizing: border-box; }
+    #htuHeader.is-solid, #htuHeader[data-theme="solid"] { background: rgba(255,255,255,.96); color: var(--hh-ink);
+      box-shadow: 0 1px 0 rgba(15,23,42,.08); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+    #htuHeader .hh-bar { height: 100%; width: min(1440px, calc(100% - 64px)); margin: 0 auto; display: flex; align-items: center; gap: 28px; }
+
+    /* 로고 */
+    #htuHeader .hh-logo { flex: 0 0 auto; display: flex; align-items: center; text-decoration: none; color: inherit; font-weight: 900; font-size: 20px; letter-spacing: -.02em; }
+    #htuHeader .hh-logo img { display: block; height: var(--hh-logo-h, 34px); width: auto; }
+    #htuHeader .hh-logo .hh-logo-dark { display: none; }
+    #htuHeader.is-solid .hh-logo .hh-logo-light, #htuHeader[data-theme="solid"] .hh-logo .hh-logo-light { display: none; }
+    #htuHeader.is-solid .hh-logo .hh-logo-dark, #htuHeader[data-theme="solid"] .hh-logo .hh-logo-dark { display: block; }
+    #htuHeader .hh-logo .hh-logo-light.is-filter { filter: brightness(0) invert(1); }
+
+    /* 데스크톱 메뉴 */
+    #htuHeader .hh-nav { flex: 1; display: flex; justify-content: center; }
+    #htuHeader .hh-menu { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: clamp(14px, 2.6vw, 44px); }
+    #htuHeader .hh-menu > li { position: relative; }
+    #htuHeader .hh-top { display: inline-flex; align-items: center; gap: 4px; height: var(--hh-h); padding: 0 2px; color: inherit; text-decoration: none;
+      font-size: 16px; font-weight: 700; letter-spacing: -.02em; background: none; border: 0; cursor: pointer; font-family: inherit; position: relative; }
+    #htuHeader .hh-top::after { content: ""; position: absolute; left: 0; right: 0; bottom: 20px; height: 2px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .3s cubic-bezier(.22,1,.36,1); }
+    #htuHeader .hh-menu > li:hover > .hh-top::after, #htuHeader .hh-menu > li:focus-within > .hh-top::after { transform: scaleX(1); }
+    #htuHeader .hh-ext { display: inline-block; font-size: .78em; opacity: .7; transform: translateY(-1px); }
+    #htuHeader .hh-drop { position: absolute; top: calc(var(--hh-h) - 12px); left: 50%; min-width: 200px; padding: 10px; list-style: none; margin: 0;
+      background: #fff; color: var(--hh-ink); border-radius: 16px; box-shadow: 0 24px 60px rgba(6,24,18,.16), 0 0 0 1px rgba(15,23,42,.06);
+      opacity: 0; visibility: hidden; transform: translate(-50%, 8px); transition: opacity .22s ease, transform .28s cubic-bezier(.22,1,.36,1), visibility .22s; }
+    #htuHeader .hh-menu > li:hover > .hh-drop, #htuHeader .hh-menu > li:focus-within > .hh-drop { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+    #htuHeader .hh-drop a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; border-radius: 10px;
+      color: inherit; text-decoration: none; font-size: 14.5px; font-weight: 600; white-space: nowrap; }
+    #htuHeader .hh-drop a:hover, #htuHeader .hh-drop a:focus-visible { background: #eef5f2; color: var(--hh-green); outline: none; }
+
+    /* 오른쪽 */
+    #htuHeader .hh-right { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; }
+    #htuHeader .hh-cta { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px; border-radius: 999px; text-decoration: none;
+      font-size: 14px; font-weight: 800; color: #fff; background: linear-gradient(135deg, #0a4f30, var(--hh-green)); box-shadow: 0 8px 20px rgba(10,106,98,.25); }
+    #htuHeader .hh-burger { display: none; width: 44px; height: 44px; border: 0; background: none; color: inherit; cursor: pointer; position: relative; }
+    #htuHeader .hh-burger span { position: absolute; left: 11px; right: 11px; height: 2px; background: currentColor; border-radius: 2px; transition: transform .3s ease, opacity .2s ease; }
+    #htuHeader .hh-burger span:nth-child(1) { top: 15px; } #htuHeader .hh-burger span:nth-child(2) { top: 21px; } #htuHeader .hh-burger span:nth-child(3) { top: 27px; }
+
+    /* 모바일 패널 */
+    #htuHeader .hh-panel { position: fixed; inset: 0; z-index: -1; background: #fff; color: var(--hh-ink); padding: calc(var(--hh-h) + 12px) 24px 40px; overflow-y: auto;
+      opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity .25s ease, transform .3s cubic-bezier(.22,1,.36,1), visibility .25s; }
+    #htuHeader .hh-panel ul { list-style: none; margin: 0; padding: 0; }
+    #htuHeader .hh-m-item { border-bottom: 1px solid rgba(15,23,42,.08); }
+    #htuHeader .hh-m-top { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 18px 4px; font: inherit; font-size: 19px; font-weight: 800;
+      color: inherit; background: none; border: 0; text-decoration: none; cursor: pointer; letter-spacing: -.02em; }
+    #htuHeader .hh-m-top .hh-plus { width: 14px; height: 14px; position: relative; flex: 0 0 14px; }
+    #htuHeader .hh-m-top .hh-plus::before, #htuHeader .hh-m-top .hh-plus::after { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 2px; background: currentColor; transition: transform .25s ease; }
+    #htuHeader .hh-m-top .hh-plus::after { transform: rotate(90deg); }
+    #htuHeader .hh-m-item.is-open .hh-plus::after { transform: rotate(0); }
+    #htuHeader .hh-m-sub { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s ease; }
+    #htuHeader .hh-m-item.is-open .hh-m-sub { grid-template-rows: 1fr; }
+    #htuHeader .hh-m-sub > ul { overflow: hidden; }
+    #htuHeader .hh-m-sub a { display: block; padding: 10px 6px 10px 14px; color: rgba(11,18,32,.72); text-decoration: none; font-size: 16px; font-weight: 600; }
+    #htuHeader .hh-m-sub li:last-child a { padding-bottom: 18px; }
+    #htuHeader .hh-m-cta { margin-top: 24px; display: grid; gap: 10px; }
+    #htuHeader .hh-m-cta .hh-cta { justify-content: center; height: 50px; font-size: 15px; }
+
+    #htuHeader.is-open { color: var(--hh-ink); background: #fff; }
+    #htuHeader.is-open .hh-logo .hh-logo-light { display: none; } #htuHeader.is-open .hh-logo .hh-logo-dark { display: block; }
+    #htuHeader.is-open .hh-panel { opacity: 1; visibility: visible; transform: none; }
+    #htuHeader.is-open .hh-burger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    #htuHeader.is-open .hh-burger span:nth-child(2) { opacity: 0; }
+    #htuHeader.is-open .hh-burger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    @media (max-width: 1024px) {
+      #htuHeader { --hh-h: 64px; }
+      #htuHeader .hh-bar { width: calc(100% - 32px); }
+      #htuHeader .hh-nav, #htuHeader .hh-right .hh-cta { display: none; }
+      #htuHeader .hh-right { margin-left: auto; }
+      #htuHeader .hh-burger { display: block; }
+      #htuHeader .hh-logo img { height: calc(var(--hh-logo-h, 34px) * .85); }
+    }
+    @media (min-width: 1025px) { #htuHeader .hh-panel { display: none; } }
+  </style>
+
+  <div class="hh-bar">
+    <a class="hh-logo" href="./index.html" aria-label="홈으로"></a>
+    <nav class="hh-nav" aria-label="주 메뉴"><ul class="hh-menu"></ul></nav>
+    <div class="hh-right">
+      <button class="hh-burger" type="button" aria-label="메뉴 열기" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="hh-panel" aria-hidden="true"><ul class="hh-m-list"></ul><div class="hh-m-cta"></div></div>
+
+  <script>
+    (function () {
+      var H = document.getElementById('htuHeader');
+      if (!H || H.__htuInit) return;
+      H.__htuInit = true;
+
+      function htuCms() {
+        if (window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
+        if (!window.__htuCmsP) {
+          var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
+          window.__htuCmsP = fetch(ep, { credentials: 'omit' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+        }
+        return window.__htuCmsP;
+      }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      /* 링크 속성: 외부(새 창) / 섹션(#id) / 내부 페이지 */
+      function attrs(it) {
+        var url = it.url || '#';
+        var a = ' href="' + esc(url) + '"';
+        if (it.new_tab) a += ' target="_blank" rel="noopener noreferrer"';
+        if (url.charAt(0) === '#' && url.length > 1) a += ' data-hh-anchor="' + esc(url.slice(1)) + '"';
+        return a;
+      }
+      var EXT = '<span class="hh-ext" aria-hidden="true">↗</span>';
+
+      /* 투명 → 스크롤 시 흰 배경 */
+      function onScroll() { if (H.getAttribute('data-theme') !== 'solid') H.classList.toggle('is-solid', window.scrollY > 10); }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      htuCms().then(function (data) {
+        data = data || {};
+        var st = (data.settings && data.settings.header) || {};
+        var items = (data.menus && data.menus.header) || [];
+
+        /* 로고 */
+        var logo = H.querySelector('.hh-logo');
+        H.style.setProperty('--hh-logo-h', (Number(st.logo_height) || 34) + 'px');
+        if (st.logo_url || st.logo_light_url) {
+          var dark = st.logo_url || st.logo_light_url;
+          var light = st.logo_light_url || st.logo_url;
+          var alt = esc(st.logo_text || 'HTU GLOBAL');
+          logo.innerHTML = '<img class="hh-logo-light' + (!st.logo_light_url ? ' is-filter' : '') + '" src="' + esc(light) + '" alt="' + alt + '">' +
+                           '<img class="hh-logo-dark" src="' + esc(dark) + '" alt="' + alt + '">';
+        } else {
+          logo.textContent = st.logo_text || 'HTU GLOBAL';
+        }
+
+        var normal = items.filter(function (i) { return !i.highlight; });
+        var ctas = items.filter(function (i) { return i.highlight && i.url; });
+
+        /* 데스크톱 */
+        H.querySelector('.hh-menu').innerHTML = normal.map(function (it) {
+          var kids = it.children || [];
+          var top = it.url
+            ? '<a class="hh-top"' + attrs(it) + '>' + esc(it.label) + (it.external ? EXT : '') + '</a>'
+            : '<button type="button" class="hh-top" aria-haspopup="true">' + esc(it.label) + '</button>';
+          var drop = kids.length ? '<ul class="hh-drop">' + kids.map(function (c) {
+            return '<li><a' + attrs(c) + '><span>' + esc(c.label) + '</span>' + (c.external ? EXT : '') + '</a></li>';
+          }).join('') + '</ul>' : '';
+          return '<li>' + top + drop + '</li>';
+        }).join('');
+
+        var ctaHtml = ctas.map(function (c) { return '<a class="hh-cta"' + attrs(c) + '>' + esc(c.label) + (c.external ? ' ↗' : '') + '</a>'; }).join('');
+        H.querySelector('.hh-right').insertAdjacentHTML('afterbegin', ctaHtml);
+
+        /* 모바일 */
+        H.querySelector('.hh-m-list').innerHTML = normal.map(function (it) {
+          var kids = it.children || [];
+          if (!kids.length) {
+            return '<li class="hh-m-item"><a class="hh-m-top"' + attrs(it) + '>' + esc(it.label) + (it.external ? EXT : '') + '</a></li>';
+          }
+          var list = (it.url ? [{ label: it.label + ' 전체', url: it.url, new_tab: it.new_tab, external: it.external }] : []).concat(kids);
+          return '<li class="hh-m-item"><button type="button" class="hh-m-top" aria-expanded="false">' + esc(it.label) + '<span class="hh-plus" aria-hidden="true"></span></button>' +
+            '<div class="hh-m-sub"><ul>' + list.map(function (c) {
+              return '<li><a' + attrs(c) + '>' + esc(c.label) + (c.external ? ' ' + EXT : '') + '</a></li>';
+            }).join('') + '</ul></div></li>';
+        }).join('');
+        H.querySelector('.hh-m-cta').innerHTML = ctaHtml;
+
+        bind();
+        /* 다른 페이지에서 index.html#섹션 으로 들어온 경우: 섹션이 그려진 뒤 이동 */
+        if (location.hash.length > 1) setTimeout(function () { scrollToId(location.hash.slice(1), false); }, 900);
+      });
+
+      function scrollToId(id, smooth) {
+        var el = document.getElementById(id);
+        if (!el) return false;
+        var y = el.getBoundingClientRect().top + window.pageYOffset - (H.offsetHeight || 0);
+        window.scrollTo({ top: Math.max(0, y), behavior: smooth === false ? 'auto' : 'smooth' });
+        return true;
+      }
+      function closePanel() {
+        H.classList.remove('is-open');
+        H.querySelector('.hh-burger').setAttribute('aria-expanded', 'false');
+        H.querySelector('.hh-panel').setAttribute('aria-hidden', 'true');
+        document.documentElement.style.overflow = '';
+      }
+
+      function bind() {
+        var burger = H.querySelector('.hh-burger');
+        burger.addEventListener('click', function () {
+          var open = !H.classList.contains('is-open');
+          H.classList.toggle('is-open', open);
+          burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+          H.querySelector('.hh-panel').setAttribute('aria-hidden', open ? 'false' : 'true');
+          document.documentElement.style.overflow = open ? 'hidden' : '';
+        });
+        H.querySelectorAll('.hh-m-item > button.hh-m-top').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var li = b.parentNode;
+            var open = !li.classList.contains('is-open');
+            li.classList.toggle('is-open', open);
+            b.setAttribute('aria-expanded', open ? 'true' : 'false');
+          });
+        });
+        /* #섹션 링크: 현재 페이지에 있으면 부드럽게 이동, 없으면 홈의 해당 섹션으로 */
+        H.addEventListener('click', function (e) {
+          var a = e.target.closest('a[data-hh-anchor]');
+          if (!a) { if (e.target.closest('.hh-panel a')) closePanel(); return; }
+          e.preventDefault();
+          var id = a.getAttribute('data-hh-anchor');
+          closePanel();
+          if (!scrollToId(id)) location.href = './index.html#' + encodeURIComponent(id);
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePanel(); });
+        window.addEventListener('resize', function () { if (window.innerWidth > 1024) closePanel(); });
+      }
+    })();
+  </script>
+</header>

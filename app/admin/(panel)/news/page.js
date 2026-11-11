@@ -2,15 +2,17 @@
 import PageHead from '@/components/admin/PageHead';
 import SettingsForm from '@/components/admin/SettingsForm';
 import CollectionEditor from '@/components/admin/CollectionEditor';
+import { useSiteBase } from '@/lib/use-site-base';
 
 const isInternal = (f) => f.type === 'internal';
 
 export default function NewsPage() {
+  const site = useSiteBase();
   return (
     <>
       <PageHead
         title="⑥ News & Event"
-        desc="외부 기사 링크로 바로 연결하거나, 이곳에서 직접 글을 작성(내부 글)할 수 있습니다. 내부 글은 /news/글번호 페이지로 열립니다."
+        desc="외부 기사 링크로 바로 연결하거나, 이곳에서 직접 글을 작성(내부 글)할 수 있습니다. 내부 글은 기존 사이트의 news.html?id=글번호 페이지로 열립니다."
       />
       <SettingsForm keys={['news']} compact />
       <section className="adm-card">
@@ -27,7 +29,7 @@ export default function NewsPage() {
             thumb: (r) => r.thumbnail_url,
             thumbShape: 'wide',
             badges: (r) => [r.type === 'internal' ? { text: '내부 글', tone: 'green' } : { text: '외부 링크 ↗', tone: 'blue' }],
-            link: (r) => (r.type === 'internal' ? `/news/${r.id}` : r.external_url),
+            link: (r) => (r.type === 'internal' ? (site ? `${site}/news.html?id=${r.id}` : null) : r.external_url),
           }}
           fields={[
             {

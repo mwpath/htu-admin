@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSiteBase } from '@/lib/use-site-base';
 
 const NAV = [
   { group: '개요', items: [{ href: '/admin', label: '대시보드' }, { href: '/admin/settings', label: '기본 설정 · 섹션 문구' }] },
@@ -17,11 +18,20 @@ const NAV = [
       { href: '/admin/news', label: '⑥ News & Event' },
     ],
   },
-  { group: '게시 · 알림', items: [{ href: '/admin/notices', label: '공지사항' }, { href: '/admin/popups', label: '메인 팝업' }] },
+  {
+    group: '게시 · 알림',
+    items: [
+      { href: '/admin/notices', label: '공지사항' },
+      { href: '/admin/events', label: '이벤트' },
+      { href: '/admin/popups', label: '메인 팝업' },
+    ],
+  },
+  { group: '메뉴 · 링크', items: [{ href: '/admin/menu', label: '헤더 메뉴' }, { href: '/admin/footer', label: '푸터 · 관련 사이트' }] },
 ];
 
 export default function Sidebar({ email }) {
   const path = usePathname();
+  const site = useSiteBase();
   return (
     <aside className="adm-side">
       <div className="adm-brand">
@@ -47,7 +57,7 @@ export default function Sidebar({ email }) {
         ))}
       </nav>
       <div className="adm-side-foot">
-        <a href="/" target="_blank" rel="noreferrer" className="adm-btn ghost-light sm">사이트 보기 ↗</a>
+        {site ? <a href={site} target="_blank" rel="noreferrer" className="adm-btn ghost-light sm">사이트 보기 ↗</a> : null}
         <div className="adm-user">{email}</div>
         <form action="/admin/logout" method="post">
           <button className="adm-link-btn">로그아웃</button>
