@@ -521,3 +521,8 @@ html.adm-lock, html.adm-lock body { overflow: hidden; }
 .adm-migrate-log { flex: 1 1 100%; font-size: 13.5px; font-weight: 700; color: var(--g-700); }
 .adm-migrate-log ul { margin: 6px 0 0; padding-left: 18px; font-weight: 500; color: var(--danger); }
 @media (max-width: 860px) { .adm-role-pick.adm-role-pick-2 { grid-template-columns: 1fr; } .adm-migrate .adm-btn { width: 100%; } }
+
+/* 메뉴 빠른 추가 (소식 · 사이트 메뉴 불러오기) */
+.adm-quickmenu { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin: 0 0 16px; padding: 14px 16px; border-radius: 12px; background: #f1f8f5; border: 1px solid #cfe5dc; font-size: 14px; line-height: 1.6; }
+.adm-quickmenu span { flex: 1 1 320px; }
+@media (max-width: 860px) { .adm-quickmenu .adm-btn { width: 100%; } }

@@ -226,6 +226,7 @@
         logo_light_url: h.logo_light_url || h.logo_url || '',
         logo_text: h.logo_text || 'HTU GLOBAL',
         logo_height: Number(h.logo_height) || 0,
+        lang_button: h.lang_button !== false,
       },
       menu: menu.length ? menu : DEFAULT.menu,
       langs: (layout.settings && layout.settings.i18n && layout.settings.i18n.languages) || null,
@@ -316,7 +317,7 @@
       return '<li class="m-cta"><a' + linkAttrs(c) + '>' + esc(c.label) + (c.external ? EXT : '') + '</a></li>';
     }).join('');
 
-    renderLangs(root, state.langs);
+    renderLangs(root, state.header && state.header.lang_button === false ? ['ko'] : state.langs);
     if (root.__syncLogo) root.__syncLogo();
   }
 

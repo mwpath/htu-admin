@@ -11,6 +11,7 @@ export default function MenuPage() {
         desc="사이트 상단 메뉴입니다. 상위 메뉴에 마우스를 올리면 하위 메뉴가 드롭다운으로 열리고, 모바일에서는 햄버거 메뉴로 표시됩니다."
       />
       <SettingsForm keys={['header']} compact />
+      <SettingsForm keys={['i18n']} compact only={{ i18n: ['__langs', 'detect'] }} titles={{ i18n: '언어 선택 메뉴 (헤더 🌐)' }} />
       <MenuTree
         location="header"
         topLabel="상위 메뉴"

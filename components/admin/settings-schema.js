@@ -111,6 +111,8 @@ export const SETTING_GROUPS = [
       { name: 'logo_light_url', label: '흰색 로고 (영상 위)', type: 'image', folder: 'logo', help: '비워두면 기본 로고를 흰색으로 자동 변환합니다.' },
       { name: 'logo_text', label: '로고 대체 텍스트', type: 'text', default: 'HTU GLOBAL', half: true, help: '로고 이미지가 없으면 이 글자가 표시됩니다.' },
       { name: 'logo_height', label: '로고 높이 (px)', type: 'number', default: 34, half: true },
+      { name: 'lang_button', label: '언어 선택 버튼 (🌐)', type: 'checkbox', default: true, half: true, switchLabel: '헤더 오른쪽에 표시',
+        help: '끄면 PC 헤더와 모바일 메뉴의 언어 선택이 모두 숨겨집니다 (방문자는 접속 국가 언어로 자동 표시).' },
     ],
   },
   {

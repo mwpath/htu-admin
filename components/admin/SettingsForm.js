@@ -8,7 +8,7 @@ import { useMe } from './AdminContext';
 import { canEdit, settingsSection } from '@/lib/perms';
 
 /** site_settings(key → jsonb) 편집. keys 로 표시할 그룹 지정 */
-export default function SettingsForm({ keys, compact = false }) {
+export default function SettingsForm({ keys, compact = false, only = null, titles = null }) {
   const me = useMe();
   const sb = supabaseBrowser();
   // 권한이 있는 섹션 설정만 표시 (DB 도 같은 규칙으로 저장을 막습니다)
@@ -70,11 +70,11 @@ export default function SettingsForm({ keys, compact = false }) {
       {groups.map((g) => (
         <section key={g.key} className="adm-card">
           <div className="adm-card-head">
-            <h3>{g.title}</h3>
+            <h3>{titles?.[g.key] || g.title}</h3>
             {g.desc ? <p>{g.desc}</p> : null}
           </div>
           <div className="adm-form">
-            {g.fields.map((f) => (
+            {g.fields.filter((f) => !only?.[g.key] || only[g.key].includes(f.name)).map((f) => (
               <Field key={f.name} field={f} value={values[g.key][f.name]} form={values[g.key]} onChange={(v) => (f.type === 'langs' ? setMany(g.key, v) : set(g.key, f.name, v))} />
             ))}
           </div>
