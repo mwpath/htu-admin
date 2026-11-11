@@ -34,7 +34,7 @@ export default function MyAccountPage() {
 
   return (
     <>
-      <PageHead title="내 계정" desc={`${me?.email} · ${ROLE_LABEL[me?.role] || ''}`} />
+      <PageHead title="내 계정" desc={`${me?.username ? `아이디 ${me.username}` : me?.email} · ${ROLE_LABEL[me?.role] || ''}`} />
       <div className="adm-grid-2">
         <form className="adm-card" onSubmit={saveName}>
           <div className="adm-card-head"><h3>이름</h3></div>

@@ -2,6 +2,7 @@
 import { requireOwner } from '@/lib/admin-auth';
 import { supabaseService } from '@/lib/supabase/service';
 import { SECTIONS } from '@/lib/perms';
+import { isValidId, normId, idToEmail, ID_RULE } from '@/lib/login-id';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +40,7 @@ async function allUsers(svc) {
 export async function GET() {
   const g = await guard();
   if (g.res) return g.res;
-  const { data, error } = await g.svc.from('admin_users').select('user_id, email, name, role, permissions, active, created_at').order('created_at');
+  const { data, error } = await g.svc.from('admin_users').select('user_id, email, username, name, role, permissions, active, created_at').order('created_at');
   if (error) return err(error.message, 500);
   const users = await allUsers(g.svc);
   const byId = Object.fromEntries(users.map((u) => [u.id, u]));
@@ -54,11 +55,14 @@ export async function POST(request) {
   const g = await guard();
   if (g.res) return g.res;
   const b = await request.json().catch(() => ({}));
-  const email = String(b.email || '').trim().toLowerCase();
+  const username = normId(b.username);
   const name = String(b.name || '').trim().slice(0, 60);
   const role = ROLE_SET.has(b.role) ? b.role : 'editor';
   const permissions = role === 'editor' ? cleanPerms(b.permissions) : [];
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('이메일 형식을 확인하세요.');
+  if (!isValidId(username)) return err(`아이디는 ${ID_RULE}로 정해주세요.`);
+  const { data: taken } = await g.svc.from('admin_users').select('user_id').eq('username', username).maybeSingle();
+  if (taken) return err('이미 사용 중인 아이디입니다.');
+  const email = idToEmail(username);
   let password = String(b.password || '');
   if (password && password.length < 8) return err('비밀번호는 8자 이상이어야 합니다.');
   const generated = !password;
@@ -79,7 +83,7 @@ export async function POST(request) {
     }
   } else userId = created.data.user.id;
 
-  const { error } = await g.svc.from('admin_users').insert({ user_id: userId, email, name: name || null, role, permissions, active: true, created_by: g.owner.user.id });
+  const { error } = await g.svc.from('admin_users').insert({ user_id: userId, email, username, name: name || null, role, permissions, active: true, created_by: g.owner.user.id });
   if (error) return err(error.message, 500);
   const reused = !!created.error;
   return Response.json({ ok: true, user_id: userId, password: reused && generated ? null : password, generated, reused });
@@ -100,6 +104,22 @@ export async function PATCH(request) {
   if (patch.role && patch.role !== 'editor') patch.permissions = [];
   if (b.active !== undefined) patch.active = !!b.active;
   if (b.name !== undefined) patch.name = String(b.name || '').trim().slice(0, 60) || null;
+
+  // 아이디 변경 (예전 이메일 계정을 아이디로 바꿀 때도 사용)
+  if (b.username !== undefined && b.username !== null && b.username !== '') {
+    const username = normId(b.username);
+    if (!isValidId(username)) return err(`아이디는 ${ID_RULE}로 정해주세요.`);
+    const { data: cur } = await g.svc.from('admin_users').select('username').eq('user_id', b.user_id).maybeSingle();
+    if (cur?.username !== username) {
+      const { data: taken } = await g.svc.from('admin_users').select('user_id').eq('username', username).maybeSingle();
+      if (taken && taken.user_id !== b.user_id) return err('이미 사용 중인 아이디입니다.');
+      const email = idToEmail(username);
+      const u = await g.svc.auth.admin.updateUserById(b.user_id, { email, email_confirm: true });
+      if (u.error) return err(u.error.message);
+      patch.username = username;
+      patch.email = email;
+    }
+  }
 
   let password = null;
   if (b.reset_password) {

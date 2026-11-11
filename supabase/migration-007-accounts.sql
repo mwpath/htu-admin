@@ -15,6 +15,11 @@ alter table public.admin_users add column if not exists name text;
 alter table public.admin_users add column if not exists active boolean not null default true;
 alter table public.admin_users add column if not exists created_by uuid;
 alter table public.admin_users add column if not exists updated_at timestamptz not null default now();
+-- 로그인 아이디 (영문 소문자 · 숫자 · . _ -  3~30자). 예전 계정은 비어 있을 수 있음(이메일로 로그인)
+alter table public.admin_users add column if not exists username text;
+alter table public.admin_users drop constraint if exists admin_users_username_check;
+alter table public.admin_users add constraint admin_users_username_check check (username is null or username ~ '^[a-z0-9][a-z0-9._-]{2,29}$');
+create unique index if not exists admin_users_username_key on public.admin_users (username) where username is not null;
 alter table public.admin_users drop constraint if exists admin_users_role_check;
 alter table public.admin_users add constraint admin_users_role_check check (role in ('owner','admin','editor'));
 
@@ -66,8 +71,17 @@ returns boolean language sql stable security definer set search_path = public as
 $$;
 grant execute on function public.has_any_admin() to anon, authenticated;
 
+-- 로그인: 아이디 → 내부 로그인 주소 (이메일을 입력하면 그대로)
+create or replace function public.login_email(p_login text)
+returns text language sql stable security definer set search_path = public as $$
+  select case when position('@' in coalesce(p_login, '')) > 0 then lower(trim(p_login))
+              else (select email from public.admin_users where username = lower(trim(p_login)) limit 1) end;
+$$;
+grant execute on function public.login_email(text) to anon, authenticated;
+
 -- 로그인한 사용자를 첫 대표 관리자로 등록 (관리자가 아무도 없을 때만 성공)
-create or replace function public.claim_first_owner(p_name text default null)
+drop function if exists public.claim_first_owner(text);
+create or replace function public.claim_first_owner(p_name text default null, p_username text default null)
 returns boolean language plpgsql security definer set search_path = public as $$
 declare uid uuid := auth.uid(); em text;
 begin
@@ -75,25 +89,26 @@ begin
   lock table public.admin_users in share row exclusive mode;
   if exists (select 1 from public.admin_users) then return false; end if;
   select email into em from auth.users where id = uid;
-  insert into public.admin_users (user_id, email, name, role, active)
-  values (uid, em, nullif(trim(coalesce(p_name, '')), ''), 'owner', true);
+  insert into public.admin_users (user_id, email, name, username, role, active)
+  values (uid, em, nullif(trim(coalesce(p_name, '')), ''), nullif(lower(trim(coalesce(p_username, ''))), ''), 'owner', true);
   return true;
 end $$;
-revoke all on function public.claim_first_owner(text) from public, anon;
-grant execute on function public.claim_first_owner(text) to authenticated;
+revoke all on function public.claim_first_owner(text, text) from public, anon;
+grant execute on function public.claim_first_owner(text, text) to authenticated;
 
 -- 서버(설치 화면)용: 계정을 만든 뒤 첫 대표로 등록 — 서버 키로만 실행 가능
-create or replace function public.bootstrap_owner(p_user uuid, p_email text, p_name text)
+drop function if exists public.bootstrap_owner(uuid, text, text);
+create or replace function public.bootstrap_owner(p_user uuid, p_email text, p_name text, p_username text default null)
 returns boolean language plpgsql security definer set search_path = public as $$
 begin
   lock table public.admin_users in share row exclusive mode;
   if exists (select 1 from public.admin_users) then return false; end if;
-  insert into public.admin_users (user_id, email, name, role, active)
-  values (p_user, p_email, nullif(trim(coalesce(p_name, '')), ''), 'owner', true);
+  insert into public.admin_users (user_id, email, name, username, role, active)
+  values (p_user, p_email, nullif(trim(coalesce(p_name, '')), ''), nullif(lower(trim(coalesce(p_username, ''))), ''), 'owner', true);
   return true;
 end $$;
-revoke all on function public.bootstrap_owner(uuid, text, text) from public, anon, authenticated;
-grant execute on function public.bootstrap_owner(uuid, text, text) to service_role;
+revoke all on function public.bootstrap_owner(uuid, text, text, text) from public, anon, authenticated;
+grant execute on function public.bootstrap_owner(uuid, text, text, text) to service_role;
 
 -- 내 이름 바꾸기 (역할 · 권한은 대표만 변경)
 create or replace function public.update_my_profile(p_name text)
@@ -216,5 +231,5 @@ grant execute on function public.app_secret_status() to authenticated;
 
 -- ---------- DB 버전 (관리자 화면이 업데이트 필요 여부를 확인) ----------
 create or replace function public.htu_schema_version()
-returns int language sql immutable as $$ select 7 $$;
+returns int language sql immutable as $$ select 8 $$;
 grant execute on function public.htu_schema_version() to anon, authenticated;

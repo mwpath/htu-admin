@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import PageHead from '@/components/admin/PageHead';
 import { toast } from '@/lib/admin-utils';
 import { ROLES, ROLE_LABEL, SECTIONS, SECTION_LABEL } from '@/lib/perms';
+import { ID_RULE } from '@/lib/login-id';
 
 const api = async (method, body) => {
   const r = await fetch('/api/admin/accounts', { method, headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
@@ -28,8 +29,8 @@ export default function AccountsPage() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  const openNew = () => setEdit({ mode: 'new', email: '', name: '', password: '', role: 'editor', permissions: ['notices', 'news'] });
-  const openEdit = (a) => setEdit({ mode: 'edit', user_id: a.user_id, email: a.email, name: a.name || '', role: a.role, permissions: a.permissions || [] });
+  const openNew = () => setEdit({ mode: 'new', username: '', name: '', password: '', role: 'editor', permissions: ['notices', 'news'] });
+  const openEdit = (a) => setEdit({ mode: 'edit', user_id: a.user_id, username: a.username || '', legacy: !a.username, email: a.email, name: a.name || '', role: a.role, permissions: a.permissions || [] });
 
   const save = async (e) => {
     e.preventDefault();
@@ -37,10 +38,10 @@ export default function AccountsPage() {
     try {
       if (edit.mode === 'new') {
         const d = await api('POST', edit);
-        if (d.password) setSecret({ email: edit.email, password: d.password, generated: d.generated });
+        if (d.password) setSecret({ id: edit.username.trim().toLowerCase(), password: d.password, generated: d.generated });
         toast(d.reused ? '이미 가입된 계정에 권한을 부여했습니다.' : '직원 계정을 만들었습니다.');
       } else {
-        await api('PATCH', { user_id: edit.user_id, name: edit.name, role: edit.role, permissions: edit.permissions });
+        await api('PATCH', { user_id: edit.user_id, name: edit.name, role: edit.role, permissions: edit.permissions, username: edit.username || undefined });
         toast('저장했습니다. 다음 화면 이동부터 바로 적용됩니다.');
       }
       setEdit(null);
@@ -50,10 +51,10 @@ export default function AccountsPage() {
   };
 
   const resetPw = async (a) => {
-    if (!confirm(`${a.name || a.email} 의 비밀번호를 새로 만들까요?\n기존 비밀번호로는 더 이상 로그인할 수 없습니다.`)) return;
+    if (!confirm(`${a.name || a.username || a.email} 의 비밀번호를 새로 만들까요?\n기존 비밀번호로는 더 이상 로그인할 수 없습니다.`)) return;
     try {
       const d = await api('PATCH', { user_id: a.user_id, reset_password: true });
-      setSecret({ email: a.email, password: d.password, generated: true });
+      setSecret({ id: a.username || a.email, password: d.password, generated: true });
     } catch (er) { toast(er.message, 'err'); }
   };
   const toggleActive = async (a) => {
@@ -61,7 +62,7 @@ export default function AccountsPage() {
     catch (er) { toast(er.message, 'err'); }
   };
   const remove = async (a) => {
-    if (!confirm(`${a.name || a.email} 계정을 삭제할까요?\n로그인 계정까지 완전히 삭제되며 되돌릴 수 없습니다.`)) return;
+    if (!confirm(`${a.name || a.username || a.email} 계정을 삭제할까요?\n로그인 계정까지 완전히 삭제되며 되돌릴 수 없습니다.`)) return;
     try { await api('DELETE', { user_id: a.user_id }); toast('삭제했습니다.'); load(); }
     catch (er) { toast(er.message, 'err'); }
   };
@@ -78,11 +79,11 @@ export default function AccountsPage() {
         <div className="adm-card adm-secret">
           <div>
             <h3>로그인 정보 — 지금 한 번만 표시됩니다</h3>
-            <p>아이디 <b>{secret.email}</b> · 비밀번호 <code>{secret.password}</code></p>
+            <p className="adm-secret-line"><span>아이디 <b>{secret.id}</b></span><span>비밀번호 <code>{secret.password}</code></span></p>
             <p className="adm-muted">직원에게 전달하고, 처음 로그인한 뒤 <b>내 계정</b>에서 비밀번호를 바꾸도록 안내하세요.</p>
           </div>
           <div className="adm-row-gap">
-            <button className="adm-btn sm" onClick={() => { navigator.clipboard?.writeText(`관리자 주소: ${location.origin}/admin\n아이디: ${secret.email}\n비밀번호: ${secret.password}`); toast('복사했습니다.'); }}>안내문 복사</button>
+            <button className="adm-btn sm" onClick={() => { navigator.clipboard?.writeText(`관리자 주소: ${location.origin}/admin\n아이디: ${secret.id}\n비밀번호: ${secret.password}`); toast('복사했습니다.'); }}>안내문 복사</button>
             <button className="adm-btn sm ghost" onClick={() => setSecret(null)}>닫기</button>
           </div>
         </div>
@@ -90,11 +91,14 @@ export default function AccountsPage() {
 
       {edit ? (
         <form className="adm-card adm-acct-form" onSubmit={save}>
-          <div className="adm-card-head"><h3>{edit.mode === 'new' ? '새 직원 계정' : `${edit.name || edit.email} 권한 수정`}</h3></div>
+          <div className="adm-card-head"><h3>{edit.mode === 'new' ? '새 직원 계정' : `${edit.name || edit.username || edit.email} 권한 수정`}</h3></div>
           <div className="adm-grid-2">
             <div>
-              <label className="adm-label">이메일 (로그인 아이디)</label>
-              <input className="adm-input" type="email" required disabled={edit.mode === 'edit'} value={edit.email} onChange={(e) => setEdit({ ...edit, email: e.target.value })} />
+              <label className="adm-label">아이디 {edit.legacy ? <span className="adm-badge warn">예전 이메일 계정 — 아이디를 정하면 아이디로 로그인</span> : null}</label>
+              <input className="adm-input" type="text" required={edit.mode === 'new'} autoCapitalize="none" autoCorrect="off" spellCheck={false}
+                pattern="[A-Za-z0-9][A-Za-z0-9._\-]{2,29}" title={ID_RULE} placeholder={edit.legacy ? edit.email : '예) kim.marketing'}
+                value={edit.username} onChange={(e) => setEdit({ ...edit, username: e.target.value.replace(/\s/g, '') })} />
+              <small className="adm-help">{ID_RULE}</small>
             </div>
             <div>
               <label className="adm-label">이름</label>
@@ -151,15 +155,15 @@ export default function AccountsPage() {
 
       <div className="adm-card">
         {!list ? <p className="adm-muted">불러오는 중…</p> : (
-          <table className="adm-table">
+          <table className="adm-table adm-table-cards">
             <thead><tr><th>직원</th><th>역할</th><th>편집 가능 메뉴</th><th>최근 로그인</th><th /></tr></thead>
             <tbody>
               {list.map((a) => (
                 <tr key={a.user_id} className={a.active ? '' : 'is-off'}>
-                  <td><b>{a.name || '(이름 없음)'}</b>{a.user_id === meId ? <span className="adm-badge green" style={{ marginLeft: 6 }}>나</span> : null}<br /><small className="adm-muted">{a.email}</small></td>
-                  <td><span className={`adm-badge ${a.role === 'owner' ? 'green' : a.role === 'admin' ? 'blue' : ''}`}>{ROLE_LABEL[a.role]}</span>{a.active ? null : <span className="adm-badge warn" style={{ marginLeft: 6 }}>사용 중지</span>}</td>
-                  <td className="adm-perm-cell">{a.role === 'editor' ? (a.permissions?.length ? a.permissions.map((p) => <span key={p} className="adm-chip">{SECTION_LABEL[p] || p}</span>) : <span className="adm-muted">없음</span>) : <span className="adm-muted">전체</span>}</td>
-                  <td><small>{fmt(a.last_sign_in_at)}</small></td>
+                  <td data-label="직원"><b>{a.name || '(이름 없음)'}</b>{a.user_id === meId ? <span className="adm-badge green" style={{ marginLeft: 6 }}>나</span> : null}<br /><small className="adm-muted">{a.username ? `아이디 ${a.username}` : a.email}</small></td>
+                  <td data-label="역할"><span className={`adm-badge ${a.role === 'owner' ? 'green' : a.role === 'admin' ? 'blue' : ''}`}>{ROLE_LABEL[a.role]}</span>{a.active ? null : <span className="adm-badge warn" style={{ marginLeft: 6 }}>사용 중지</span>}</td>
+                  <td data-label="편집 가능 메뉴" className="adm-perm-cell">{a.role === 'editor' ? (a.permissions?.length ? a.permissions.map((p) => <span key={p} className="adm-chip">{SECTION_LABEL[p] || p}</span>) : <span className="adm-muted">없음</span>) : <span className="adm-muted">전체</span>}</td>
+                  <td data-label="최근 로그인"><small>{fmt(a.last_sign_in_at)}</small></td>
                   <td className="adm-actions">
                     <button className="adm-btn sm" onClick={() => openEdit(a)}>권한</button>
                     <button className="adm-btn sm ghost" onClick={() => resetPw(a)}>비밀번호 재설정</button>

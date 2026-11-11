@@ -1,13 +1,14 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabase/browser';
+import { ID_RULE, normId } from '@/lib/login-id';
 
 // 처음 설정: ① Supabase 연결 확인 → ② DB 설치 → ③ 대표 관리자 만들기
 export default function SetupPage() {
   const [st, setSt] = useState(null);
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState(null);
-  const [form, setForm] = useState({ name: '', email: '', password: '', password2: '' });
+  const [form, setForm] = useState({ name: '', username: '', password: '', password2: '' });
 
   const load = useCallback(async () => {
     const r = await fetch('/api/setup/status', { cache: 'no-store' });
@@ -39,22 +40,22 @@ export default function SetupPage() {
     const sb = supabaseBrowser();
     if (!r.ok) { setBusy(''); return setMsg({ err: true, text: d.error || '계정을 만들지 못했습니다.' }); }
     if (d.mode === 'service') {
-      const { error } = await sb.auth.signInWithPassword({ email: form.email.trim(), password: form.password });
+      const { error } = await sb.auth.signInWithPassword({ email: d.email, password: form.password });
       setBusy('');
       if (error) return setMsg({ err: true, text: '계정은 만들어졌습니다. 로그인 화면에서 로그인하세요.' });
       window.location.href = '/admin';
       return;
     }
     // 서버 키 없이: 직접 가입 → 첫 대표로 등록
-    const { data, error } = await sb.auth.signUp({ email: form.email.trim(), password: form.password, options: { data: { name: form.name } } });
+    const { data, error } = await sb.auth.signUp({ email: d.email, password: form.password, options: { data: { name: form.name } } });
     if (error) { setBusy(''); return setMsg({ err: true, text: error.message }); }
     if (data.session) {
-      await sb.rpc('claim_first_owner', { p_name: form.name });
+      await sb.rpc('claim_first_owner', { p_name: form.name, p_username: normId(form.username) });
       window.location.href = '/admin';
       return;
     }
     setBusy('');
-    setMsg({ text: `${form.email} 로 인증 메일을 보냈습니다. 메일의 링크를 누른 뒤 로그인하면 대표 관리자로 자동 등록됩니다.` });
+    setMsg({ err: true, text: '서버 키가 없어 계정을 바로 만들 수 없습니다. 1단계의 Supabase 연동을 다시 연결(Reconnect)한 뒤 다시 배포하고 시도하세요.' });
   };
 
   return (
@@ -101,8 +102,11 @@ export default function SetupPage() {
             <p>처음 만드는 계정이 <b>대표 관리자</b>가 되어 직원 계정과 권한을 관리합니다.</p>
             <label className="adm-label">이름</label>
             <input className="adm-input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="홍길동" />
-            <label className="adm-label">이메일 (로그인 아이디)</label>
-            <input className="adm-input" type="email" required autoComplete="username" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <label className="adm-label">아이디</label>
+            <input className="adm-input" type="text" required autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+              pattern="[A-Za-z0-9][A-Za-z0-9._\-]{2,29}" title={ID_RULE} placeholder="예) htuadmin"
+              value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value.replace(/\s/g, '') })} />
+            <small className="adm-help">{ID_RULE}</small>
             <label className="adm-label">비밀번호 (8자 이상)</label>
             <input className="adm-input" type="password" required minLength={8} autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
             <label className="adm-label">비밀번호 확인</label>

@@ -32,7 +32,7 @@ export default function SiteConnect() {
     <section className="adm-card adm-connect">
       <div className="adm-card-head">
         <h3>기존 사이트 연결</h3>
-        <p>아래 파일을 받아 표시된 위치에 올리면 연결이 끝납니다. 연결 주소는 htu-cms-config.js 에 자동으로 들어가 있습니다.</p>
+        <p>연결 상태를 확인합니다. 연동 파일에는 이 관리자 주소가 자동으로 들어가 있습니다.</p>
       </div>
 
       <div className="adm-connect-status">
@@ -50,6 +50,8 @@ export default function SiteConnect() {
         </div>
       </div>
 
+      <details className="adm-connect-files">
+        <summary>사이트 연동 파일 받기 <span className="adm-badge">{FILES.length}개</span><small>처음 연결하거나 섹션 디자인을 바꿨을 때만 필요합니다</small></summary>
       <div className="adm-files">
         {FILES.map((f) => (
           <div key={f.name} className="adm-file">
@@ -71,6 +73,7 @@ export default function SiteConnect() {
         <li><b>index.html</b> 은 백업 후 교체하고, <b>news.html · notice.html · event.html</b> 은 같은 폴더에 추가합니다. img · video · css 폴더는 그대로 둡니다.</li>
         <li>이후 내용 수정은 이 관리자에서만 하면 됩니다. 저장 후 약 30초 안에 사이트에 반영됩니다.</li>
       </ol>
+      </details>
     </section>
   );
 }

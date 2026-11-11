@@ -1,6 +1,7 @@
 // 첫 대표 관리자 만들기 — 관리자가 아무도 없을 때만 동작합니다.
 import { getSetupState } from '@/lib/setup/state';
 import { supabaseService } from '@/lib/supabase/service';
+import { isValidId, normId, idToEmail, ID_RULE } from '@/lib/login-id';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,15 +12,16 @@ export async function POST(request) {
   if (state.hasAdmin) return Response.json({ error: '이미 대표 관리자가 있습니다. 로그인하세요.' }, { status: 409 });
 
   const body = await request.json().catch(() => ({}));
-  const email = String(body.email || '').trim().toLowerCase();
+  const username = normId(body.username);
   const password = String(body.password || '');
   const name = String(body.name || '').trim().slice(0, 60);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return Response.json({ error: '이메일 형식을 확인하세요.' }, { status: 400 });
+  if (!isValidId(username)) return Response.json({ error: `아이디는 ${ID_RULE}로 정해주세요.` }, { status: 400 });
+  const email = idToEmail(username);
   if (password.length < 8) return Response.json({ error: '비밀번호는 8자 이상으로 정해주세요.' }, { status: 400 });
 
   const svc = supabaseService();
   // 서버 키가 없으면 브라우저에서 가입 후 자동 등록 (메일 인증이 필요할 수 있음)
-  if (!svc) return Response.json({ mode: 'client' });
+  if (!svc) return Response.json({ mode: 'client', email });
 
   let userId = null;
   const created = await svc.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { name } });
@@ -32,10 +34,10 @@ export async function POST(request) {
     userId = found.id;
   } else userId = created.data.user.id;
 
-  const { data: ok, error } = await svc.rpc('bootstrap_owner', { p_user: userId, p_email: email, p_name: name });
+  const { data: ok, error } = await svc.rpc('bootstrap_owner', { p_user: userId, p_email: email, p_name: name, p_username: username });
   if (error) return Response.json({ error: error.message }, { status: 500 });
   if (!ok) return Response.json({ error: '이미 대표 관리자가 있습니다. 로그인하세요.' }, { status: 409 });
-  return Response.json({ ok: true, mode: 'service' });
+  return Response.json({ ok: true, mode: 'service', email });
 }
 
 async function findUserByEmail(svc, email) {

@@ -50,7 +50,6 @@ export default async function Dashboard() {
         <div className="adm-card adm-alert">자동 번역 키가 아직 없습니다. <Link className="adm-link" href="/admin/integrations">연동 설정에서 번역 엔진 키 저장 →</Link></div>
       ) : null}
 
-      <SiteConnect />
 
       <div className="adm-stats">
         {counts.map((c) => (
@@ -61,6 +60,8 @@ export default async function Dashboard() {
           </Link>
         ))}
       </div>
+
+      <SiteConnect />
 
       <div className="adm-grid-2">
         <section className="adm-card">
