@@ -1,7 +1,8 @@
 // 번역 현황 (관리자)
 import { requireAdmin } from '@/lib/admin-auth';
 import { supabaseService } from '@/lib/supabase/service';
-import { providerInfo } from '@/lib/i18n/translate';
+import { providerInfo, getTranslateConfig } from '@/lib/i18n/translate';
+import { env } from '@/lib/env';
 import { collectUnits, loadExisting, keyOf } from '@/lib/i18n/sync';
 import { enabledLangs } from '@/lib/i18n/fields';
 
@@ -35,9 +36,9 @@ export async function GET() {
     return { lang, done, missing, stale, review, manual };
   });
   return Response.json({
-    ...providerInfo(),
-    serviceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    cron: !!process.env.CRON_SECRET,
+    ...providerInfo(await getTranslateConfig()),
+    serviceRole: !!env.serviceKey(),
+    cron: true,
     langs, units: units.length, memory, stats, tableMissing,
   });
 }

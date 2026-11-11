@@ -1,5 +1,8 @@
 import Link from 'next/link';
-import { supabaseServer } from '@/lib/supabase/server';
+import { getStaff } from '@/lib/admin-auth';
+import { getSetupState } from '@/lib/setup/state';
+import { getTranslateConfig } from '@/lib/i18n/translate';
+import { canOpen } from '@/lib/perms';
 import PageHead from '@/components/admin/PageHead';
 import RefreshButton from '@/components/admin/RefreshButton';
 import SiteConnect from '@/components/admin/SiteConnect';
@@ -20,9 +23,11 @@ const CARDS = [
 ];
 
 export default async function Dashboard() {
-  const sb = supabaseServer();
+  const { sb, me } = await getStaff();
+  const isOwner = me?.role === 'owner';
+  const [setup, tcfg] = isOwner ? await Promise.all([getSetupState(), getTranslateConfig()]) : [null, null];
   const counts = await Promise.all(
-    CARDS.map(async (c) => {
+    CARDS.filter((c) => canOpen(me, c.href)).map(async (c) => {
       const [all, on] = await Promise.all([
         sb.from(c.table).select('id', { count: 'exact', head: true }),
         sb.from(c.table).select('id', { count: 'exact', head: true }).eq('active', true),
@@ -37,6 +42,13 @@ export default async function Dashboard() {
       <PageHead title="대시보드" desc="홈페이지의 모든 섹션을 여기서 관리합니다. 저장하면 약 30초 안에 기존 사이트에 반영됩니다.">
         <RefreshButton />
       </PageHead>
+
+      {isOwner && setup && setup.version < setup.required ? (
+        <div className="adm-card adm-alert">DB 업데이트가 필요합니다 (버전 {setup.version} → {setup.required}). <Link className="adm-link" href="/admin/integrations">연동 설정에서 자동 업데이트 →</Link></div>
+      ) : null}
+      {isOwner && tcfg && !tcfg.configured ? (
+        <div className="adm-card adm-alert">자동 번역 키가 아직 없습니다. <Link className="adm-link" href="/admin/integrations">연동 설정에서 번역 엔진 키 저장 →</Link></div>
+      ) : null}
 
       <SiteConnect />
 

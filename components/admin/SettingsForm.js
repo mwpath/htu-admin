@@ -4,11 +4,15 @@ import { supabaseBrowser } from '@/lib/supabase/browser';
 import { revalidateSite, toast, errMsg } from '@/lib/admin-utils';
 import Field, { cleanValue } from './Field';
 import { SETTING_GROUPS } from './settings-schema';
+import { useMe } from './AdminContext';
+import { canEdit, settingsSection } from '@/lib/perms';
 
 /** site_settings(key → jsonb) 편집. keys 로 표시할 그룹 지정 */
 export default function SettingsForm({ keys, compact = false }) {
+  const me = useMe();
   const sb = supabaseBrowser();
-  const groups = SETTING_GROUPS.filter((g) => !keys || keys.includes(g.key));
+  // 권한이 있는 섹션 설정만 표시 (DB 도 같은 규칙으로 저장을 막습니다)
+  const groups = SETTING_GROUPS.filter((g) => (!keys || keys.includes(g.key)) && canEdit(me, settingsSection(g.key)));
   const [values, setValues] = useState(null);
   const [dirty, setDirty] = useState({});
   const [saving, setSaving] = useState(false);

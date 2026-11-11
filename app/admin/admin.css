@@ -302,3 +302,55 @@ textarea.adm-input { resize: vertical; line-height: 1.6; }
 .adm-lang.is-on::before{ content:'✓'; font-size:12px; }
 .adm-lang.is-base{ background:#f2f4f7; color:#101828; cursor:default; }
 .adm-langs-count{ margin-left:4px; font-size:12.5px; color:#667085; }
+
+/* 처음 설정 */
+.adm-login-card.adm-setup{ width:min(620px, 94vw); text-align:left; }
+.adm-login-card.adm-setup > h1, .adm-login-card.adm-setup > .adm-login-mark, .adm-login-card.adm-setup > p{ text-align:center; margin-left:auto; margin-right:auto; }
+.adm-setup-step{ display:flex; gap:14px; padding:18px 0; border-top:1px solid #eef0f4; }
+.adm-setup-step.is-off{ opacity:.55; }
+.adm-setup-num{ flex:0 0 30px; height:30px; border-radius:50%; background:#eef2f6; color:#475467; font-weight:800; display:grid; place-items:center; font-size:14px; }
+.adm-setup-step.is-ok .adm-setup-num{ background:#0f9b8e; color:#fff; }
+.adm-setup-body{ flex:1; min-width:0; }
+.adm-setup-body h2{ margin:4px 0 8px; font-size:16px; }
+.adm-setup-body p{ margin:0 0 10px; font-size:14px; line-height:1.6; color:#344054; }
+.adm-setup-howto{ margin:6px 0 10px; padding-left:20px; font-size:13.5px; line-height:1.8; color:#344054; }
+.adm-setup-manual{ margin-top:12px; font-size:13.5px; }
+.adm-setup-manual summary{ cursor:pointer; color:#0f9b8e; font-weight:700; }
+.adm-setup-form{ display:flex; flex-direction:column; }
+.adm-setup-form .adm-btn{ margin-top:16px; }
+.adm-setup-ok{ margin-top:12px; padding:12px 14px; border-radius:10px; background:#ecfdf5; color:#067647; font-size:14px; }
+.adm-setup-foot{ display:flex; justify-content:flex-end; margin-top:14px; }
+.adm-link{ color:#0f9b8e; font-weight:700; text-decoration:none; }
+.adm-link:hover{ text-decoration:underline; }
+.adm-login-help{ margin:16px 0 0; font-size:12.5px; line-height:1.6; color:#667085; text-align:center; }
+.adm-user{ display:flex; flex-direction:column; gap:2px; }
+.adm-user small{ font-size:11.5px; opacity:.65; }
+.adm-role{ display:inline-block; width:max-content; padding:1px 8px; border-radius:999px; background:rgba(255,255,255,.12); font-size:11px; font-weight:700; }
+.adm-denied{ max-width:520px; margin:40px auto; text-align:center; padding:36px; }
+.adm-denied h2{ margin:0 0 8px; font-size:18px; }
+.adm-denied p{ margin:0 0 18px; color:#667085; }
+
+/* 직원 계정 · 권한 */
+.adm-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+.adm-table th{ text-align:left; font-size:12px; color:#667085; font-weight:700; padding:8px 10px; border-bottom:1px solid var(--line); }
+.adm-table td{ padding:12px 10px; border-bottom:1px solid #f0f2f5; vertical-align:middle; }
+.adm-table tr.is-off td{ opacity:.55; }
+.adm-actions{ text-align:right; white-space:nowrap; }
+.adm-actions .adm-btn{ margin-left:4px; }
+.adm-perm-cell{ max-width:340px; }
+.adm-chip{ display:inline-block; margin:2px 4px 2px 0; padding:2px 8px; border-radius:999px; background:#f2f4f7; font-size:11.5px; font-weight:600; color:#344054; }
+.adm-role-pick{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+.adm-role-opt{ display:flex; flex-direction:column; gap:4px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; cursor:pointer; background:#fff; }
+.adm-role-opt input{ display:none; }
+.adm-role-opt span{ font-size:12px; color:#667085; }
+.adm-role-opt.is-on{ border-color:var(--g-600); box-shadow:0 0 0 3px rgba(15,155,142,.12); }
+.adm-perm-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:12px; padding:14px; border:1px solid var(--line); border-radius:12px; background:#fafbfc; }
+.adm-perm-title{ font-size:11.5px; font-weight:800; color:#667085; margin-bottom:6px; }
+.adm-perm{ display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13.5px; cursor:pointer; }
+.adm-secret{ display:flex; justify-content:space-between; align-items:center; gap:16px; border-color:#f5d48a; background:#fffaf0; }
+.adm-secret h3{ margin:0 0 6px; font-size:15px; }
+.adm-secret p{ margin:2px 0; font-size:14px; }
+.adm-secret code{ padding:2px 8px; border-radius:6px; background:#fff; border:1px solid #f0e2bd; font-size:14px; font-weight:700; }
+.adm-alert.err{ border-color:#fecdca; background:#fef3f2; color:#b42318; }
+@media (max-width:900px){ .adm-role-pick{ grid-template-columns:1fr; } }
+.adm-setup-form .adm-label{ margin-top:12px; }

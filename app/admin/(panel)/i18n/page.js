@@ -14,7 +14,6 @@ const TABLES = [
   ['popups', '메인 팝업'], ['page', '페이지 고정 문구 (회사소개 등)'],
 ];
 const PROVIDER = { anthropic: 'Claude (Anthropic)', deepl: 'DeepL', google: 'Google 번역', mock: '테스트(mock)' };
-const ENV_KEY = { anthropic: 'ANTHROPIC_API_KEY', deepl: 'DEEPL_API_KEY', google: 'GOOGLE_TRANSLATE_API_KEY' };
 
 function Status({ status, onSync, syncing, progress }) {
   if (!status) return <section className="adm-card"><div className="adm-empty">번역 상태 확인 중…</div></section>;
@@ -30,17 +29,16 @@ function Status({ status, onSync, syncing, progress }) {
         </p>
       </div>
       {status.tableMissing ? (
-        <div className="adm-alert">번역 테이블이 없습니다. Supabase SQL Editor 에서 <code>supabase/migration-005-i18n.sql</code> 을 실행하세요.</div>
+        <div className="adm-alert">번역 테이블이 없습니다. <a className="adm-link" href="/admin/integrations">연동 설정</a>에서 DB 자동 업데이트를 실행하세요 (대표 관리자).</div>
       ) : null}
       {!status.configured ? (
         <div className="adm-alert">
-          번역 엔진이 설정되지 않았습니다. Vercel → Settings → Environment Variables 에
-          <code>TRANSLATE_PROVIDER</code>(anthropic / deepl / google) 와 <code>{ENV_KEY[status.provider] || 'ANTHROPIC_API_KEY'}</code> 를 넣고 Redeploy 하세요.
+          번역 엔진 키가 없습니다. 대표 관리자가 <a className="adm-link" href="/admin/integrations">연동 설정</a>에서 API 키를 저장하면 바로 동작합니다 (다시 배포 불필요).
         </div>
       ) : null}
       {!status.serviceRole ? (
         <div className="adm-alert">
-          <code>SUPABASE_SERVICE_ROLE_KEY</code> 가 없습니다. 관리자 저장 시 번역은 되지만, 매일 점검 · 페이지 고정 문구 번역은 동작하지 않습니다.
+          서버 키가 연결되지 않았습니다. Vercel → Storage(Integrations) 에서 Supabase 연동을 연결(또는 Reconnect)한 뒤 다시 배포하세요.
         </div>
       ) : null}
 

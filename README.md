@@ -21,44 +21,43 @@ Vercel에서는 **관리자 페이지만** 열립니다. 사이트 화면은 기
 
 ---
 
-## 1. Supabase
+## 1. 설치 (환경변수 입력 없음)
 
-1. 새 프로젝트를 만듭니다 (Region: Seoul).
-2. **SQL Editor**에서 `supabase/schema.sql` → `supabase/seed.sql` 순서로 실행합니다. 현재 홈페이지 내용이 그대로 들어갑니다.
-   - 예전 버전 SQL을 이미 실행했다면 아직 실행하지 않은 마이그레이션만 순서대로 실행하세요.
-     `migration-002-intro.sql` (인트로 영상) → `migration-003-menu-events.sql` (이벤트·메뉴·첨부파일)
-     → `migration-004-site-menus.sql` (헤더·푸터를 현재 htuglobal.com 메뉴로 설정 — 메뉴를 덮어씀)
-     → `migration-005-i18n.sql` (다국어 자동 번역) → `migration-006-languages.sql` (20개 언어 · 접속 국가별 자동 언어)
-3. **Authentication → Users → Add user**로 관리자 계정을 만듭니다 (Auto Confirm 체크).
-4. SQL Editor에서 관리자로 등록합니다 (이메일만 바꿔서 실행).
-   ```sql
-   insert into public.admin_users (user_id, email)
-   select id, email from auth.users where email = 'admin@example.com'
-   on conflict (user_id) do nothing;
+1. **GitHub** — 이 폴더를 Vercel 에 로그인한 GitHub 계정의 새 저장소에 올립니다.
+   ```bash
+   git init && git add . && git commit -m "HTU CMS"
+   git branch -M main
+   git remote add origin https://github.com/<계정>/htu-cms.git
+   git push -u origin main
    ```
-5. 권장: **Authentication → Providers → Email → Allow new users to sign up = OFF**
-6. **Project Settings → API Keys → Legacy API Keys** 탭에서 `anon public` 키, **Data API**에서 Project URL을 복사합니다.
+2. **Vercel** — Add New → Project → 저장소 선택 → **Deploy** (환경변수 칸은 비워둡니다).
+3. **Supabase 연결** — Vercel 프로젝트 → **Storage** 탭(또는 Integrations) → **Supabase → Connect**
+   → 사용할 Supabase 프로젝트 선택(없으면 새로 만들기, Region: Seoul) → 연결 후 **Deployments → Redeploy**.
+   Supabase 주소 · 키 · DB 주소가 Vercel 에 자동으로 들어갑니다. 직접 복사할 필요가 없습니다.
+4. **Vercel 주소로 접속** → `관리자 처음 설정` 화면이 열립니다.
+   - ① Supabase 연결 확인
+   - ② **DB 자동 설치** 버튼 → 테이블과 현재 홈페이지 내용이 들어갑니다
+   - ③ **대표 관리자 만들기** → 이메일 · 비밀번호 입력 → 바로 로그인
+   > 배포 직후 바로 진행하세요. 관리자가 아무도 없을 때 처음 가입한 사람이 대표 관리자가 됩니다.
+5. **연동 설정** 메뉴에서 번역 엔진 API 키(Claude · DeepL · Google 중 하나)를 저장하면 자동 번역이 켜집니다.
+   키는 Supabase 에 보관되고 다시 배포할 필요가 없습니다.
 
-## 2. GitHub → Vercel
+**DB 자동 설치 버튼이 없을 때** (연동에 DB 주소가 없는 경우): 처음 설정 화면의 `install.sql 내려받기` →
+Supabase **SQL Editor → New query** → 붙여넣기 → Run. 이 파일은 새로 설치 · 업데이트 모두 처리하고 여러 번 실행해도 안전합니다.
+(`supabase/install.sql` 과 같은 파일입니다. 예전처럼 schema · seed · migration 을 순서대로 실행할 필요가 없습니다.)
 
-Vercel에 로그인한 GitHub 계정(같은 계정)에 저장소를 만들고 올립니다.
-```bash
-git init
-git config user.email "Vercel에 연결된 GitHub 계정 이메일"
-git add . && git commit -m "HTU CMS"
-git branch -M main
-git remote add origin https://github.com/<계정>/htu-cms.git
-git push -u origin main
-```
-Vercel → Add New → Project → 저장소 선택 → **Environment Variables**:
+**예전 버전을 쓰던 경우**: 새 코드로 배포 → 대표 관리자로 로그인 → 대시보드의 `DB 업데이트 필요` 안내 → **연동 설정 → 자동 업데이트**.
+기존 내용은 그대로 유지되고, 예전에 등록된 관리자는 모두 대표 관리자가 됩니다.
 
-| Key | Value |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon public 키 |
-| `NEXT_PUBLIC_SITE_URL` | (선택) Vercel 주소. 비워두면 자동 |
+## 2. 직원 계정 · 권한
 
-배포 후 Vercel 주소로 접속 → 관리자 로그인 화면이 나오면 성공입니다.
+**계정 · 연동 → 👥 직원 계정 · 권한** (대표 관리자만)
+- `+ 직원 추가` → 이메일 · 이름 · 역할 · 편집할 메뉴 선택 → 계정 만들기. 처음 비밀번호는 한 번만 표시되며 `안내문 복사`로 전달합니다.
+- 역할: **대표 관리자**(전체 + 계정 · 연동 관리) / **관리자**(모든 메뉴 편집) / **담당자**(체크한 메뉴만)
+- 권한은 데이터베이스(RLS)에서 강제됩니다. 담당자는 화면을 우회해도 허용되지 않은 메뉴를 수정할 수 없습니다.
+- 권한 변경 · 비밀번호 재설정 · 사용 중지 · 삭제 가능. 마지막 대표 관리자는 삭제하거나 낮출 수 없습니다.
+- 직원은 **내 계정**에서 이름 · 비밀번호를 바꿉니다.
+- 권장: Supabase → Authentication → Providers → Email → **Allow new users to sign up = OFF** (계정은 대표 관리자만 만들도록)
 
 ## 3. 기존 사이트 연결
 
@@ -117,19 +116,12 @@ supabase/               DB 스키마 · 초기 데이터
 - 관리자에서 관리하는 모든 글: 섹션 문구, 슬라이드, 로고 설명, 출간물, 연재, 영상 제목, News & Event, 공지사항, 이벤트, 팝업, 헤더·푸터 메뉴, 푸터 정보
 - 회사소개 · 대표 인사말 등 HTML 에 직접 쓰인 페이지 문구와 버튼 문구 (처음 방문할 때 한 번 번역 후 저장)
 
-**설정 (한 번만)**
-1. Supabase SQL Editor 에서 `supabase/migration-005-i18n.sql` → `migration-006-languages.sql` 실행 (새로 설치는 schema.sql 에 포함됨)
-2. Vercel → Settings → Environment Variables 추가 후 **Redeploy**
-   | 이름 | 값 |
-   |---|---|
-   | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API Keys → `service_role` (**secret**, `NEXT_PUBLIC_` 붙이지 말 것) |
-   | `TRANSLATE_PROVIDER` | `anthropic` (기본) · `deepl` · `google` 중 하나 |
-   | `ANTHROPIC_API_KEY` | console.anthropic.com 에서 발급 (provider 가 anthropic 일 때) |
-   | `DEEPL_API_KEY` / `GOOGLE_TRANSLATE_API_KEY` | 해당 엔진을 쓸 때만 |
-   | `CRON_SECRET` | 아무 긴 임의 문자열 (매일 새벽 3시 자동 점검용) |
-3. 사이트에 `js/htu-i18n.js` 를 올리고 (언어 목록이 들어 있으므로 언어를 추가한 뒤에는 이 파일도 새로 받아 올리세요) `menu3.js`, `js/footer.js`, `index.html`, `news.html`, `notice.html`, `event.html` 을 새 버전으로 교체
-   (관리자 대시보드 → 사이트 연동 파일에서 내려받거나 htu-site.zip 사용)
-4. 관리자 → **다국어 → 🌐 번역 관리** → `지금 전체 번역` 한 번 실행
+**설정**
+1. 관리자 → **연동 설정**에서 번역 엔진 API 키 저장 → `연결 테스트`
+2. 사이트에 `js/htu-i18n.js` 를 올리고 `menu3.js`, `js/footer.js`, `index.html`, `news.html`, `notice.html`, `event.html` 을 새 버전으로 교체
+   (관리자 대시보드 → 사이트 연동 파일에서 내려받거나 htu-site.zip 사용. 언어 목록을 늘린 뒤에는 `js/htu-i18n.js` 도 새로 받아 올리세요)
+3. 관리자 → **다국어 → 🌐 번역 · 언어** → `지금 전체 번역` 한 번 실행
+4. 매일 새벽 3시 자동 점검은 별도 설정 없이 동작합니다.
 
 **동작 방식**
 - 저장할 때마다 바뀐 한국어 문구만 골라 번역합니다 (나머지는 그대로 → 비용 최소).
@@ -144,5 +136,5 @@ supabase/               DB 스키마 · 초기 데이터
 - 관리자 → 번역 관리 → 사이트 언어에서: 사용할 언어 켜기/끄기(20개), 자동 선택 방식(국가 · 브라우저 · 항상 한국어), 국가별 예외(`SG = zh`).
 - 지원 언어: 한국어, 영어, 일본어, 중국어(간체·번체), 베트남어, 태국어, 인도네시아어, 말레이어, 필리핀어, 힌디어, 몽골어, 러시아어, 우즈베크어, 스페인어, 포르투갈어, 프랑스어, 독일어, 아랍어, 튀르키예어.
   언어를 더 추가하려면 `lib/i18n/langs.js` 의 목록에 한 줄 추가하면 관리자 · 사이트 모두 자동 반영됩니다.
-- DeepL 은 베트남어·태국어·말레이어·필리핀어·힌디어·몽골어·우즈베크어를 지원하지 않습니다. DeepL 을 쓰면 이 언어들은 `GOOGLE_TRANSLATE_API_KEY` 또는 `ANTHROPIC_API_KEY` 가 있을 때 자동으로 그 엔진을 사용합니다.
-- 여러 언어를 동시에 번역합니다 (`TRANSLATE_CONCURRENCY`, 기본 4).
+- DeepL 은 베트남어·태국어·말레이어·필리핀어·힌디어·몽골어·우즈베크어를 지원하지 않습니다. DeepL 을 쓰면 이 언어들은 연동 설정에 Google 또는 Claude 키가 함께 있을 때 자동으로 그 엔진을 사용합니다.
+- 여러 언어를 동시에 번역합니다 (기본 4개 언어 동시).

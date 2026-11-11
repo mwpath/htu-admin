@@ -24,7 +24,9 @@ export default function SiteConnect() {
       .catch(() => setApi({ state: 'err', msg: 'API 응답 없음' }));
   }, []);
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  // 서버 렌더와 화면이 같도록 주소는 브라우저에서만 채움 (hydration 불일치 방지)
+  const [origin, setOrigin] = useState('');
+  useEffect(() => setOrigin(window.location.origin), []);
 
   return (
     <section className="adm-card adm-connect">

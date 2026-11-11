@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSiteBase } from '@/lib/use-site-base';
+import { canOpen, ROLE_LABEL } from '@/lib/perms';
 
 const NAV = [
   { group: '개요', items: [{ href: '/admin', label: '대시보드' }, { href: '/admin/settings', label: '기본 설정 · 섹션 문구' }] },
@@ -28,7 +29,15 @@ const NAV = [
     ],
   },
   { group: '메뉴 · 링크', items: [{ href: '/admin/menu', label: '헤더 메뉴' }, { href: '/admin/footer', label: '푸터 · 관련 사이트' }] },
-  { group: '다국어', items: [{ href: '/admin/i18n', label: '🌐 번역 관리 (EN · 中 · 日)' }] },
+  { group: '다국어', items: [{ href: '/admin/i18n', label: '🌐 번역 · 언어' }] },
+  {
+    group: '계정 · 연동',
+    items: [
+      { href: '/admin/accounts', label: '👥 직원 계정 · 권한' },
+      { href: '/admin/integrations', label: '🔌 연동 설정' },
+      { href: '/admin/account', label: '내 계정' },
+    ],
+  },
 ];
 
 function SyncBadge() {
@@ -45,7 +54,7 @@ function SyncBadge() {
   return <div className="adm-sync ok">🌐 번역 최신 상태{r.translated ? ` (+${r.translated})` : ''}</div>;
 }
 
-export default function Sidebar({ email }) {
+export default function Sidebar({ email, me }) {
   const path = usePathname();
   const site = useSiteBase();
   return (
@@ -58,7 +67,7 @@ export default function Sidebar({ email }) {
         </div>
       </div>
       <nav className="adm-nav">
-        {NAV.map((g) => (
+        {NAV.map((g) => ({ ...g, items: g.items.filter((it) => canOpen(me, it.href)) })).filter((g) => g.items.length).map((g) => (
           <div key={g.group} className="adm-nav-group">
             <div className="adm-nav-title">{g.group}</div>
             {g.items.map((it) => {
@@ -75,7 +84,11 @@ export default function Sidebar({ email }) {
       <div className="adm-side-foot">
         <SyncBadge />
         {site ? <a href={site} target="_blank" rel="noreferrer" className="adm-btn ghost-light sm">사이트 보기 ↗</a> : null}
-        <div className="adm-user">{email}</div>
+        <div className="adm-user">
+          <b>{me?.name || email}</b>
+          <span className="adm-role">{ROLE_LABEL[me?.role] || ''}</span>
+          {me?.name ? <small>{email}</small> : null}
+        </div>
         <form action="/admin/logout" method="post">
           <button className="adm-link-btn">로그아웃</button>
         </form>

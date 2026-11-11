@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "sections": "node scripts/build-home.mjs",
-    "predev": "node scripts/build-home.mjs",
+    "predev": "node scripts/build-sql.mjs && node scripts/build-home.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/build-home.mjs",
+    "prebuild": "node scripts/build-sql.mjs && node scripts/build-home.mjs",
     "build": "next build",
     "start": "next start"
   },
@@ -14,6 +14,7 @@
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.4",
     "next": "14.2.33",
+    "pg": "^8.23.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "sanitize-html": "^2.13.1"

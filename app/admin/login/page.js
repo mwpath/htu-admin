@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabase/browser';
 
 export default function LoginPage() {
@@ -7,6 +7,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+
+  // 관리자가 아직 없으면(또는 DB 설치 전이면) 처음 설정으로
+  useEffect(() => {
+    fetch('/api/setup/status', { cache: 'no-store' }).then((r) => r.json()).then((s) => {
+      if (!s.supabase || s.installed === false || s.hasAdmin === false || (s.installed && s.version < s.required && !s.hasAdmin)) {
+        window.location.replace('/admin/setup');
+      }
+    }).catch(() => {});
+  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -31,6 +40,7 @@ export default function LoginPage() {
         <input className="adm-input" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         {err ? <div className="adm-login-err">{err}</div> : null}
         <button className="adm-btn primary lg" disabled={busy}>{busy ? '로그인 중…' : '로그인'}</button>
+        <p className="adm-login-help">계정이 없거나 비밀번호를 잊었다면 대표 관리자에게 요청하세요.<br />대표 관리자는 <b>계정 · 권한</b> 메뉴에서 직원 계정을 만들고 비밀번호를 재설정할 수 있습니다.</p>
       </form>
     </div>
   );

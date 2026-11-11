@@ -1,7 +1,7 @@
 import { normLang } from '@/lib/i18n/overlay';
 // 번역 확인 · 수정 · 다시 번역 (관리자)
 import { revalidateTag, revalidatePath } from 'next/cache';
-import { requireAdmin } from '@/lib/admin-auth';
+import { requireAdmin, requirePerm } from '@/lib/admin-auth';
 import { supabaseService } from '@/lib/supabase/service';
 import { collectUnits, translateUnits, hashOf } from '@/lib/i18n/sync';
 import { translateBatch } from '@/lib/i18n/translate';
@@ -49,7 +49,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const admin = await requireAdmin();
+  const admin = await requirePerm('i18n');
   if (!admin) return Response.json({ error: 'unauthorized' }, { status: 401 });
   const sb = supabaseService() || admin;
   const b = await request.json();
