@@ -438,7 +438,7 @@ where key = 'i18n' and not (value ? 'detect');
 --   · 첫 대표 관리자 가입 (관리자가 아무도 없을 때만)
 --   · 역할: owner(대표 — 전체 + 계정 관리) / admin(전체 편집) / editor(지정한 메뉴만)
 --   · 권한은 데이터베이스(RLS)에서 강제됩니다 — 화면을 우회해도 편집 불가
---   · 번역 API 키 등은 Vercel 환경변수 대신 이 DB(app_secrets)에 보관
+--   · 번역 API 키 · GitHub 업로드 토큰 등은 Vercel 환경변수 대신 이 DB(app_secrets)에 보관
 -- 여러 번 실행해도 안전합니다.
 -- =====================================================================
 
@@ -638,7 +638,8 @@ create or replace function public.set_app_secret(p_key text, p_value text)
 returns void language plpgsql security definer set search_path = public as $$
 begin
   if not public.is_owner() then raise exception '대표 관리자만 변경할 수 있습니다.'; end if;
-  if p_key not in ('translate_provider','translate_model','anthropic_api_key','deepl_api_key','google_api_key') then
+  if p_key not in ('translate_provider','translate_model','anthropic_api_key','deepl_api_key','google_api_key',
+                   'github_token','github_repo','github_branch','github_folder','media_url_mode') then
     raise exception '알 수 없는 항목: %', p_key;
   end if;
   if p_value is null or trim(p_value) = '' then
@@ -656,7 +657,7 @@ create or replace function public.app_secret_status()
 returns table (key text, hint text, updated_at timestamptz)
 language sql stable security definer set search_path = public as $$
   select s.key,
-         case when s.key like '%\_key' then '••••' || right(s.value, 4) else s.value end,
+         case when s.key like '%\_key' or s.key like '%\_token' then '••••' || right(s.value, 4) else s.value end,
          s.updated_at
   from public.app_secrets s
   where public.is_owner();
@@ -666,5 +667,5 @@ grant execute on function public.app_secret_status() to authenticated;
 
 -- ---------- DB 버전 (관리자 화면이 업데이트 필요 여부를 확인) ----------
 create or replace function public.htu_schema_version()
-returns int language sql immutable as $$ select 8 $$;
+returns int language sql immutable as $$ select 9 $$;
 grant execute on function public.htu_schema_version() to anon, authenticated;

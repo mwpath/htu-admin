@@ -60,7 +60,23 @@ Supabase **SQL Editor → New query** → 붙여넣기 → Run. 이 파일은 �
 - 직원은 **내 계정**에서 이름 · 비밀번호를 바꿉니다.
 - 권장: Supabase → Authentication → Providers → Email → **Allow new users to sign up = OFF** (계정은 대표 관리자만 만들도록)
 
-## 3. 기존 사이트 연결
+## 3. 업로드 파일 저장소 (GitHub)
+
+관리자에서 올리는 이미지 · 영상 · 첨부파일은 **홈페이지 GitHub 저장소**에 저장됩니다 (Supabase 에 남지 않음).
+1. 사이트 저장소가 있는 GitHub 계정 → Settings → Developer settings → Personal access tokens → **Fine-grained tokens → Generate new token**
+   - Repository access: **Only select repositories** → 홈페이지 저장소 하나
+   - Permissions → Repository permissions → **Contents: Read and write**
+2. 관리자 → **연동 설정 → 파일 저장소** → 저장소(`계정/저장소이름`) · 토큰 입력 → `저장하고 연결 확인`
+3. 예전에 Supabase 에 올린 파일이 있으면 같은 화면의 **기존 Supabase 파일 → GitHub 로 옮기기** → `지금 옮기기`
+   (모든 글 · 번역의 주소를 새 주소로 바꾸고 Supabase 원본은 삭제합니다. 다시 번역하지 않습니다.)
+
+- 파일은 `uploads/<메뉴>/<연>/<월>/…` 에 저장되고 사이트에서는 `./uploads/…` 로 쓰입니다 (기존 `./img` 와 같은 방식). 사이트 반영까지 약 1분이며, 관리자 미리보기는 바로 보입니다.
+- 4MB 넘는 파일은 Supabase 임시 위치를 잠깐 거쳐 GitHub 로 옮긴 뒤 바로 삭제합니다 (Vercel 은 한 번에 약 4.5MB 까지만 받을 수 있음).
+- 큰 사진은 올리기 전에 자동으로 줄입니다 (긴 변 2560px). 파일당 최대 50MB.
+- GitHub Pages 사이트는 전체 1GB 까지라서, 긴 영상은 YouTube · Vimeo 링크를 권장합니다.
+- 업로드할 때마다 저장소에 커밋이 하나씩 생깁니다 (메시지: `CMS 업로드: 파일이름`).
+
+## 4. 기존 사이트 연결
 
 1. 전달받은 사이트 완성본(htu-site.zip)을 서버에 덮어쓰거나, 관리자 **대시보드 → 기존 사이트 연결**에서
    `js/htu-cms-config.js` · `menu3.js` · `js/footer.js` · `index.html` · `news.html` · `notice.html` · `event.html` 을 받아 올립니다.

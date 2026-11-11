@@ -1,6 +1,30 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { uploadFile, youtubeId, toast, errMsg } from '@/lib/admin-utils';
+import { uploadFile, youtubeId, toast, errMsg, previewUrl } from '@/lib/admin-utils';
+
+// 사이트 기준 주소(./uploads/… · ./img/…)는 편집기 안에서 미리보기 주소로 보여주고, 저장할 때 원래 주소로 되돌림
+const MEDIA_SEL = 'img[src], video[src], source[src]';
+function toEditor(html) {
+  if (!html || typeof document === 'undefined') return html || '';
+  const t = document.createElement('template');
+  t.innerHTML = html;
+  t.content.querySelectorAll(MEDIA_SEL).forEach((el) => {
+    const src = el.getAttribute('src');
+    const view = previewUrl(src);
+    if (view && view !== src) { el.setAttribute('data-cms-src', src); el.setAttribute('src', view); }
+  });
+  return t.innerHTML;
+}
+function fromEditor(html) {
+  if (!html || !html.includes('data-cms-src') || typeof document === 'undefined') return html || '';
+  const t = document.createElement('template');
+  t.innerHTML = html;
+  t.content.querySelectorAll('[data-cms-src]').forEach((el) => {
+    el.setAttribute('src', el.getAttribute('data-cms-src'));
+    el.removeAttribute('data-cms-src');
+  });
+  return t.innerHTML;
+}
 
 const TOOLS = [
   { cmd: 'formatBlock', arg: 'H2', label: '제목', title: '큰 제목' },
@@ -36,12 +60,12 @@ export default function RichEditor({ value, onChange, folder = 'posts' }) {
 
   // 최초 1회 / 외부 값 변경(다른 항목 선택) 시에만 innerHTML 동기화 → 커서 튐 방지
   useEffect(() => {
-    if (ref.current && !source && ref.current.innerHTML !== (value || '')) {
-      ref.current.innerHTML = value || '';
+    if (ref.current && !source && fromEditor(ref.current.innerHTML) !== (value || '')) {
+      ref.current.innerHTML = toEditor(value || '');
     }
   }, [value, source]);
 
-  const emit = () => ref.current && onChange(ref.current.innerHTML);
+  const emit = () => ref.current && onChange(fromEditor(ref.current.innerHTML));
 
   const saveSel = () => {
     const sel = window.getSelection();
@@ -95,7 +119,8 @@ export default function RichEditor({ value, onChange, folder = 'posts' }) {
     setBusy(true);
     try {
       const url = await uploadFile(file, folder);
-      insertHtml(`<img src="${url}" alt=""><p><br></p>`);
+      const view = previewUrl(url);
+      insertHtml(view !== url ? `<img src="${view}" data-cms-src="${url}" alt=""><p><br></p>` : `<img src="${url}" alt=""><p><br></p>`);
     } catch (err) {
       toast(errMsg(err), 'err');
     } finally {
