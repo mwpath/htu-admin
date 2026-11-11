@@ -4,6 +4,7 @@
 // npm run dev / npm run build 시 자동 실행됩니다.
 import fs from 'node:fs';
 import path from 'node:path';
+import { LANG_LIST } from '../lib/i18n/langs.js';
 
 const root = process.cwd();
 const dir = path.join(root, 'sections');
@@ -13,20 +14,17 @@ fs.mkdirSync(outGen, { recursive: true });
 const read = (f) => fs.readFileSync(path.join(dir, f), 'utf8');
 const resolve = (f) => read(f).replace(/\/\*@include ([\w./-]+)\*\//g, (_, inc) => read(inc));
 
-const all = fs.readdirSync(dir).filter((f) => /^\d\d-.+\.html$/.test(f)).sort();
-const headerFile = all.find((f) => f.startsWith('00-'));
-const footerFile = all.find((f) => f.startsWith('99-'));
-const sectionFiles = all.filter((f) => f !== headerFile && f !== footerFile);
+const sectionFiles = fs.readdirSync(dir).filter((f) => /^\d\d-.+\.html$/.test(f)).sort();
 const sections = sectionFiles.map(resolve).join('\n\n');
-const header = (theme) => (headerFile ? resolve(headerFile).replace('__HEADER_THEME__', theme) + '\n\n' : '');
-const footer = footerFile ? '\n\n' + resolve(footerFile) : '';
 
-const head = read('standalone/head.html');
+const headTpl = read('standalone/head.html');
+const head = headTpl.replace('__MENU_THEME__', '');
 const foot = read('standalone/foot.html');
-const boardHead = head
+const boardHead = headTpl
+  .replace('__MENU_THEME__', ' data-theme="solid"')
   .replace(/\/\*PREFETCH\*\/[\s\S]*?\/\*\/PREFETCH\*\//, '')
   .replace(/\s*<link rel="canonical"[^>]*>/, '');
-const board = (mode) => boardHead + header('solid') + read('board/board.html').replace('__BOARD_MODE__', mode) + footer + foot;
+const board = (mode) => boardHead + read('board/board.html').replace('__BOARD_MODE__', mode) + foot;
 
 const snippetBanner = `<!--
   [HTU CMS] 홈페이지 섹션 묶음 — 기존 페이지의 <body> 안 원하는 위치에 붙여넣으세요.
@@ -36,11 +34,16 @@ const snippetBanner = `<!--
 `;
 
 const files = {
-  'index.html': head + header('transparent') + sections + footer + foot,
+  'index.html': head + sections + foot,
   'news.html': board('news'),
   'notice.html': board('notice'),
   'event.html': board('event'),
   'sections.html': snippetBanner + sections,
+  // 사이트 공용 스크립트 (메뉴 · 푸터 · 연결 설정)
+  'menu3.js': resolve('standalone/menu3.js'),
+  'footer.js': resolve('standalone/footer.js'),
+  'htu-cms-config.js': read('standalone/htu-cms-config.js'),
+  'htu-i18n.js': read('standalone/htu-i18n.js').replace(/\/\*__LANGS__\*\/[\s\S]*?\/\*__\/LANGS__\*\//, () => '/*__LANGS__*/' + JSON.stringify(Object.fromEntries(LANG_LIST.map((l) => [l.code, { name: l.name, short: l.short, html: l.html, locale: l.locale }]))) + '/*__/LANGS__*/'),
 };
 fs.writeFileSync(path.join(outGen, 'site-files.js'), 'export default ' + JSON.stringify(files) + ';\n');
-console.log(`[sections] site-files.js built (${sectionFiles.length} sections + news/notice pages)`);
+console.log(`[sections] site-files.js built: ${Object.keys(files).join(', ')}`);

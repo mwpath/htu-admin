@@ -23,7 +23,7 @@ export default function SettingsForm({ keys, compact = false }) {
         groups.forEach((g) => {
           const row = (data || []).find((r) => r.key === g.key);
           const base = {};
-          g.fields.forEach((f) => (base[f.name] = f.default));
+          g.fields.forEach((f) => { if (!f.virtual) base[f.name] = f.default; });
           v[g.key] = { ...base, ...(row?.value || {}) };
         });
         setValues(v);
@@ -31,6 +31,10 @@ export default function SettingsForm({ keys, compact = false }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [(keys || []).join(',')]);
 
+  const setMany = (key, patch) => {
+    setValues((s) => ({ ...s, [key]: { ...s[key], ...patch } }));
+    setDirty((d) => ({ ...d, [key]: true }));
+  };
   const set = (key, name, v) => {
     setValues((s) => ({ ...s, [key]: { ...s[key], [name]: v } }));
     setDirty((d) => ({ ...d, [key]: true }));
@@ -43,7 +47,7 @@ export default function SettingsForm({ keys, compact = false }) {
     const rows = keysToSave.map((key) => {
       const g = groups.find((x) => x.key === key);
       const value = { ...values[key] };
-      g.fields.forEach((f) => (value[f.name] = cleanValue(f, value[f.name])));
+      g.fields.forEach((f) => { if (!f.virtual) value[f.name] = cleanValue(f, value[f.name]); });
       return { key, value };
     });
     const { error } = await sb.from('site_settings').upsert(rows, { onConflict: 'key' });
@@ -67,7 +71,7 @@ export default function SettingsForm({ keys, compact = false }) {
           </div>
           <div className="adm-form">
             {g.fields.map((f) => (
-              <Field key={f.name} field={f} value={values[g.key][f.name]} form={values[g.key]} onChange={(v) => set(g.key, f.name, v)} />
+              <Field key={f.name} field={f} value={values[g.key][f.name]} form={values[g.key]} onChange={(v) => (f.type === 'langs' ? setMany(g.key, v) : set(g.key, f.name, v))} />
             ))}
           </div>
         </section>

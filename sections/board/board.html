@@ -117,10 +117,12 @@
       }
       function fmt(d, long){
         var t = new Date(d); if(isNaN(t)) return '';
-        return t.toLocaleDateString('ko-KR', long ? { year:'numeric', month:'long', day:'numeric' } : { year:'numeric', month:'2-digit', day:'2-digit' });
+        return t.toLocaleDateString((window.HTU_I18N && window.HTU_I18N.locale) || 'ko-KR', long ? { year:'numeric', month:'long', day:'numeric' } : { year:'numeric', month:'2-digit', day:'2-digit' });
       }
       function get(path){
-        return fetch(API + path, { credentials:'omit' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+        return (window.HTU_I18N ? window.HTU_I18N.ready : Promise.resolve()).then(function(){
+          return fetch(API + (window.HTU_I18N ? window.HTU_I18N.q(path) : path), { credentials:'omit' });
+        }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
       }
       function bump(table, rid){
         var key = 'htu_view_' + table + '_' + rid;

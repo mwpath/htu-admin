@@ -105,7 +105,7 @@ export const SETTING_GROUPS = [
   {
     key: 'header',
     title: '헤더 로고',
-    desc: '홈 첫 화면(영상 위)에서는 흰색 로고, 스크롤하거나 다른 페이지에서는 기본 로고가 표시됩니다.',
+    desc: '화면 맨 위(영상·이미지 위)에서는 흰색 로고, 스크롤하거나 메뉴에 마우스를 올리면 기본 로고가 표시됩니다. 오른쪽 햄버거 버튼은 PC 전체 메뉴 / 모바일 메뉴를 엽니다.',
     fields: [
       { name: 'logo_url', label: '기본 로고 (흰 배경용, 어두운 색)', type: 'image', folder: 'logo' },
       { name: 'logo_light_url', label: '흰색 로고 (영상 위)', type: 'image', folder: 'logo', help: '비워두면 기본 로고를 흰색으로 자동 변환합니다.' },
@@ -118,8 +118,9 @@ export const SETTING_GROUPS = [
     title: '푸터 회사 정보',
     fields: [
       { name: 'logo_url', label: '푸터 로고 (어두운 배경용, 흰색)', type: 'image', folder: 'logo' },
+      { name: 'slogan', label: '로고 아래 문구', type: 'textarea', rows: 2 },
       { name: 'logo_text', label: '로고 대체 텍스트', type: 'text', default: 'HTU GLOBAL HOLDINGS', half: true },
-      { name: 'related_label', label: '관련 사이트 버튼 문구', type: 'text', default: 'FAMILY SITE', half: true },
+      { name: 'related_label', label: '패밀리 사이트 버튼 문구', type: 'text', default: '패밀리 사이트', half: true },
       { name: 'company', label: '상호', type: 'text', half: true },
       { name: 'ceo', label: '대표자', type: 'text', half: true },
       { name: 'address', label: '주소', type: 'text' },
@@ -128,7 +129,23 @@ export const SETTING_GROUPS = [
       { name: 'fax', label: '팩스', type: 'text', half: true },
       { name: 'email', label: '이메일', type: 'text', half: true },
       { name: 'extra', label: '추가 문구 (통신판매업 신고번호 등)', type: 'textarea', rows: 2 },
-      { name: 'copyright', label: '저작권 문구', type: 'text', default: 'Copyright © HTU GLOBAL HOLDINGS. All rights reserved.' },
+      { name: 'copyright', label: '저작권 문구 (줄바꿈 가능)', type: 'textarea', rows: 2 },
+    ],
+  },
+  {
+    key: 'i18n',
+    title: '사이트 언어',
+    desc: '켜진 언어가 사이트 언어 선택 메뉴에 표시되고, 관리자에서 저장하는 모든 한국어 내용이 자동 번역됩니다.',
+    fields: [
+      { name: '__langs', label: '사용할 언어 (클릭해서 켜기 · 끄기)', type: 'langs', virtual: true,
+        help: '켠 언어는 사이트 언어 메뉴에 나타나고, 저장된 모든 한국어 내용이 그 언어로 자동 번역됩니다. 새 언어를 켜면 ‘지금 전체 번역’을 눌러주세요.' },
+      { name: 'detect', label: '첫 방문 시 언어 자동 선택', type: 'radio', default: 'geo',
+        options: [{ value: 'geo', label: '접속 국가 기준 (권장)' }, { value: 'browser', label: '브라우저 언어 기준' }, { value: 'off', label: '항상 한국어' }],
+        help: '국가 기준: 일본에서 접속하면 일본어, 베트남이면 베트남어… 그 나라 언어가 꺼져 있으면 영어로 보입니다. 방문자가 직접 고른 언어는 항상 우선합니다.' },
+      { name: 'country_map', label: '국가별 언어 직접 지정 (선택)', type: 'textarea', rows: 3, placeholder: 'SG = zh\nIN = en\nPH = en',
+        help: '기본 규칙을 바꾸고 싶은 나라만 한 줄에 하나씩: 국가코드(2자리) = 언어코드. 예) SG = zh, IN = en' },
+      { name: 'translate_pages', label: '페이지 고정 문구 번역', type: 'checkbox', default: true, switchLabel: '회사소개 · 대표 인사말 등 HTML 에 직접 쓰인 글과 버튼 문구도 자동 번역' },
+      { name: 'glossary', label: '번역 용어집 (Claude 번역에 적용)', type: 'textarea', rows: 5, help: '한 줄에 하나씩: 한국어 = 번역어. 회사명·브랜드명처럼 번역하면 안 되는 단어를 적어두세요.' },
     ],
   },
 ];

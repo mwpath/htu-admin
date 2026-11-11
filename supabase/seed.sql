@@ -225,58 +225,82 @@ insert into public.popups (sort, active, title, image_url, link_url, link_new_ta
 select 0, false, '10회 컨퍼런스 포스터', './img/10-poster.jpg', 'https://mindwellpath.co.kr/conference-10-htu.html', false
 where not exists (select 1 from public.popups where image_url = './img/10-poster.jpg');
 
--- ---------- 헤더 / 푸터 설정 ----------
+-- ---------- 헤더 / 푸터 설정 (현재 사이트 기준) ----------
 insert into public.site_settings (key, value) values
 ('header', jsonb_build_object(
-  'logo_url', '', 'logo_light_url', '', 'logo_text', 'HTU GLOBAL', 'logo_height', 34
+  'logo_url', './img/logo-g-htu.png', 'logo_light_url', './img/logo-w.png',
+  'logo_text', 'HTU GLOBAL HOLDINGS', 'logo_height', 36
 )),
 ('footer', jsonb_build_object(
-  'logo_url', '', 'logo_text', 'HTU GLOBAL HOLDINGS',
-  'company', '(주)에이치티유 글로벌 홀딩스', 'ceo', '', 'address', '', 'biz_no', '',
+  'logo_url', './img/logo-w.png', 'logo_text', 'HTU GLOBAL HOLDINGS',
+  'slogan', E'세계를 더욱 아름답고 건강하게\n만들어가는 뷰티, 헬스 글로벌 플랫폼',
+  'company', 'HTU GLOBAL HOLDINGS', 'biz_no', '581-81-03408', 'ceo', '이유리',
+  'address', '강남구 역삼로 114, 현죽빌딩 8층 8016호',
   'tel', '', 'fax', '', 'email', '', 'extra', '',
-  'copyright', 'Copyright © HTU GLOBAL HOLDINGS. All rights reserved.',
-  'related_label', 'FAMILY SITE'
+  'copyright', E'COPYRIGHT © 2025 HTU GLOBAL HOLDINGS\nALL RIGHTS RESERVED',
+  'related_label', '패밀리 사이트'
 ))
-on conflict (key) do nothing;
+on conflict (key) do update set value = excluded.value;
 
--- ---------- 기본 메뉴 (관리자 > 메뉴 관리에서 자유롭게 수정) ----------
+-- ---------- 메뉴 (현재 사이트 menu3.js / footer.js 기준 + '소식' 메뉴 추가) ----------
 do $$
-declare h1 uuid; h2 uuid; h3 uuid; h4 uuid; f1 uuid; f2 uuid; f3 uuid;
+declare h_lab uuid; h_news uuid; f_lab uuid; f_news uuid;
 begin
-  if exists (select 1 from public.menu_items) then return; end if;
+  delete from public.menu_items where location in ('header','footer','related');
 
-  insert into public.menu_items (location, sort, label, link_type, url) values ('header', 0, 'HTU 소개', 'internal', '#mainSliderPack') returning id into h1;
-  insert into public.menu_items (location, sort, label, link_type, url) values ('header', 1, '파트너', 'internal', '#partner-logo-slider-section') returning id into h2;
-  insert into public.menu_items (location, sort, label, link_type, url) values ('header', 2, '출간·연재', 'none', null) returning id into h3;
-  insert into public.menu_items (location, sort, label, link_type, url) values ('header', 3, '소식', 'none', null) returning id into h4;
-  insert into public.menu_items (location, parent_id, sort, label, link_type, url) values
-    ('header', h3, 0, '정기 출간물', 'internal', '#youtubeVideoSection'),
-    ('header', h3, 1, '전문가 연재', 'internal', '#bookshelf-gallery'),
-    ('header', h4, 0, 'News & Event', 'internal', './news.html'),
-    ('header', h4, 1, '이벤트', 'internal', './event.html'),
-    ('header', h4, 2, '공지사항', 'internal', './notice.html'),
-    ('header', h4, 3, 'YouTube', 'internal', '#youtubePopupGallerySection');
+  -- 헤더
+  insert into public.menu_items (location, sort, label, link_type, url) values
+    ('header', 0, '회사소개', 'internal', './introduce.html'),
+    ('header', 1, '대표 인사말', 'internal', './ceo.html'),
+    ('header', 2, '비전 & 철학', 'internal', './vision.html');
+  insert into public.menu_items (location, sort, label, link_type) values ('header', 3, '산하 독립 연구소', 'none') returning id into h_lab;
+  insert into public.menu_items (location, sort, label, link_type) values ('header', 4, '소식', 'none') returning id into h_news;
+  insert into public.menu_items (location, sort, label, link_type, url) values ('header', 5, '오시는 길', 'internal', './location.html');
+  insert into public.menu_items (location, parent_id, sort, label, link_type, url, new_tab) values
+    ('header', h_lab, 0, '비즈니스 혁신 연구소', 'external', 'https://biznovalab.com', true),
+    ('header', h_news, 0, 'News & Event', 'internal', './news.html', false),
+    ('header', h_news, 1, '이벤트', 'internal', './event.html', false),
+    ('header', h_news, 2, '공지사항', 'internal', './notice.html', false);
 
-  insert into public.menu_items (location, sort, label, link_type) values ('footer', 0, 'HTU', 'none') returning id into f1;
-  insert into public.menu_items (location, sort, label, link_type) values ('footer', 1, '미디어', 'none') returning id into f2;
-  insert into public.menu_items (location, sort, label, link_type) values ('footer', 2, '고객지원', 'none') returning id into f3;
-  insert into public.menu_items (location, parent_id, sort, label, link_type, url) values
-    ('footer', f1, 0, 'HTU 소개', 'internal', './index.html#mainSliderPack'),
-    ('footer', f1, 1, '파트너', 'internal', './index.html#partner-logo-slider-section'),
-    ('footer', f2, 0, 'News & Event', 'internal', './news.html'),
-    ('footer', f2, 1, '전문가 연재', 'internal', './index.html#bookshelf-gallery'),
-    ('footer', f3, 0, '공지사항', 'internal', './notice.html'),
-    ('footer', f3, 1, '이벤트', 'internal', './event.html');
+  -- 푸터 메뉴 (컬럼 → 링크)
+  with cols(sort, label, child, url, ext) as (values
+    (0, '회사소개', '회사소개', './introduce.html', false),
+    (1, '대표 인사말', '대표 인사말', './ceo.html', false),
+    (2, '비전 & 철학', '비전 & 철학', './vision.html', false),
+    (5, '오시는 길', '오시는 길', './location.html', false)
+  ), ins as (
+    insert into public.menu_items (location, sort, label, link_type)
+    select 'footer', sort, label, 'none' from cols returning id, label
+  )
+  insert into public.menu_items (location, parent_id, sort, label, link_type, url)
+  select 'footer', ins.id, 0, cols.child, 'internal', cols.url from ins join cols on cols.label = ins.label;
 
-  insert into public.menu_items (location, sort, label, link_type, url, new_tab)
-  select 'related', row_number() over (order by g.sort, s.sort) - 1, s.title, 'external', s.href, true
-    from public.family_sites s join public.family_groups g on g.key = s.group_key
-   where s.href is not null and s.href <> '#' and s.href ~ '^https?://';
+  insert into public.menu_items (location, sort, label, link_type) values ('footer', 3, '산하 독립 연구소', 'none') returning id into f_lab;
+  insert into public.menu_items (location, sort, label, link_type) values ('footer', 4, '소식', 'none') returning id into f_news;
+  insert into public.menu_items (location, parent_id, sort, label, link_type, url, new_tab) values
+    ('footer', f_lab, 0, '비즈니스 혁신 연구소', 'external', 'https://biznovalab.com', true),
+    ('footer', f_news, 0, 'News & Event', 'internal', './news.html', false),
+    ('footer', f_news, 1, '이벤트', 'internal', './event.html', false),
+    ('footer', f_news, 2, '공지사항', 'internal', './notice.html', false);
 
-  insert into public.menu_items (location, sort, label, link_type, url, active) values
-    ('policy', 0, '개인정보처리방침', 'internal', '#', false),
-    ('policy', 1, '이용약관', 'internal', '#', false);
+  -- 패밀리 사이트 (푸터 드롭다운)
+  insert into public.menu_items (location, sort, label, link_type, url, new_tab) values
+    ('related', 0, '건강소비자 연대', 'external', 'http://hcn.or.kr/', true),
+    ('related', 1, '비즈니스 혁신 연구소', 'external', 'https://biznovalab.com', true),
+    ('related', 2, 'MAXQ', 'external', 'https://www.maxq.kr/', true),
+    ('related', 3, 'MD 저널', 'external', 'https://www.mdjournal.kr/', true),
+    ('related', 4, 'ENDO 저널', 'external', 'https://endo365.kr/', true),
+    ('related', 5, '헬스컨슈머', 'external', 'https://www.healthumer.com/', true),
+    ('related', 6, '한국뷰티헬시에이징국제교류회', 'external', 'https://kbhga.com/', true),
+    ('related', 7, '한국헬시에이징학회', 'external', 'https://khealthyaging.com/', true),
+    ('related', 8, '사피엔스 아일랜드', 'external', 'https://www.sapiensland.io/', true);
 end $$;
+
+-- ---------- 다국어 설정 ----------
+insert into public.site_settings (key, value) values
+('i18n', jsonb_build_object('en', true, 'zh', true, 'ja', true, 'detect', 'geo', 'translate_pages', true,
+  'glossary', E'HTU GLOBAL HOLDINGS = HTU GLOBAL HOLDINGS (번역하지 않음)\nMAXQ = MAXQ\nMD 저널 = MD Journal\nENDO 저널 = ENDO Journal'))
+on conflict (key) do nothing;
 
 -- ---------- 관리자 계정 등록 ----------
 -- 1) Supabase Dashboard → Authentication → Users → "Add user" 로 이메일/비밀번호 계정 생성

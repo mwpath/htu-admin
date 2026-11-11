@@ -1,6 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { LANG_LIST, enabledLangs } from '@/lib/i18n/langs';
 import { previewUrl, uploadFile, youtubeId, toast, errMsg, toLocalInput, fromLocalInput } from '@/lib/admin-utils';
 
 const RichEditor = dynamic(() => import('./RichEditor'), { ssr: false });
@@ -190,6 +191,24 @@ export default function Field({ field, value, onChange, form }) {
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
+      );
+      break;
+    }
+    case 'langs': {
+      const on = enabledLangs(form);
+      input = (
+        <div className="adm-langs">
+          <span className="adm-lang is-base">한국어 <small>원문</small></span>
+          {LANG_LIST.filter((l) => l.code !== 'ko').map((l) => {
+            const active = on.includes(l.code);
+            return (
+              <button key={l.code} type="button" className={`adm-lang ${active ? 'is-on' : ''}`} onClick={() => onChange({ [l.code]: !active })} title={l.ko}>
+                {l.name} <small>{l.ko}</small>
+              </button>
+            );
+          })}
+          <span className="adm-langs-count">{on.length + 1}개 언어 사용 중</span>
+        </div>
       );
       break;
     }

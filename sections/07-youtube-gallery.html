@@ -73,8 +73,7 @@
       function htuCms() {
         if (window.__HTU_CMS_DATA__) return Promise.resolve(window.__HTU_CMS_DATA__);
         if (!window.__htuCmsP) {
-          var ep = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + '/api/public/content';
-          window.__htuCmsP = fetch(ep, { credentials: 'omit' })
+          window.__htuCmsP = (window.HTU_I18N ? window.HTU_I18N.ready : Promise.resolve()).then(function () { return fetch(String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + (window.HTU_I18N ? window.HTU_I18N.q('/api/public/content') : '/api/public/content'), { credentials: 'omit' }); })
             .then(function (r) { return r.ok ? r.json() : null; })
             .catch(function () { return null; });
         }

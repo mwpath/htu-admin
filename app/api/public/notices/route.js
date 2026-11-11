@@ -1,3 +1,4 @@
+import { loadTranslationMap, applyRows, normLang } from '@/lib/i18n/overlay';
 // 공지사항 목록 (notice.html?page=N)
 import { supabasePublic } from '@/lib/supabase/public';
 import { json, preflight } from '@/lib/cors';
@@ -15,6 +16,8 @@ export async function GET(request) {
     .order('pinned', { ascending: false })
     .order('published_at', { ascending: false })
     .range((page - 1) * PER, page * PER - 1);
-  return json({ rows: data || [], count: count || 0, page, per: PER, error: error?.message });
+  const lang = normLang(new URL(request.url).searchParams.get('lang'));
+  const tr = await loadTranslationMap(sb, lang, ['notices']);
+  return json({ rows: applyRows(tr, 'notices', data || []), count: count || 0, page, per: PER, error: error?.message });
 }
 export const OPTIONS = preflight;

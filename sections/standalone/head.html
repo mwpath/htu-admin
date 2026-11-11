@@ -6,15 +6,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-  <!-- =====================================================================
-       ★ HTU CMS 연결 — 이 한 줄만 관리자(Vercel) 주소로 바꾸세요 ★
-       예) https://htu-cms.vercel.app   (끝에 / 없이)
-       ===================================================================== -->
+  <!-- HTU CMS 연결 주소는 js/htu-cms-config.js 한 곳에서만 관리합니다 -->
+  <script src="./js/htu-cms-config.js"></script>
+  <!-- 다국어: 언어 선택 · 페이지 문구 번역 -->
+  <script src="./js/htu-i18n.js"></script>
   <script>
-    window.HTU_CMS_ENDPOINT = '__HTU_CMS_ENDPOINT__';
     /*PREFETCH*/
-    /* 페이지 로딩과 동시에 콘텐츠를 미리 불러옵니다 (모든 섹션이 공유) */
-    window.__htuCmsP = fetch(String(window.HTU_CMS_ENDPOINT).replace(/\/+$/, '') + '/api/public/content', { credentials: 'omit' })
+    /* 페이지 로딩과 동시에 콘텐츠를 미리 불러옵니다 (모든 섹션 · 메뉴 · 푸터가 공유) */
+    /* 첫 방문이면 접속 국가로 언어를 정한 뒤(HTU_I18N.ready) 그 언어로 받아옵니다 */
+    window.__htuCmsP = (window.HTU_I18N ? window.HTU_I18N.ready : Promise.resolve()).then(function () {
+      return fetch(String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + (window.HTU_I18N ? window.HTU_I18N.q('/api/public/content') : '/api/public/content'), { credentials: 'omit' });
+    })
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; });
     /*/PREFETCH*/
@@ -71,5 +73,9 @@
 </head>
 
 <body>
-  <!-- 메뉴/푸터는 관리자(메뉴 관리 · 푸터 관리)에서 수정합니다. 기존 menu3.js / footer.js 는 사용하지 않습니다. -->
+  <!-- 헤더 메뉴: 관리자 > 헤더 메뉴 에서 수정 (menu3.js 가 관리자 데이터로 그립니다) -->
+  <div id="menu_navi"__MENU_THEME__></div>
+
+  <script src="./menu3.js"></script>
+
 

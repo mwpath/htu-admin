@@ -19,7 +19,7 @@ export async function GET(request, { params }) {
 
   return new Response(body, {
     headers: {
-      'content-type': inline ? 'text/plain; charset=utf-8' : 'text/html; charset=utf-8',
+      'content-type': inline ? 'text/plain; charset=utf-8' : name.endsWith('.js') ? 'text/javascript; charset=utf-8' : 'text/html; charset=utf-8',
       'content-disposition': inline ? 'inline' : `attachment; filename="${name}"`,
       'cache-control': 'no-store',
     },

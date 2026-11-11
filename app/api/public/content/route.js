@@ -3,6 +3,6 @@ import { getPublicContent, siteOrigin } from '@/lib/content';
 import { json, preflight } from '@/lib/cors';
 
 export async function GET(request) {
-  return json(await getPublicContent(siteOrigin(request.url)));
+  return json(await getPublicContent(siteOrigin(request.url), new URL(request.url).searchParams.get('lang')));
 }
 export const OPTIONS = preflight;

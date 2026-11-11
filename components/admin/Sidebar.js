@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useSiteBase } from '@/lib/use-site-base';
 
 const NAV = [
@@ -27,7 +28,22 @@ const NAV = [
     ],
   },
   { group: '메뉴 · 링크', items: [{ href: '/admin/menu', label: '헤더 메뉴' }, { href: '/admin/footer', label: '푸터 · 관련 사이트' }] },
+  { group: '다국어', items: [{ href: '/admin/i18n', label: '🌐 번역 관리 (EN · 中 · 日)' }] },
 ];
+
+function SyncBadge() {
+  const [st, setSt] = useState(null);
+  useEffect(() => {
+    const on = (e) => setSt(e.detail);
+    window.addEventListener('adm-i18n', on);
+    return () => window.removeEventListener('adm-i18n', on);
+  }, []);
+  if (!st) return null;
+  if (st.state === 'running') return <div className="adm-sync">🌐 번역 업데이트 중…</div>;
+  const r = st.result || {};
+  if (r.error || (r.errors && r.errors.length)) return <Link href="/admin/i18n" className="adm-sync err">🌐 번역 오류 — 확인</Link>;
+  return <div className="adm-sync ok">🌐 번역 최신 상태{r.translated ? ` (+${r.translated})` : ''}</div>;
+}
 
 export default function Sidebar({ email }) {
   const path = usePathname();
@@ -57,6 +73,7 @@ export default function Sidebar({ email }) {
         ))}
       </nav>
       <div className="adm-side-foot">
+        <SyncBadge />
         {site ? <a href={site} target="_blank" rel="noreferrer" className="adm-btn ghost-light sm">사이트 보기 ↗</a> : null}
         <div className="adm-user">{email}</div>
         <form action="/admin/logout" method="post">
