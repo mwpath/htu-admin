@@ -20,4 +20,5 @@ const nextConfig = {
     return [{ source: '/', destination: '/admin', permanent: false }];
   },
 };
+
 export default nextConfig;
