@@ -24,6 +24,7 @@
         { label: '대표 인사말', children: [{ label: '대표 인사말', url: './ceo.html' }] },
         { label: '비전 & 철학', children: [{ label: '비전 & 철학', url: './vision.html' }] },
         { label: '산하 독립 연구소', children: [{ label: '비즈니스 혁신 연구소', url: 'https://biznovalab.com', external: true, new_tab: true }] },
+        { label: '소식', children: [{ label: 'News & Event', url: './news.html' }, { label: '이벤트', url: './event.html' }, { label: '공지사항', url: './notice.html' }] },
         { label: '오시는 길', children: [{ label: '오시는 길', url: './location.html' }] },
       ],
       related: [

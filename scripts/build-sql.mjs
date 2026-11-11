@@ -9,6 +9,7 @@ const m2data = m2.slice(m2.indexOf('-- ---------- 인트로 영상 슬라이더 
 const m6 = read('migration-006-languages.sql');
 const m6data = m6.slice(m6.indexOf('update public.site_settings'));
 const seed = read('seed.sql');
+const fillMenus = read('fill-menus-if-empty.sql');
 if (seed.includes('$htu_seed$')) throw new Error('seed tag clash');
 const out = `-- =====================================================================
 -- HTU CMS · 설치 / 업데이트 (이 파일 하나만 실행하세요)
@@ -39,6 +40,7 @@ insert into public.site_settings (key, value) values
 ('i18n', jsonb_build_object('en', true, 'zh', true, 'ja', true, 'detect', 'geo', 'translate_pages', true, 'glossary', ''))
 on conflict (key) do nothing;
 ${m6data}
+${fillMenus}
 notify pgrst, 'reload schema';
 `;
 fs.writeFileSync(path.join(root, 'install.sql'), out);

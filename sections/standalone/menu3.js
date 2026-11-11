@@ -10,6 +10,11 @@
       { label: '대표 인사말', url: './ceo.html', children: [] },
       { label: '비전 & 철학', url: './vision.html', children: [] },
       { label: '산하 독립 연구소', url: '', children: [{ label: '비즈니스 혁신 연구소', url: 'https://biznovalab.com', external: true, new_tab: true }] },
+      { label: '소식', url: '', children: [
+        { label: 'News & Event', url: './news.html' },
+        { label: '이벤트', url: './event.html' },
+        { label: '공지사항', url: './notice.html' },
+      ] },
       { label: '오시는 길', url: './location.html', children: [] },
     ],
   };
@@ -54,7 +59,7 @@
     #nbbioHeaderLocal .m-lang:empty{ display:none; }
     #nbbioHeaderLocal .m-lang button{ height:38px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:#fff; font:inherit; font-size:14px; font-weight:700; color:#333; cursor:pointer; }
     #nbbioHeaderLocal .m-lang button.is-on{ background:var(--brand); border-color:var(--brand); color:#fff; }
-    @media (max-width:1279.98px){ #nbbioHeaderLocal .lang-wrap{ display:none; } }
+    @media (max-width:767.98px){ #nbbioHeaderLocal .lang-wrap{ display:none; } } /* 휴대폰은 메뉴 안 언어 버튼 사용 */
   </style>
 
   <!-- ====== Header Bar ====== -->
@@ -232,7 +237,8 @@
   function langName(l) { return (window.HTU_I18N && window.HTU_I18N.names[l]) || LANG_NAMES[l] || l.toUpperCase(); }
   function langShort(l) { return (window.HTU_I18N && window.HTU_I18N.short[l]) || l.toUpperCase(); }
   function renderLangs(root, langs) {
-    var list = langs || (window.HTU_I18N && window.HTU_I18N.languages) || ['ko'];
+    // 관리자 설정을 아직 못 받았어도 기본 언어(한국어·영어·중국어·일본어)로 표시 → 설정이 오면 그 목록으로 갱신
+    var list = langs || (window.HTU_I18N && window.HTU_I18N.languages) || ['ko', 'en', 'zh', 'ja'];
     var cur = curLang();
     var globe = root.querySelector('.globeBtn');
     var show = list.length > 1;
