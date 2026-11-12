@@ -26,6 +26,10 @@
   <style>
 /*@include css/menu3.css*/
     /* ===== HTU CMS 추가 ===== */
+    /* 메뉴 글자가 두 줄로 깨지지 않게 + 화면 폭에 따라 간격 자동 조절 */
+    #nbbioHeaderLocal .gnb>li>a{ white-space:nowrap; }
+    #nbbioHeaderLocal .gnb{ gap:clamp(22px, 3.6vw, 76px); }
+    #nbbioHeaderLocal .bar .wrap nav{ min-width:0; }
     #nbbioHeaderLocal .m-sub-list.open{ max-height:640px; }
     #nbbioHeaderLocal .gnb .ext, #nbbioHeaderLocal .mega .ext, #nbbioHeaderLocal .mlist .ext{ font-size:.78em; opacity:.6; margin-left:3px; }
     #nbbioHeaderLocal .cta{

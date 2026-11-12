@@ -104,6 +104,45 @@
       font-size:15px; font-weight:800; color:#fff; background:linear-gradient(135deg,#0a4f30,#0a6a62); box-shadow:0 14px 34px rgba(10,106,98,.28); }
     #htuBoard .hb-apply.is-disabled { background:#c9d1cd; box-shadow:none; pointer-events:none; }
 
+
+    /* 게시판 공통: 도구 막대 · 보기 전환 · 페이지 */
+    #htuBoard .hb-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:28px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+    #htuBoard .hb-total { font-size:14px; color:var(--muted); }
+    #htuBoard .hb-total b { color:var(--ink); }
+    #htuBoard .hb-tools { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    #htuBoard .hb-search { display:flex; align-items:center; height:42px; border:1px solid var(--line); border-radius:999px; background:#fff; overflow:hidden; }
+    #htuBoard .hb-search input { width:200px; height:100%; border:0; padding:0 4px 0 18px; font:inherit; font-size:14px; outline:none; background:transparent; min-width:0; }
+    #htuBoard .hb-search button { width:42px; height:100%; border:0; background:none; cursor:pointer; color:var(--ink); display:grid; place-items:center; }
+    #htuBoard .hb-search button svg { width:18px; height:18px; }
+    #htuBoard .hb-search:focus-within { border-color:var(--green); box-shadow:0 0 0 3px rgba(10,106,98,.12); }
+    #htuBoard .hb-view { display:inline-flex; padding:3px; border:1px solid var(--line); border-radius:999px; background:#f6f8f7; }
+    #htuBoard .hb-view button { display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border:0; border-radius:999px; background:none; cursor:pointer;
+      font:inherit; font-size:13px; font-weight:800; color:rgba(11,18,32,.6); }
+    #htuBoard .hb-view button svg { width:16px; height:16px; }
+    #htuBoard .hb-view button.is-on { background:#fff; color:var(--green); box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    #htuBoard .hb-toolbar + .hb-list { margin-top:0; }
+    #htuBoard .hb-toolbar + .hb-grid { margin-top:24px; }
+    #htuBoard .hb-pager { flex-wrap:wrap; margin-top:40px; }
+    #htuBoard .hb-pager a.nav, #htuBoard .hb-pager .is-off { min-width:36px; height:36px; display:grid; place-items:center; border-radius:10px; font-weight:700; }
+    #htuBoard .hb-pager .is-off { color:rgba(11,18,32,.25); border:1px solid rgba(15,23,42,.05); }
+    #htuBoard .hb-pager a:hover:not(.is-on) { border-color:var(--green); color:var(--green); }
+    #htuBoard .hb-clip { font-style:normal; font-size:13px; margin-left:4px; }
+    /* 카드형 공지 */
+    #htuBoard .hb-thumb .hb-ph { display:none; }
+    #htuBoard .hb-thumb.is-empty { display:flex; align-items:center; justify-content:center; background:radial-gradient(120% 120% at 0% 0%, #0f7a6e 0%, #0a4f30 55%, #033b1e 100%); }
+    #htuBoard .hb-thumb.is-empty .hb-ph { display:block; color:rgba(255,255,255,.92); font-size:13px; font-weight:900; letter-spacing:.22em; text-transform:uppercase; }
+    #htuBoard .hb-chip.is-pin { color:var(--green); }
+    #htuBoard .hb-chip.is-pin:before { content:''; width:6px; height:6px; border-radius:50%; background:#ef4444; margin-right:6px; }
+    #htuBoard .hb-new { position:absolute; right:12px; top:12px; height:22px; padding:0 8px; display:inline-flex; align-items:center; border-radius:6px; background:#ef4444; color:#fff; font-size:11px; font-weight:900; }
+    #htuBoard .hb-card-title, #htuBoard .hb-card-ex, #htuBoard .hb-subject { overflow-wrap:anywhere; }
+    @media (max-width:640px){
+      #htuBoard .hb-toolbar { flex-direction:column; align-items:stretch; }
+      #htuBoard .hb-tools { justify-content:space-between; }
+      #htuBoard .hb-search { flex:1; }
+      #htuBoard .hb-search input { width:100%; }
+      #htuBoard .hb-view button span { display:none; }
+      #htuBoard .hb-view button { padding:0 12px; }
+    }
     @media (max-width:900px){ #htuBoard .hb-grid { grid-template-columns:repeat(2, minmax(0,1fr)); } }
     @media (max-width:640px){
       #htuBoard { padding-top:110px; }
@@ -170,6 +209,45 @@
         }).join('') + '</ul></div>';
       }
       function postUrl(kind, r){ return r.seo_path ? r.seo_path : kind + '.html?id=' + esc(r.id); }
+      /* ---------- 게시판 공통: 검색 · 보기 전환 · 번호 페이지 ---------- */
+      var Q = (qs.get('q') || '').trim();
+      function linkTo(base, extra){
+        var u = new URLSearchParams();
+        Object.keys(extra).forEach(function(k){ if(extra[k] !== '' && extra[k] != null && !(k === 'page' && +extra[k] === 1)) u.set(k, extra[k]); });
+        var s = u.toString(); return base + (s ? '?' + s : '');
+      }
+      function pagerHtml(base, cur, pages, extra){
+        if(pages <= 1) return '';
+        var W = 10, start = Math.floor((cur - 1) / W) * W + 1, end = Math.min(pages, start + W - 1), h = '';
+        function a(p, label, cls, aria){ return '<a href="' + linkTo(base, Object.assign({}, extra, { page: p })) + '"' + (cls ? ' class="' + cls + '"' : '') + (aria ? ' aria-label="' + aria + '"' : '') + '>' + label + '</a>'; }
+        function off(label){ return '<span class="is-off" aria-hidden="true">' + label + '</span>'; }
+        h += cur > 1 ? a(1, '«', 'nav', '처음') : off('«');
+        h += cur > 1 ? a(cur - 1, '‹', 'nav', '이전') : off('‹');
+        for(var p = start; p <= end; p++) h += a(p, p, p === cur ? 'is-on' : '', p + ' 페이지');
+        h += cur < pages ? a(cur + 1, '›', 'nav', '다음') : off('›');
+        h += cur < pages ? a(pages, '»', 'nav', '마지막') : off('»');
+        return '<nav class="hb-pager" aria-label="페이지">' + h + '</nav>';
+      }
+      var ICO_GRID = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>';
+      var ICO_LIST = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>';
+      function toolbarHtml(total, opts){
+        opts = opts || {};
+        return '<div class="hb-toolbar">' +
+          '<span class="hb-total">전체 <b>' + total + '</b>건' + (Q ? ' · “' + esc(Q) + '” 검색 결과' : '') + '</span>' +
+          '<div class="hb-tools">' +
+            '<form class="hb-search" role="search"><input type="search" name="q" value="' + esc(Q) + '" placeholder="검색어 입력" aria-label="검색어"><button type="submit" aria-label="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></form>' +
+            (opts.views ? '<div class="hb-view" role="group" aria-label="보기 방식">' +
+              '<button type="button" data-view="card"' + (opts.view === 'card' ? ' class="is-on" aria-pressed="true"' : ' aria-pressed="false"') + ' title="카드형">' + ICO_GRID + '<span>카드형</span></button>' +
+              '<button type="button" data-view="list"' + (opts.view === 'list' ? ' class="is-on" aria-pressed="true"' : ' aria-pressed="false"') + ' title="목록형">' + ICO_LIST + '<span>목록형</span></button>' +
+            '</div>' : '') +
+          '</div></div>';
+      }
+      function bindToolbar(base, extra, onView){
+        var f = box.querySelector('.hb-search');
+        if(f) f.addEventListener('submit', function(e){ e.preventDefault(); location.href = linkTo(base, Object.assign({}, extra, { q: f.q.value.trim(), page: 1 })); });
+        box.querySelectorAll('.hb-view button').forEach(function(b){ b.addEventListener('click', function(){ onView(b.getAttribute('data-view')); }); });
+      }
+      function noThumb(label){ return '<div class="hb-thumb is-empty"><span class="hb-ph">' + label + '</span>'; }
       function article(d, eyebrow, back, extra){
         document.title = (d.seo_title || d.title) + ' | ' + SITE;
         var md = document.querySelector('meta[name="description"]');
@@ -198,25 +276,47 @@
           }); });
           return;
         }
-        get('/notices?page=' + page).then(function(d){
-          d = d || { rows:[], count:0, per:15 };
-          d.count = Math.max(d.count || 0, (page - 1) * (d.per || 15) + d.rows.length);
-          d.per = d.per || 15;
+        var VKEY = 'htu_notice_view';
+        var view = qs.get('view') || (function(){ try{ return localStorage.getItem(VKEY); }catch(e){ return null; } })() || 'card';
+        if(view !== 'list') view = 'card';
+        get('/notices?page=' + page + (Q ? '&q=' + encodeURIComponent(Q) : '')).then(function(d){
+          d = d || { rows:[], count:0, per:12 };
+          d.per = d.per || 12;
+          d.count = Math.max(d.count || 0, (page - 1) * d.per + d.rows.length);
           var pages = Math.max(1, Math.ceil(d.count / d.per));
-          var rows = d.rows.map(function(r, i){
-            return '<li class="' + (r.pinned ? 'is-pinned' : '') + '"><a href="' + postUrl('notice', r) + '">' +
-              '<span class="hb-no">' + (r.pinned ? '<em>공지</em>' : (d.count - ((page - 1) * d.per + i))) + '</span>' +
-              '<span class="hb-subject">' + esc(r.title) + '</span>' +
-              '<span class="hb-date">' + fmt(r.published_at) + '</span></a></li>';
-          }).join('');
-          var pager = '';
-          if(pages > 1){
-            for(var p = 1; p <= pages; p++) pager += '<a href="notice.html?page=' + p + '"' + (p === page ? ' class="is-on"' : '') + '>' + p + '</a>';
-            pager = '<nav class="hb-pager">' + pager + '</nav>';
-          }
           document.title = '공지사항 | ' + SITE;
-          box.innerHTML = '<div class="hb-narrow"><p class="hb-eyebrow">Notice</p><h1 class="hb-h1">공지사항</h1>' +
-            '<ul class="hb-list">' + (rows || '<li class="hb-empty">등록된 공지사항이 없습니다.</li>') + '</ul>' + pager + '</div>';
+          function render(){
+            var body;
+            if(!d.rows.length){
+              body = '<div class="hb-empty">' + (Q ? '검색 결과가 없습니다.' : '등록된 공지사항이 없습니다.') + '</div>';
+            } else if(view === 'card'){
+              body = '<div class="hb-grid">' + d.rows.map(function(r){
+                var isNew = Date.now() - new Date(r.published_at).getTime() < 7 * 864e5;
+                return '<a class="hb-card" href="' + postUrl('notice', r) + '">' +
+                  (r.img ? '<div class="hb-thumb"><span class="hb-ph">Notice</span><img src="' + esc(r.img) + '" alt="" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-empty\');this.remove()">' : noThumb('Notice')) +
+                    '<span class="hb-chip' + (r.pinned ? ' is-pin' : '') + '">' + (r.pinned ? '공지' : '안내') + '</span>' +
+                    (isNew ? '<span class="hb-new">NEW</span>' : '') + '</div>' +
+                  '<div class="hb-card-body"><h3 class="hb-card-title">' + esc(r.title) + '</h3>' +
+                    (r.excerpt ? '<p class="hb-card-ex">' + esc(r.excerpt) + '</p>' : '') +
+                    '<div class="hb-card-date">' + fmt(r.published_at) + (r.attachments && r.attachments.length ? ' · 📎 ' + r.attachments.length : '') + '</div></div></a>';
+              }).join('') + '</div>';
+            } else {
+              body = '<ul class="hb-list">' + d.rows.map(function(r, i){
+                return '<li class="' + (r.pinned ? 'is-pinned' : '') + '"><a href="' + postUrl('notice', r) + '">' +
+                  '<span class="hb-no">' + (r.pinned ? '<em>공지</em>' : (d.count - ((page - 1) * d.per + i))) + '</span>' +
+                  '<span class="hb-subject">' + esc(r.title) + (r.attachments && r.attachments.length ? ' <i class="hb-clip" title="첨부파일">📎</i>' : '') + '</span>' +
+                  '<span class="hb-date">' + fmt(r.published_at) + '</span></a></li>';
+              }).join('') + '</ul>';
+            }
+            box.innerHTML = '<div class="hb-wrap"><p class="hb-eyebrow">Notice</p><h1 class="hb-h1">공지사항</h1>' +
+              toolbarHtml(d.count, { views: true, view: view }) + body +
+              pagerHtml('notice.html', page, pages, { q: Q, view: qs.get('view') || '' }) + '</div>';
+            bindToolbar('notice.html', { view: qs.get('view') || '' }, function(v){
+              view = v; try{ localStorage.setItem(VKEY, v); }catch(e){}
+              render();
+            });
+          }
+          render();
         });
         return;
       }
@@ -257,7 +357,9 @@
           document.title = '이벤트 | ' + SITE;
           var filter = qs.get('status') || 'all';
           function render(){
-            var list = rows.filter(function(e){ return filter === 'all' || status(e).key === filter; });
+            var all = rows.filter(function(e){ return (filter === 'all' || status(e).key === filter) && (!Q || (e.title + ' ' + (e.summary || '') + ' ' + (e.location || '')).toLowerCase().indexOf(Q.toLowerCase()) >= 0); });
+            var PER = 12, pages = Math.max(1, Math.ceil(all.length / PER)), cur = Math.min(page, pages);
+            var list = all.slice((cur - 1) * PER, cur * PER);
             var cards = list.map(function(e){
               var stt = status(e);
               var external = e.link_type === 'external' && e.external_url;
@@ -274,12 +376,15 @@
               return '<button type="button" data-st="' + t[0] + '"' + (t[0] === filter ? ' class="is-on"' : '') + '>' + t[1] + '</button>';
             }).join('');
             box.innerHTML = '<div class="hb-wrap"><p class="hb-eyebrow">Event</p><h1 class="hb-h1">이벤트</h1><div class="hb-tabs">' + tabs + '</div>' +
-              (cards ? '<div class="hb-grid">' + cards + '</div>' : '<div class="hb-empty">해당하는 이벤트가 없습니다.</div>') + '</div>';
+              toolbarHtml(all.length) +
+              (cards ? '<div class="hb-grid">' + cards + '</div>' : '<div class="hb-empty">' + (Q ? '검색 결과가 없습니다.' : '해당하는 이벤트가 없습니다.') + '</div>') +
+              pagerHtml('event.html', cur, pages, { q: Q, status: filter === 'all' ? '' : filter }) + '</div>';
+            bindToolbar('event.html', { status: filter === 'all' ? '' : filter }, function(){});
             box.querySelectorAll('.hb-tabs button').forEach(function(b){
               b.addEventListener('click', function(){
                 filter = b.getAttribute('data-st');
-                history.replaceState(null, '', filter === 'all' ? 'event.html' : 'event.html?status=' + filter);
-                render();
+                history.replaceState(null, '', linkTo('event.html', { status: filter === 'all' ? '' : filter, q: Q }));
+                page = 1; render();
               });
             });
           }
@@ -299,8 +404,10 @@
         return;
       }
       get('/news').then(function(d){
-        var rows = (d && d.rows) || [];
+        var all = ((d && d.rows) || []).filter(function(n){ return !Q || (n.title + ' ' + (n.excerpt || '')).toLowerCase().indexOf(Q.toLowerCase()) >= 0; });
         document.title = 'News & Event | ' + SITE;
+        var PER = 12, pages = Math.max(1, Math.ceil(all.length / PER)), cur = Math.min(page, pages);
+        var rows = all.slice((cur - 1) * PER, cur * PER);
         var cards = rows.map(function(n){
           var internal = n.type === 'internal';
           var href = internal ? postUrl('news', n) : esc(n.external_url || '#');
@@ -313,7 +420,10 @@
               '<div class="hb-card-date">' + fmt(n.published_at) + '</div></div></a>';
         }).join('');
         box.innerHTML = '<div class="hb-wrap"><p class="hb-eyebrow">News &amp; Event</p><h1 class="hb-h1">News &amp; Event</h1>' +
-          (cards ? '<div class="hb-grid">' + cards + '</div>' : '<div class="hb-empty">등록된 소식이 없습니다.</div>') + '</div>';
+          toolbarHtml(all.length) +
+          (cards ? '<div class="hb-grid">' + cards + '</div>' : '<div class="hb-empty">' + (Q ? '검색 결과가 없습니다.' : '등록된 소식이 없습니다.') + '</div>') +
+          pagerHtml('news.html', cur, pages, { q: Q }) + '</div>';
+        bindToolbar('news.html', {}, function(){});
       });
     })();
   </script>
