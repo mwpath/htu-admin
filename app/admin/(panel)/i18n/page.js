@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import PageHead from '@/components/admin/PageHead';
 import SettingsForm from '@/components/admin/SettingsForm';
 import Tabs from '@/components/admin/Tabs';
@@ -77,8 +77,10 @@ function Status({ status, onSync, syncing, progress }) {
   );
 }
 
-function FieldRow({ f, table, lang, onChanged }) {
-  const [value, setValue] = useState(Array.isArray(f.value) ? f.value.join('\n') : f.value || '');
+function FieldRow({ f, table, lang, onChanged, reg, onDirty }) {
+  const initial = Array.isArray(f.value) ? f.value.join('\n') : f.value || '';
+  const [value, setValue] = useState(initial);
+  const [saved, setSaved] = useState(initial);
   const [meta, setMeta] = useState({ status: f.status, locked: f.locked, stale: f.stale });
   const [busy, setBusy] = useState(false);
   const isArray = f.type === 'array';
@@ -98,11 +100,23 @@ function FieldRow({ f, table, lang, onChanged }) {
     }
   };
 
-  const save = async () => {
+  const save = async (quiet) => {
     const v = isArray ? value.split('\n').map((s) => s.trim()).filter(Boolean) : value;
     const d = await call({ action: 'save', value: v });
-    if (d) { setMeta({ status: 'manual', locked: true, stale: false }); toast('번역을 저장했습니다. (자동 번역이 덮어쓰지 않도록 잠금)'); onChanged?.(); }
+    if (d) { setMeta({ status: 'manual', locked: true, stale: false }); setSaved(value); if (!quiet) toast('번역을 저장했습니다. (자동 번역이 덮어쓰지 않도록 잠금)'); onChanged?.(); }
+    return !!d;
   };
+  // '한번에 저장' 에 등록 — 고친 칸 + 아직 잠기지 않은 번역 칸
+  const dirty = value !== saved;
+  const key = `${f.id || f.memoryId}-${f.field}`;
+  const api = useRef({});
+  api.current = { needs: () => !!value.trim() && (dirty || !meta.locked || meta.stale), dirty, save: () => save(true) };
+  useEffect(() => {
+    if (!reg) return undefined;
+    reg.current.set(key, api);
+    return () => reg.current.delete(key);
+  }, [reg, key]);
+  useEffect(() => { onDirty?.(); }, [dirty, meta.locked, meta.stale, onDirty]);
   const redo = async () => {
     const d = await call({ action: 'redo' });
     if (d) { setValue(Array.isArray(d.value) ? d.value.join('\n') : d.value || ''); setMeta({ status: 'auto', locked: false, stale: false }); toast('다시 번역했습니다.'); }
@@ -132,7 +146,8 @@ function FieldRow({ f, table, lang, onChanged }) {
           <span style={{ flex: 1 }} />
           <button type="button" className="adm-btn sm ghost" onClick={lock} disabled={busy || !f.value}>{meta.locked ? '잠금 해제' : '잠금'}</button>
           <button type="button" className="adm-btn sm ghost" onClick={redo} disabled={busy}>다시 번역</button>
-          <button type="button" className="adm-btn sm primary" onClick={save} disabled={busy}>저장</button>
+          {dirty ? <span className="adm-badge warn">저장 안 됨</span> : null}
+          <button type="button" className="adm-btn sm primary" onClick={() => save()} disabled={busy}>저장</button>
         </div>
       </div>
     </div>
@@ -144,6 +159,34 @@ function Browser({ langs }) {
   const [lang, setLang] = useState(langs[0] || 'en');
   const [items, setItems] = useState(null);
   const [q, setQ] = useState('');
+  const reg = useRef(new Map());
+  const [counts, setCounts] = useState({ need: 0, dirty: 0 });
+  const [bulk, setBulk] = useState('');
+  const recount = useCallback(() => {
+    clearTimeout(recount.t);
+    recount.t = setTimeout(() => {
+      let need = 0, dirty = 0;
+      reg.current.forEach((a) => { if (a.current.needs()) need++; if (a.current.dirty) dirty++; });
+      setCounts({ need, dirty });
+    }, 60);
+  }, []);
+  const saveAll = async () => {
+    const list = [...reg.current.values()].filter((a) => a.current.needs());
+    if (!list.length) return toast('저장할 번역이 없습니다. 모두 저장 · 잠금 상태입니다.');
+    if (!window.confirm(`이 목록의 번역 ${list.length}개를 지금 내용 그대로 저장하고 잠급니다.\n(잠근 번역은 자동 번역이 덮어쓰지 않습니다)`)) return;
+    let ok = 0, fail = 0, i = 0;
+    const worker = async () => {
+      while (i < list.length) {
+        const a = list[i++];
+        (await a.current.save()) ? ok++ : fail++;
+        setBulk(`저장 중… ${ok + fail} / ${list.length}`);
+      }
+    };
+    await Promise.all([worker(), worker(), worker(), worker()]);
+    setBulk('');
+    recount();
+    toast(fail ? `${ok}개 저장 · ${fail}개 실패` : `번역 ${ok}개를 한번에 저장하고 잠갔습니다.`, fail ? 'err' : undefined);
+  };
 
   const load = useCallback(async () => {
     setItems(null);
@@ -167,6 +210,12 @@ function Browser({ langs }) {
         </select>
         <input className="adm-input sm" placeholder="검색" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
+      <div className="adm-tr-bulk">
+        <span>
+          {bulk || (counts.need ? <>저장 · 잠금 대기 <b>{counts.need}</b>개{counts.dirty ? <> (직접 고친 칸 <b>{counts.dirty}</b>개)</> : null}</> : '이 목록의 번역이 모두 저장 · 잠금 상태입니다')}
+        </span>
+        <button type="button" className="adm-btn primary" onClick={saveAll} disabled={!!bulk || !counts.need}>💾 한번에 저장</button>
+      </div>
       {langs.length <= 5 ? (
         <Tabs value={lang} onChange={setLang} tabs={langs.map((c) => ({ value: c, label: LANG[c]?.name || c }))} />
       ) : (
@@ -182,7 +231,7 @@ function Browser({ langs }) {
         list.slice(0, 200).map((it) => (
           <div key={it.key} className="adm-tr-item">
             <h4>{it.title || it.key}</h4>
-            {it.fields.map((f) => <FieldRow key={`${lang}-${f.id || f.memoryId}-${f.field}`} f={f} table={table} lang={lang} />)}
+            {it.fields.map((f) => <FieldRow key={`${lang}-${f.id || f.memoryId}-${f.field}`} f={f} table={table} lang={lang} reg={reg} onDirty={recount} />)}
           </div>
         ))
       )}

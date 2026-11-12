@@ -1,6 +1,7 @@
 // 관리자 전용: 기존 사이트에 올릴 파일 다운로드 (연결 주소 자동 입력)
 import SITE_FILES from '@/generated/site-files';
 import { supabaseServer } from '@/lib/supabase/server';
+import { stableEndpoint } from '@/lib/site/endpoint';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ export async function GET(request, { params }) {
   const tpl = SITE_FILES[name];
   if (!tpl) return new Response('Not found', { status: 404 });
 
-  const origin = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/+$/, '') || new URL(request.url).origin;
+  const origin = stableEndpoint(request.url);
   const body = tpl.split('__HTU_CMS_ENDPOINT__').join(origin);
   const inline = new URL(request.url).searchParams.get('view') === '1';
 

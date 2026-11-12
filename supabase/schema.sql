@@ -665,7 +665,34 @@ $$;
 revoke all on function public.app_secret_status() from public, anon;
 grant execute on function public.app_secret_status() to authenticated;
 
+-- ---------- v10: 썸네일 · 검색엔진(SEO) 메타 · 정적 페이지 주소 ----------
+alter table public.notices add column if not exists thumbnail_url   text;
+do $$ declare t text; begin
+  foreach t in array array['notices','events','news'] loop
+    execute format('alter table public.%I add column if not exists seo_title text', t);
+    execute format('alter table public.%I add column if not exists seo_description text', t);
+    execute format('alter table public.%I add column if not exists seo_keywords text', t);
+    execute format('alter table public.%I add column if not exists seo_path text', t);
+  end loop;
+end $$;
+
+-- ---------- v11: 로그인 보안 (무차별 대입 차단) ----------
+create table if not exists public.login_attempts (
+  id    bigserial primary key,
+  ip    text,
+  login text,
+  ok    boolean not null default false,
+  at    timestamptz not null default now()
+);
+create index if not exists idx_login_attempts_login on public.login_attempts (login, at desc);
+create index if not exists idx_login_attempts_ip on public.login_attempts (ip, at desc);
+alter table public.login_attempts enable row level security;   -- 정책 없음 = 서버(service_role)만 접근
+revoke all on public.login_attempts from anon, authenticated;
+-- 아이디 → 로그인 주소 변환은 서버에서만 (방문자가 직원 이메일을 알아낼 수 없게)
+revoke execute on function public.login_email(text) from anon, authenticated, public;
+grant execute on function public.login_email(text) to service_role;
+
 -- ---------- DB 버전 (관리자 화면이 업데이트 필요 여부를 확인) ----------
 create or replace function public.htu_schema_version()
-returns int language sql immutable as $$ select 9 $$;
+returns int language sql immutable as $$ select 11 $$;
 grant execute on function public.htu_schema_version() to anon, authenticated;

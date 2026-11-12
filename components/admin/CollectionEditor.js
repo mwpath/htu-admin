@@ -1,7 +1,8 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabase/browser';
-import { previewUrl, revalidateSite, toast, errMsg, youtubeId } from '@/lib/admin-utils';
+import { previewUrl, revalidateSite, publishPosts, toast, errMsg, youtubeId } from '@/lib/admin-utils';
+import { finalSeo } from '@/lib/seo';
 import Field, { cleanValue, Switch } from './Field';
 
 /**
@@ -73,7 +74,10 @@ export default function CollectionEditor({
 
   const setField = (name, v) => setEditing((e) => ({ ...e, form: { ...e.form, [name]: v } }));
 
-  const dataFields = fields.filter((f) => !f.section);
+  const dataFields = fields.filter((f) => !f.section && !f.virtual);
+  const seoField = fields.find((f) => f.type === 'seo');
+  const POST_TABLES = ['notices', 'events', 'news'];
+  const afterChange = () => { revalidateSite(); if (POST_TABLES.includes(table)) publishPosts(); };
   const visibleFields = (form) => fields.filter((f) => !f.showIf || f.showIf(form));
 
   const save = async () => {
@@ -93,6 +97,13 @@ export default function CollectionEditor({
     dataFields.forEach((f) => (payload[f.name] = cleanValue(f, form[f.name])));
     if ('active' in form) payload.active = !!form.active;
     Object.assign(payload, filter);
+    if (seoField) {
+      // 검색 메타: 비워둔 칸은 제목 · 본문에서 자동으로 채워 저장
+      const m = finalSeo({ ...form, ...payload }, seoField.kind);
+      payload.seo_title = (form.seo_title || '').trim() || m.title;
+      payload.seo_description = (form.seo_description || '').trim() || m.description;
+      payload.seo_keywords = (form.seo_keywords || '').trim() || m.keywords;
+    }
 
     setSaving(true);
     let error;
@@ -107,7 +118,7 @@ export default function CollectionEditor({
     if (error) return toast(errMsg(error), 'err');
     toast(isNew ? `${itemLabel}을(를) 추가했습니다.` : '저장했습니다.');
     setEditing(null);
-    revalidateSite();
+    afterChange();
     load();
   };
 
@@ -118,7 +129,7 @@ export default function CollectionEditor({
     if (error) return toast(errMsg(error), 'err');
     toast('삭제했습니다.');
     if (editing?.form?.id === row.id) setEditing(null);
-    revalidateSite();
+    afterChange();
     load();
   };
 
@@ -139,7 +150,7 @@ export default function CollectionEditor({
       load();
       return;
     }
-    revalidateSite();
+    afterChange();
   };
 
   const persistOrder = async (next) => {
@@ -155,7 +166,7 @@ export default function CollectionEditor({
     }
     setRows(next.map((r, i) => ({ ...r, sort: i })));
     toast('순서를 변경했습니다.');
-    revalidateSite();
+    afterChange();
   };
 
   const move = (idx, dir) => {
@@ -273,7 +284,8 @@ export default function CollectionEditor({
                   f.section ? (
                     <h4 key={f.name} className="adm-form-section">{f.section}</h4>
                   ) : (
-                    <Field key={f.name} field={f} value={editing.form[f.name]} form={editing.form} onChange={(v) => setField(f.name, v)} />
+                    <Field key={f.name} field={f} value={editing.form[f.name]} form={editing.form} onChange={(v) => setField(f.name, v)}
+                      setValues={(obj) => setEditing((e) => ({ ...e, form: { ...e.form, ...obj } }))} />
                   )
                 )}
                 <div className="adm-field">

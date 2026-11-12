@@ -33,7 +33,10 @@ export async function middleware(request) {
     },
   });
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // 빠른 화면 이동: 여기서는 쿠키의 세션만 확인(만료 시에만 갱신 요청).
+  // 실제 권한 확인은 관리자 화면(서버) · DB(RLS) 에서 getUser / is_admin 으로 다시 합니다.
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user || null;
   if (isSetup) return response;
 
   if (!user && !isLogin) {
@@ -48,6 +51,7 @@ export async function middleware(request) {
     u.search = '';
     return NextResponse.redirect(u);
   }
+  response.headers.set('Cache-Control', 'private, no-store');
   return response;
 }
 

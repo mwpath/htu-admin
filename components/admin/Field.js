@@ -5,6 +5,49 @@ import { LANG_LIST, enabledLangs } from '@/lib/i18n/langs';
 import { previewUrl, uploadFile, youtubeId, toast, errMsg, toLocalInput, fromLocalInput } from '@/lib/admin-utils';
 
 const RichEditor = dynamic(() => import('./RichEditor'), { ssr: false });
+import { suggestSeo } from '@/lib/seo';
+
+// 검색엔진(구글 · 네이버) 노출 설정 — 비워두면 저장 시 자동으로 채움
+function SeoField({ form, setValues, kind, siteHint }) {
+  const auto = () => suggestSeo({
+    kind, title: form.title, summary: form.summary || form.excerpt, html: form.content_html, location: form.location,
+    date: [form.start_date, form.end_date && form.end_date !== form.start_date ? form.end_date : ''].filter(Boolean).join(' ~ '),
+  });
+  const a = auto();
+  const t = form.seo_title || '', d = form.seo_description || '', k = form.seo_keywords || '';
+  const showT = t || a.title, showD = d || a.description;
+  const len = (s) => [...String(s)].length;
+  const cls = (n, ok, max) => (n === 0 ? '' : n > max ? 'err' : n >= ok ? 'ok' : 'warn');
+  const site = (siteHint || 'htuglobal.com').replace(/^https?:\/\//, '');
+  return (
+    <div className="adm-seo">
+      <div className="adm-seo-head">
+        <p>제목 · 본문을 분석해 검색 문구를 만듭니다. <b>비워두면 저장할 때 자동으로 채워지고</b>, 사이트에 검색엔진용 페이지 · sitemap 이 함께 올라갑니다.</p>
+        <button type="button" className="adm-btn sm primary" onClick={() => setValues({ seo_title: a.title, seo_description: a.description, seo_keywords: a.keywords })}>✨ 자동 생성</button>
+      </div>
+      <label className="adm-label">검색 결과 제목 <span className={`adm-count ${cls(len(t), 15, 60)}`}>{len(t)} / 60</span></label>
+      <input className="adm-input" value={t} placeholder={a.title} onChange={(e) => setValues({ seo_title: e.target.value })} />
+      <label className="adm-label">검색 결과 설명 <span className={`adm-count ${cls(len(d), 60, 160)}`}>{len(d)} / 160</span></label>
+      <textarea className="adm-input" rows={3} value={d} placeholder={a.description} onChange={(e) => setValues({ seo_description: e.target.value })} />
+      <label className="adm-label">키워드 <small className="adm-muted">쉼표로 구분 · 네이버 등에 전달</small></label>
+      <input className="adm-input" value={k} placeholder={a.keywords} onChange={(e) => setValues({ seo_keywords: e.target.value })} />
+      <div className="adm-seo-preview">
+        <div className="g">
+          <small>Google 미리보기</small>
+          <span className="url">{site} › posts</span>
+          <span className="t">{showT} | HTU GLOBAL</span>
+          <span className="d">{showD}</span>
+        </div>
+        <div className="n">
+          <small>NAVER 미리보기</small>
+          <span className="t">{showT}</span>
+          <span className="d">{showD}</span>
+          <span className="url">{site}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ImageField({ value, onChange, folder }) {
   const ref = useRef(null);
@@ -163,7 +206,7 @@ function Switch({ checked, onChange, label }) {
 }
 export { Switch };
 
-export default function Field({ field, value, onChange, form }) {
+export default function Field({ field, value, onChange, form, setValues }) {
   const f = field;
   let input;
   switch (f.type) {
@@ -266,6 +309,9 @@ export default function Field({ field, value, onChange, form }) {
     case 'richtext':
       input = <RichEditor value={value} onChange={onChange} folder={f.folder} />;
       break;
+    case 'seo':
+      input = <SeoField form={form || {}} setValues={setValues || (() => {})} kind={f.kind} siteHint={f.site} />;
+      break;
     default:
       input = (
         <input className="adm-input" type={f.type === 'url' ? 'url' : 'text'} value={value ?? ''} onChange={(e) => onChange(e.target.value)} placeholder={f.placeholder} />
@@ -273,7 +319,7 @@ export default function Field({ field, value, onChange, form }) {
   }
 
   return (
-    <div className={`adm-field ${f.half ? 'half' : ''} ${f.type === 'richtext' ? 'full' : ''}`}>
+    <div className={`adm-field ${f.half ? 'half' : ''} ${f.type === 'richtext' || f.type === 'seo' ? 'full' : ''}`}>
       {f.label ? <label className="adm-label">{f.label}{f.required ? <em>*</em> : null}</label> : null}
       {input}
       {f.type === 'lite' && !f.help ? <p className="adm-help">줄바꿈은 그대로 반영됩니다. &lt;b&gt;굵게&lt;/b&gt;, &lt;u&gt;밑줄&lt;/u&gt; 태그 사용 가능</p> : null}

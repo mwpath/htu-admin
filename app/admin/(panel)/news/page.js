@@ -42,6 +42,8 @@ export default function NewsPage() {
             { name: 'external_url', label: '외부 기사 주소', type: 'url', required: true, placeholder: 'https://', showIf: (f) => f.type === 'external' },
             { name: 'content_html', label: '본문', type: 'richtext', folder: 'news', showIf: isInternal },
             { name: 'published_at', label: '게시일', type: 'datetime', default: () => new Date().toISOString(), half: true },
+            { section: '🔎 검색엔진 노출 (구글 · 네이버)', name: '_s_seo', showIf: isInternal },
+            { name: '_seo', type: 'seo', kind: 'news', virtual: true, showIf: isInternal },
           ]}
         />
       </section>

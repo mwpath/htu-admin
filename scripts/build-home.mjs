@@ -23,7 +23,8 @@ const foot = read('standalone/foot.html');
 const boardHead = headTpl
   .replace('__MENU_THEME__', ' data-theme="solid"')
   .replace(/\/\*PREFETCH\*\/[\s\S]*?\/\*\/PREFETCH\*\//, '')
-  .replace(/\s*<link rel="canonical"[^>]*>/, '');
+  .replace(/\s*<link rel="canonical"[^>]*>/, '')
+  .replace(/\s*<!-- 관리자 서버에 바로[^\n]*\n\s*<!--HTU_INLINE_DATA-->[\s\S]*?<!--\/HTU_INLINE_DATA-->/, '');
 const board = (mode) => boardHead + read('board/board.html').replace('__BOARD_MODE__', mode) + foot;
 
 const snippetBanner = `<!--

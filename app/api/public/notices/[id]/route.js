@@ -8,12 +8,16 @@ export async function GET(request, { params }) {
   if (!isUuid(params.id)) return json({ error: 'NOT_FOUND' }, { status: 404 });
   const sb = supabasePublic();
   if (!sb) return json({ error: 'SUPABASE_ENV_MISSING' }, { status: 500 });
-  const { data } = await sb
+  // DB 가 아직 v10(썸네일 · 검색 메타) 이전이면 예전 칸으로 다시 조회 → 사이트가 비지 않음
+  const run = (cols) => sb
     .from('notices')
-    .select('id,title,pinned,content_html,attachments,published_at,view_count')
+    .select(cols)
     .eq('id', params.id)
     .eq('active', true)
     .maybeSingle();
+  let res = await run('id,title,pinned,content_html,attachments,published_at,view_count,thumbnail_url,seo_title,seo_description,seo_path');
+  if (res.error && /seo_|thumbnail_url|column/i.test(res.error.message || '')) { res = await run('id,title,pinned,content_html,attachments,published_at,view_count'); }
+  const { data } = res;
   if (!data) return json({ error: 'NOT_FOUND' }, { status: 404 });
   const lang = normLang(new URL(request.url).searchParams.get('lang'));
   const tr = await loadTranslationMap(sb, lang, ['notices']);

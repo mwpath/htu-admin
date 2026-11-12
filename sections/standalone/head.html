@@ -6,19 +6,51 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
+  <link rel="preconnect" href="__HTU_CMS_ENDPOINT__" crossorigin>
+  <link rel="dns-prefetch" href="__HTU_CMS_ENDPOINT__">
   <!-- HTU CMS 연결 주소는 js/htu-cms-config.js 한 곳에서만 관리합니다 -->
   <script src="./js/htu-cms-config.js"></script>
   <!-- 다국어: 언어 선택 · 페이지 문구 번역 -->
   <script src="./js/htu-i18n.js"></script>
+  <!-- 관리자 서버에 바로 연결되지 않아도 첫 화면을 즉시 그리는 내장 콘텐츠 ("사이트 파일 자동 업데이트" 때마다 갱신) -->
+  <!--HTU_INLINE_DATA--><script src="./js/htu-cms-data.js"></script><!--/HTU_INLINE_DATA-->
   <script>
     /*PREFETCH*/
-    /* 페이지 로딩과 동시에 콘텐츠를 미리 불러옵니다 (모든 섹션 · 메뉴 · 푸터가 공유) */
-    /* 첫 방문이면 접속 국가로 언어를 정한 뒤(HTU_I18N.ready) 그 언어로 받아옵니다 */
-    window.__htuCmsP = (window.HTU_I18N ? window.HTU_I18N.ready : Promise.resolve()).then(function () {
-      return fetch(String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + (window.HTU_I18N ? window.HTU_I18N.q('/api/public/content') : '/api/public/content'), { credentials: 'omit' });
-    })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; });
+    /* 빠른 첫 화면: ① 이 페이지에 내장된 최신 콘텐츠(자동 업데이트 때 저장) / 이 브라우저의 마지막 데이터로 즉시 그림
+       ② 관리자 서버에서 최신 데이터를 동시에 받아 0.9초 안에 오면 그것으로, 늦으면 다음 방문부터 반영
+       ③ 관리자 서버가 멈춰도 빈 화면이 되지 않음 */
+    (function () {
+      var EP = String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '');
+      var I = window.HTU_I18N;
+      function ok(d) { return d && !d.error && d.settings ? d : null; }
+      function get(l) {
+        if (!EP || !window.fetch) return Promise.resolve(null);
+        var ctl = window.AbortController ? new AbortController() : null;
+        if (ctl) setTimeout(function () { ctl.abort(); }, 9000);
+        return fetch(EP + '/api/public/content' + (l && l !== 'ko' ? '?lang=' + encodeURIComponent(l) : ''), { credentials: 'omit', signal: ctl ? ctl.signal : undefined })
+          .then(function (r) { return r.ok ? r.json() : null; }).then(ok).catch(function () { return null; });
+      }
+      function key(l) { return 'htu_content_' + l; }
+      function cached(l) { try { return ok(JSON.parse(localStorage.getItem(key(l)) || 'null')); } catch (e) { return null; } }
+      function save(l, d) { try { localStorage.setItem(key(l), JSON.stringify(d)); } catch (e) { } }
+      function snap() { var s = window.HTU_CMS_SNAPSHOT; return s ? ok(s.content) : null; }
+      function after(ms, v) { return new Promise(function (r) { setTimeout(function () { r(v); }, ms); }); }
+      var lang0 = I && I.decided ? I.lang : 'ko';
+      // 한국어 방문자는 국가 확인을 기다리지 않고 바로 요청
+      var early = (!I || I.decided || I.guess === 'ko') ? get(lang0) : null;
+      window.__htuCmsP = (I ? I.ready : Promise.resolve('ko')).then(function (l) {
+        l = l || 'ko';
+        var net = early && l === lang0 ? early : get(l);
+        net.then(function (d) { if (d) save(l, d); });
+        var mine = cached(l);
+        // 같은 언어로 저장된 데이터 → 0.9초 / 한국어 내장 데이터(다른 언어면 번역본을 조금 더 기다림)
+        var quick = mine || snap();
+        var wait = mine || l === 'ko' ? 900 : 2500;
+        if (quick) return Promise.race([net.then(function (d) { return d || quick; }), after(wait, quick)]);
+        // 처음 방문 + 내장 데이터 없음 → 서버 응답을 기다림 (실패해도 null 로 끝남)
+        return net;
+      });
+    })();
     /*/PREFETCH*/
   </script>
   <link rel="preconnect" href="https://player.vimeo.com" crossorigin>

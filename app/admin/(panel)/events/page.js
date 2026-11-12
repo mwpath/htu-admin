@@ -32,8 +32,8 @@ export default function EventsPage() {
             sub: (r) => [r.start_date && `${r.start_date}${r.end_date && r.end_date !== r.start_date ? ' ~ ' + r.end_date : ''}`, r.location, `조회 ${r.view_count || 0}`].filter(Boolean).join(' · '),
             thumb: (r) => r.thumbnail_url,
             thumbShape: 'wide',
-            badges: (r) => [statusOf(r), ...(r.link_type === 'external' ? [{ text: '외부 링크 ↗' }] : [])],
-            link: (r) => (r.link_type === 'external' ? r.external_url : site ? `${site}/event.html?id=${r.id}` : null),
+            badges: (r) => [statusOf(r), ...(r.link_type === 'external' ? [{ text: '외부 링크 ↗' }] : []), ...(r.seo_path ? [{ text: '검색 페이지 ✓', tone: 'blue' }] : [])],
+            link: (r) => (r.link_type === 'external' ? r.external_url : site ? (r.seo_path ? `${site}/${r.seo_path}` : `${site}/event.html?id=${r.id}`) : null),
           }}
           fields={[
             {
@@ -42,7 +42,7 @@ export default function EventsPage() {
             },
             { name: 'title', label: '이벤트명', type: 'text', required: true },
             { name: 'summary', label: '요약 (목록 카드)', type: 'textarea', rows: 2 },
-            { name: 'thumbnail_url', label: '대표 이미지', type: 'image', folder: 'events', help: '16:10 비율 권장' },
+            { name: 'thumbnail_url', label: '썸네일 이미지', type: 'image', folder: 'events', help: '목록 카드 · 메인 · 검색 결과 · SNS 공유 미리보기에 쓰입니다. 16:10 (예: 1600×1000) 권장' },
             { name: 'start_date', label: '시작일', type: 'date', half: true },
             { name: 'end_date', label: '종료일', type: 'date', half: true, help: '하루 행사면 비워두세요.' },
             { name: 'location', label: '장소', type: 'text', placeholder: '예) 서울 코엑스 컨퍼런스룸 / 온라인' },
@@ -52,6 +52,8 @@ export default function EventsPage() {
             { name: 'apply_label', label: '버튼 문구', type: 'text', half: true, showIf: (f) => f.link_type !== 'external' },
             { name: 'content_html', label: '상세 내용', type: 'richtext', folder: 'events', showIf: (f) => f.link_type !== 'external' },
             { name: 'attachments', label: '첨부파일', type: 'files', folder: 'events', showIf: (f) => f.link_type !== 'external' },
+            { section: '🔎 검색엔진 노출 (구글 · 네이버)', name: '_s_seo', showIf: (f) => f.link_type !== 'external' },
+            { name: '_seo', type: 'seo', kind: 'event', virtual: true, showIf: (f) => f.link_type !== 'external' },
           ]}
         />
       </section>

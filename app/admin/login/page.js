@@ -1,7 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { supabaseBrowser } from '@/lib/supabase/browser';
-import { LOGIN_DOMAIN } from '@/lib/login-id';
 
 export default function LoginPage() {
   const [loginId, setLoginId] = useState('');
@@ -20,21 +18,20 @@ export default function LoginPage() {
 
   const submit = async (e) => {
     e.preventDefault();
+    if (busy) return;
     setBusy(true);
     setErr('');
-    const sb = supabaseBrowser();
-    // 아이디 → 내부 로그인 주소 (예전 계정은 이메일로도 로그인 가능)
-    const id = loginId.trim();
-    let email = id.includes('@') ? id.toLowerCase() : null;
-    if (!email) {
-      const { data } = await sb.rpc('login_email', { p_login: id });
-      email = data || `${id.toLowerCase()}@${LOGIN_DOMAIN}`;
+    let d = {};
+    try {
+      const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ login: loginId.trim(), password }) });
+      d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.ok) { setBusy(false); setPassword(''); return setErr(d.error || '아이디 또는 비밀번호를 확인해 주세요.'); }
+    } catch {
+      setBusy(false);
+      return setErr('네트워크 오류입니다. 잠시 후 다시 시도하세요.');
     }
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    setBusy(false);
-    if (error) return setErr('아이디 또는 비밀번호를 확인해 주세요.');
     const next = new URLSearchParams(window.location.search).get('next') || '/admin';
-    window.location.href = next.startsWith('/admin') ? next : '/admin';
+    window.location.replace(/^\/admin(\/|$)/.test(next) && !next.startsWith('//') ? next : '/admin');
   };
 
   return (

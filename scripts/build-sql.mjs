@@ -47,5 +47,5 @@ fs.writeFileSync(path.join(root, 'install.sql'), out);
 // 관리자 '자동 설치' 버튼용 (빌드에 포함)
 const gen = path.join(root, '..', 'generated');
 fs.mkdirSync(gen, { recursive: true });
-fs.writeFileSync(path.join(gen, 'install-sql.js'), `// 자동 생성 — scripts/build-sql.mjs\nexport const SCHEMA_VERSION = 9;\nexport default ${JSON.stringify(out)};\n`);
+fs.writeFileSync(path.join(gen, 'install-sql.js'), `// 자동 생성 — scripts/build-sql.mjs\nexport const SCHEMA_VERSION = 11;\nexport default ${JSON.stringify(out)};\n`);
 console.log('[sql] install.sql', out.split('\n').length, 'lines');

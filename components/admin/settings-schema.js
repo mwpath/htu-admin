@@ -77,7 +77,18 @@ export const SETTING_GROUPS = [
       { name: 'title', label: '섹션 제목', type: 'text', default: 'News & Event', half: true },
       { name: 'auto_interval', label: '자동 넘김 간격 (ms, 0 = 끔)', type: 'number', default: 4200, half: true },
       { name: 'show_notice_link', label: '공지사항 버튼 표시', type: 'checkbox', default: true, half: true, switchLabel: '섹션 우측 상단에 표시' },
-      { name: 'show_source_badge', label: '출처 배지 표시', type: 'checkbox', default: true, half: true, switchLabel: "썸네일에 'HTU 소식 / 외부 기사' 표시" },
+      { name: 'show_source_badge', label: '출처 배지 표시', type: 'checkbox', default: true, half: true, switchLabel: "썸네일에 'HTU 소식 / 외부 기사 / 이벤트' 표시" },
+      { name: 'include_events', label: '이벤트도 함께 표시', type: 'checkbox', default: true, half: true, switchLabel: '이벤트 글을 News & Event 슬라이드에 최신순으로 섞어서 표시' },
+    ],
+  },
+  {
+    key: 'notices_main',
+    title: '메인 공지사항 섹션 (News & Event 아래)',
+    fields: [
+      { name: 'show', label: '메인에 표시', type: 'checkbox', default: true, half: true, switchLabel: 'News & Event 바로 아래에 최신 공지 목록 표시' },
+      { name: 'title', label: '섹션 제목', type: 'text', default: '공지사항', half: true },
+      { name: 'count', label: '표시할 공지 수', type: 'number', default: 5, half: true, help: '상단 고정 공지가 먼저 나오고, 나머지는 최신순' },
+      { name: 'more_label', label: '전체 보기 버튼 문구', type: 'text', default: '전체 보기', half: true },
     ],
   },
   {

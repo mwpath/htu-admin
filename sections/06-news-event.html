@@ -24,6 +24,7 @@
       backdrop-filter: blur(8px);
     }
     #newsSlideSection .src-chip[data-type="internal"] { color: #fff; background: linear-gradient(135deg, #0a4f30, #0a6a62); border-color: transparent; }
+    #newsSlideSection .src-chip[data-type="event"] { color: #fff; background: linear-gradient(135deg, #b45309, #ea580c); border-color: transparent; }
     #newsSlideSection .src-chip svg { width: 12px; height: 12px; display: block; }
     #newsSlideSection .src-chip:empty { display: none; }
 
@@ -169,7 +170,7 @@
 
           if (showBadge && chip) {
             chip.setAttribute('data-type', item.type || 'external');
-            chip.innerHTML = item.type === 'internal' ? 'HTU 소식' : '외부 기사 ' + ARROW;
+            chip.innerHTML = item.type === 'internal' ? 'HTU 소식' : item.type === 'event' ? '이벤트' : '외부 기사 ' + ARROW;
           }
           if (!item.img) {
             var thumb = node.querySelector('.thumb');

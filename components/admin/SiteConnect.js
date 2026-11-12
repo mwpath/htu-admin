@@ -38,7 +38,8 @@ function SiteSync() {
     } catch (e) { setDeploy({ error: String(e.message || e) }); }
     setBusy('');
   }
-  useEffect(() => { runCheck(); }, []);
+  // 대시보드가 먼저 뜨도록 점검은 잠시 뒤에
+  useEffect(() => { const t = setTimeout(runCheck, 1200); return () => clearTimeout(t); }, []);
 
   const bad = check?.items?.filter((i) => i.ok !== true) || [];
   return (
@@ -57,6 +58,7 @@ function SiteSync() {
       {deploy && (deploy.ok ? (
         <div className="adm-alert ok">
           GitHub 에 올렸습니다 (버전 {deploy.version}) — {deploy.results.map((r) => r.upToDate ? `${r.branch}: 이미 최신` : `${r.branch}${r.dir ? '/' + r.dir : ''}: ${r.changed}개 파일 · 커밋 ${r.commit}`).join(' / ')}.
+          {deploy.seo?.pages != null ? <><br />검색엔진용 글 페이지 {deploy.seo.pages}개 · sitemap.xml · robots.txt 도 함께 올렸습니다.</> : deploy.seo?.error ? <><br />검색엔진 페이지: {deploy.seo.error}</> : null}
           <br />GitHub Pages 반영까지 1~2분 걸립니다. 90초 뒤 자동으로 다시 점검합니다. 사이트는 <b>Ctrl+Shift+R</b>(휴대폰은 새로고침 두 번)로 확인하세요.
         </div>
       ) : <div className="adm-alert err">{deploy.error}</div>)}
@@ -98,7 +100,10 @@ export default function SiteConnect() {
 
   // 서버 렌더와 화면이 같도록 주소는 브라우저에서만 채움 (hydration 불일치 방지)
   const [origin, setOrigin] = useState('');
-  useEffect(() => setOrigin(window.location.origin), []);
+  useEffect(() => {
+    setOrigin(window.location.origin);
+    fetch('/api/site/endpoint', { cache: 'no-store' }).then((r) => r.json()).then((d) => d.endpoint && setOrigin(d.endpoint)).catch(() => {});
+  }, []);
 
   return (
     <section className="adm-card adm-connect">
@@ -109,7 +114,7 @@ export default function SiteConnect() {
 
       <div className="adm-connect-status">
         <div>
-          <span className="adm-muted">관리자(API) 주소</span>
+          <span className="adm-muted">사이트가 쓰는 관리자 주소 (고정)</span>
           <code>{origin}</code>
         </div>
         <div>

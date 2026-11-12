@@ -1,0 +1,95 @@
+<section id="htuNoticeMain" aria-label="공지사항" hidden>
+  <style>
+    /* Scope: #htuNoticeMain ONLY — News & Event 바로 아래 최신 공지 */
+    #htuNoticeMain { --ink:#0b0b0b; --muted:rgba(11,11,11,.58); --line:rgba(11,11,11,.10); --green:#0a6a62;
+      font-family:Pretendard,"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); background:#fff;
+      padding:0 20px 96px; -webkit-font-smoothing:antialiased; }
+    #htuNoticeMain[hidden] { display:none; }
+    #htuNoticeMain * { box-sizing:border-box; }
+    #htuNoticeMain .nm-wrap { max-width:1200px; margin:0 auto; }
+    #htuNoticeMain .nm-box { display:grid; grid-template-columns:minmax(200px, 280px) minmax(0,1fr); gap:40px; padding:36px 40px; border:1px solid var(--line);
+      border-radius:22px; background:linear-gradient(180deg,#fbfdfc,#fff); box-shadow:0 10px 30px rgba(0,0,0,.04); }
+    #htuNoticeMain .nm-head { display:flex; flex-direction:column; justify-content:space-between; gap:18px; min-width:0; }
+    #htuNoticeMain .nm-eyebrow { margin:0 0 8px; font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--green); }
+    #htuNoticeMain h2 { margin:0; font-size:30px; font-weight:900; letter-spacing:-.04em; line-height:1.15; word-break:keep-all; }
+    #htuNoticeMain .nm-more { align-self:flex-start; display:inline-flex; align-items:center; gap:6px; height:40px; padding:0 18px; border-radius:999px;
+      border:1px solid var(--line); background:#fff; color:rgba(11,11,11,.86); font-size:14px; font-weight:800; text-decoration:none;
+      transition:border-color .15s ease, color .15s ease, transform .15s ease; }
+    #htuNoticeMain .nm-more:hover { border-color:var(--green); color:var(--green); transform:translateY(-1px); }
+    #htuNoticeMain .nm-list { list-style:none; margin:0; padding:0; border-top:2px solid var(--ink); min-width:0; }
+    #htuNoticeMain .nm-list li { border-bottom:1px solid var(--line); }
+    #htuNoticeMain .nm-list a { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:14px; padding:17px 6px;
+      color:var(--ink); text-decoration:none; transition:background .15s ease; }
+    #htuNoticeMain .nm-list a:hover { background:#f6f9f8; }
+    #htuNoticeMain .nm-list a:hover .nm-title { color:var(--green); }
+    #htuNoticeMain .nm-tag { display:inline-flex; align-items:center; justify-content:center; min-width:44px; height:24px; padding:0 9px; border-radius:999px;
+      font-size:11.5px; font-weight:800; background:#eef2f0; color:rgba(11,11,11,.6); }
+    #htuNoticeMain .nm-tag.is-pin { background:var(--green); color:#fff; }
+    #htuNoticeMain .nm-title { font-size:16px; font-weight:700; letter-spacing:-.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:color .15s ease; }
+    #htuNoticeMain .nm-new { display:inline-block; margin-left:6px; padding:1px 6px; border-radius:5px; background:#ef4444; color:#fff; font-size:10.5px; font-weight:800; vertical-align:2px; }
+    #htuNoticeMain .nm-date { color:var(--muted); font-size:14px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    @media (max-width:900px){
+      #htuNoticeMain .nm-box { grid-template-columns:1fr; gap:20px; padding:26px 22px; }
+      #htuNoticeMain .nm-head { flex-direction:row; align-items:flex-end; }
+      #htuNoticeMain h2 { font-size:26px; }
+    }
+    @media (max-width:520px){
+      #htuNoticeMain { padding-bottom:64px; }
+      #htuNoticeMain .nm-box { padding:22px 16px; border-radius:18px; }
+      #htuNoticeMain .nm-more { height:36px; padding:0 13px; font-size:13px; }
+      #htuNoticeMain .nm-list a { grid-template-columns:auto minmax(0,1fr); gap:6px 10px; padding:14px 2px; }
+      #htuNoticeMain .nm-date { grid-column:2; font-size:12.5px; }
+      #htuNoticeMain .nm-title { font-size:15px; }
+    }
+  </style>
+
+  <div class="nm-wrap">
+    <div class="nm-box">
+      <div class="nm-head">
+        <div>
+          <p class="nm-eyebrow">Notice</p>
+          <h2 data-cms="title">공지사항</h2>
+        </div>
+        <a class="nm-more" href="./notice.html"><span data-cms="more">전체 보기</span> <span aria-hidden="true">›</span></a>
+      </div>
+      <ul class="nm-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var section = document.getElementById('htuNoticeMain');
+      if (!section || section.__htuInit) return;
+      section.__htuInit = true;
+      function htuCms() {
+        if (!window.__htuCmsP) {
+          window.__htuCmsP = (window.HTU_I18N ? window.HTU_I18N.ready : Promise.resolve()).then(function () { return fetch(String(window.HTU_CMS_ENDPOINT || '').replace(/\/+$/, '') + (window.HTU_I18N ? window.HTU_I18N.q('/api/public/content') : '/api/public/content'), { credentials: 'omit' }); })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; });
+        }
+        return window.__htuCmsP;
+      }
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+      function fmt(d) {
+        var t = new Date(d); if (isNaN(t)) return '';
+        return t.toLocaleDateString((window.HTU_I18N && window.HTU_I18N.locale) || 'ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+      }
+      htuCms().then(function (data) {
+        if (!data) return;
+        var st = (data.settings && data.settings.notices_main) || {};
+        var rows = data.notices || [];
+        if (st.show === false || !rows.length) return;
+        section.querySelector('[data-cms="title"]').textContent = st.title || '공지사항';
+        section.querySelector('[data-cms="more"]').textContent = st.more_label || '전체 보기';
+        if (data.links && data.links.notice) section.querySelector('.nm-more').href = data.links.notice;
+        section.querySelector('.nm-list').innerHTML = rows.map(function (n) {
+          return '<li><a href="' + esc(n.link) + '">' +
+            '<span class="nm-tag' + (n.pinned ? ' is-pin' : '') + '">' + (n.pinned ? '공지' : '안내') + '</span>' +
+            '<span class="nm-title">' + esc(n.title) + (n.isNew ? '<span class="nm-new">N</span>' : '') + '</span>' +
+            '<time class="nm-date" datetime="' + esc(n.date) + '">' + fmt(n.date) + '</time></a></li>';
+        }).join('');
+        section.hidden = false;
+      });
+    })();
+  </script>
+</section>

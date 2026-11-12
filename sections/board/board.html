@@ -6,6 +6,9 @@
     #htuBoard *, #htuBoard *::before, #htuBoard *::after { box-sizing:border-box; }
     #htuBoard .hb-wrap { width:min(1200px, calc(100% - 40px)); margin:0 auto; }
     #htuBoard .hb-narrow { width:min(840px, calc(100% - 40px)); margin:0 auto; }
+    #htuBoard .hb-crumb { font-size:13px; color:var(--muted); margin:0 0 18px; }
+    #htuBoard .hb-crumb a { color:inherit; text-decoration:none; }
+    #htuBoard .hb-crumb a:hover { color:var(--green); }
     #htuBoard .hb-eyebrow { font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--green); margin:0 0 14px; }
     #htuBoard .hb-h1 { margin:0; font-size:clamp(28px,3.6vw,44px); font-weight:900; letter-spacing:-.035em; line-height:1.25; word-break:keep-all; }
     #htuBoard .hb-meta { margin-top:16px; padding-bottom:24px; border-bottom:1px solid var(--line); color:var(--muted); font-size:14px; display:flex; gap:14px; flex-wrap:wrap; }
@@ -22,6 +25,23 @@
     #htuBoard .hb-content hr { border:0; border-top:1px solid var(--line); margin:2em 0; }
     #htuBoard .hb-content .yt-embed { position:relative; aspect-ratio:16/9; margin:1.4em 0; border-radius:14px; overflow:hidden; background:#000; }
     #htuBoard .hb-content .yt-embed iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+    #htuBoard .hb-content::after { content:''; display:block; clear:both; }
+    #htuBoard .hb-content h4 { font-size:18px; margin:1.4em 0 .45em; }
+    #htuBoard .hb-content img.is-left { float:left; margin:4px 22px 12px 0; }
+    #htuBoard .hb-content img.is-right { float:right; margin:4px 0 12px 22px; }
+    #htuBoard .hb-content img.is-center { display:block; margin-left:auto; margin-right:auto; }
+    #htuBoard .hb-content table { width:100%; border-collapse:collapse; margin:1.6em 0; font-size:15px; line-height:1.6; }
+    @media (max-width:640px){ #htuBoard .hb-content table { display:block; overflow-x:auto; white-space:nowrap; } }
+    #htuBoard .hb-content th, #htuBoard .hb-content td { border:1px solid rgba(15,23,42,.12); padding:10px 14px; vertical-align:top; text-align:left; }
+    #htuBoard .hb-content th { background:#f3f7f5; font-weight:800; }
+    #htuBoard .hb-content pre { background:#0f172a; color:#e2e8f0; padding:16px 18px; border-radius:12px; font:14px/1.65 ui-monospace,Menlo,monospace; white-space:pre-wrap; overflow-x:auto; }
+    #htuBoard .hb-content mark { background:#fef08a; padding:0 .15em; }
+    #htuBoard .hb-content sup, #htuBoard .hb-content sub { font-size:.72em; }
+    #htuBoard .hb-content .hb-box { padding:18px 22px; margin:1.6em 0; border-radius:14px; background:#f6f8f7; border:1px solid rgba(15,23,42,.08); }
+    #htuBoard .hb-content .hb-box > :last-child { margin-bottom:0; }
+    #htuBoard .hb-content .hb-box-green { background:#ecf7f3; border-color:#bfe3d6; border-left:4px solid var(--green); }
+    #htuBoard .hb-content .hb-box-gray { background:#f3f4f6; border-color:#e5e7eb; color:#4b5563; }
+    @media (max-width:640px){ #htuBoard .hb-content img.is-left, #htuBoard .hb-content img.is-right { float:none; margin:12px auto; display:block; width:100% !important; } }
     #htuBoard .hb-actions { margin-top:56px; padding-top:24px; border-top:1px solid var(--line); }
     #htuBoard .hb-btn { display:inline-flex; align-items:center; gap:6px; padding:12px 20px; border-radius:999px; border:1px solid var(--line);
       text-decoration:none; color:var(--ink); font-weight:800; font-size:14px; background:#fff; cursor:pointer; }
@@ -106,7 +126,16 @@
       if(mode !== 'news' && mode !== 'event') mode = 'notice';
       var box = root.querySelector('.hb-root');
       var qs = new URLSearchParams(location.search);
-      var id = qs.get('id');
+      var id = qs.get('id') || root.getAttribute('data-id');
+      // 검색엔진용 정적 페이지(posts/…html): 한국어면 미리 그려진 본문을 그대로 쓰고 조회수만 올림
+      var pre = root.getAttribute('data-id') && box.querySelector('article');
+      function whenNeeded(table, render){
+        if(!pre) return render();
+        (window.HTU_I18N ? window.HTU_I18N.ready : Promise.resolve()).then(function(){
+          var l = (window.HTU_I18N && window.HTU_I18N.lang) || 'ko';
+          if(l === 'ko') bump(table, id); else render();   /* 다른 언어 → 번역본으로 다시 그림 */
+        });
+      }
       var page = Math.max(1, parseInt(qs.get('page') || '1', 10) || 1);
       var SITE = document.title.split('|').pop().trim() || 'HTU GLOBAL';
 
@@ -140,8 +169,11 @@
           return '<li><a href="' + esc(f.url) + '" target="_blank" rel="noopener" download>' + FILE_ICO + esc(f.name || '파일') + '</a></li>';
         }).join('') + '</ul></div>';
       }
+      function postUrl(kind, r){ return r.seo_path ? r.seo_path : kind + '.html?id=' + esc(r.id); }
       function article(d, eyebrow, back, extra){
-        document.title = d.title + ' | ' + SITE;
+        document.title = (d.seo_title || d.title) + ' | ' + SITE;
+        var md = document.querySelector('meta[name="description"]');
+        if(md && d.seo_description) md.setAttribute('content', d.seo_description);
         box.innerHTML =
           '<article class="hb-narrow">' +
             '<p class="hb-eyebrow">' + eyebrow + '</p>' +
@@ -159,11 +191,11 @@
       /* ---------- 공지사항 ---------- */
       if(mode === 'notice'){
         if(id){
-          get('/notices/' + encodeURIComponent(id)).then(function(d){
+          whenNeeded('notices', function(){ get('/notices/' + encodeURIComponent(id)).then(function(d){
             if(!d || d.error) return notFound('notice.html');
             article(d, 'Notice', 'notice.html');
             bump('notices', d.id);
-          });
+          }); });
           return;
         }
         get('/notices?page=' + page).then(function(d){
@@ -172,7 +204,7 @@
           d.per = d.per || 15;
           var pages = Math.max(1, Math.ceil(d.count / d.per));
           var rows = d.rows.map(function(r, i){
-            return '<li class="' + (r.pinned ? 'is-pinned' : '') + '"><a href="notice.html?id=' + esc(r.id) + '">' +
+            return '<li class="' + (r.pinned ? 'is-pinned' : '') + '"><a href="' + postUrl('notice', r) + '">' +
               '<span class="hb-no">' + (r.pinned ? '<em>공지</em>' : (d.count - ((page - 1) * d.per + i))) + '</span>' +
               '<span class="hb-subject">' + esc(r.title) + '</span>' +
               '<span class="hb-date">' + fmt(r.published_at) + '</span></a></li>';
@@ -204,7 +236,7 @@
           return a && b && a !== b ? a + ' ~ ' + b : (a || b);
         }
         if(id){
-          get('/events/' + encodeURIComponent(id)).then(function(d){
+          whenNeeded('events', function(){ get('/events/' + encodeURIComponent(id)).then(function(d){
             if(!d || d.error) return notFound('event.html');
             if(d.link_type === 'external' && d.external_url){ location.replace(d.external_url); return; }
             var stt = status(d);
@@ -217,7 +249,7 @@
             d.excerpt = d.summary;
             article(d, 'Event', 'event.html', info);
             bump('events', d.id);
-          });
+          }); });
           return;
         }
         get('/events').then(function(d){
@@ -229,7 +261,7 @@
             var cards = list.map(function(e){
               var stt = status(e);
               var external = e.link_type === 'external' && e.external_url;
-              var href = external ? esc(e.external_url) : 'event.html?id=' + esc(e.id);
+              var href = external ? esc(e.external_url) : postUrl('event', e);
               return '<a class="hb-card' + (stt.key === 'end' ? ' is-end' : '') + '" href="' + href + '"' + (external ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' +
                 '<div class="hb-thumb">' + (e.thumbnail_url ? '<img src="' + esc(e.thumbnail_url) + '" alt="" loading="lazy">' : '') +
                   '<span class="hb-status is-' + stt.key + '">' + stt.label + '</span>' + (external ? '<span class="hb-chip">외부 링크 ↗</span>' : '') + '</div>' +
@@ -258,12 +290,12 @@
 
       /* ---------- News & Event ---------- */
       if(id){
-        get('/news/' + encodeURIComponent(id)).then(function(d){
+        whenNeeded('news', function(){ get('/news/' + encodeURIComponent(id)).then(function(d){
           if(!d || d.error) return notFound('news.html');
           if(d.type === 'external' && d.external_url){ location.replace(d.external_url); return; }
           article(d, 'News &amp; Event', 'news.html');
           bump('news', d.id);
-        });
+        }); });
         return;
       }
       get('/news').then(function(d){
@@ -271,7 +303,7 @@
         document.title = 'News & Event | ' + SITE;
         var cards = rows.map(function(n){
           var internal = n.type === 'internal';
-          var href = internal ? 'news.html?id=' + esc(n.id) : esc(n.external_url || '#');
+          var href = internal ? postUrl('news', n) : esc(n.external_url || '#');
           var target = internal ? '' : ' target="_blank" rel="noopener noreferrer"';
           return '<a class="hb-card" href="' + href + '"' + target + '>' +
             '<div class="hb-thumb">' + (n.thumbnail_url ? '<img src="' + esc(n.thumbnail_url) + '" alt="" loading="lazy">' : '') +
