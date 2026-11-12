@@ -67,20 +67,17 @@
         if (st.show_scroll_hint === false) root.querySelector('.scrollHint').style.display = 'none';
         render(list);
         var needVimeo = list.some(function (s) { return s.type === 'video'; });
-        // 첫 슬라이드가 Vimeo 가 아니면 기다리지 않고 바로 시작 (Vimeo 스크립트는 뒤에서 불러옴)
-        if (needVimeo && list[0].type === 'video') loadVimeoApi().then(function () { start(Number(st.duration) || 6000); });
-        else { start(Number(st.duration) || 6000); if (needVimeo) setTimeout(function () { loadVimeoApi().then(function () { root.dispatchEvent(new Event('nw-vimeo-ready')); }); }, 1200); }
+        (needVimeo ? loadVimeoApi() : Promise.resolve()).then(function () { start(Number(st.duration) || 6000); });
       });
 
       function render(list) {
         root.querySelector('.slides').innerHTML = list.map(function (s, n) {
           var frame = '';
           if (s.type === 'local-video') {
-            frame = '<video muted playsinline webkit-playsinline loop ' + (n === 0 ? 'autoplay preload="auto"' : 'preload="none"') + ' style="width:100%;height:100%;object-fit: cover;"></video>';
+            frame = '<video muted playsinline webkit-playsinline autoplay loop preload="auto" style="width:100%;height:100%;object-fit: cover;"></video>';
           } else if (s.type === 'video') {
-            /* 속도: 첫 슬라이드만 바로 불러오고 나머지 영상은 차례가 오기 직전에 불러옴 (data-src) */
-            frame = '<iframe ' + (n === 0 ? 'src' : 'data-src') + '="https://player.vimeo.com/video/' + esc(s.vimeo_id) +
-              '?background=1&mute=1&muted=1&autoplay=1&loop=1&playsinline=1&autopause=0" allow="autoplay; fullscreen" title="' + esc(s.eyebrow || 'video') + ' ' + (n + 1) + '"' + (n === 0 ? '' : ' loading="lazy"') + '></iframe>';
+            frame = '<iframe src="https://player.vimeo.com/video/' + esc(s.vimeo_id) +
+              '?background=1&mute=1&muted=1&autoplay=1&loop=1&playsinline=1&autopause=0" allow="autoplay; fullscreen" title="' + esc(s.eyebrow || 'video') + ' ' + (n + 1) + '"></iframe>';
           }
           return '<div class="slide" data-type="' + esc(s.type) + '" data-poster="' + esc(s.poster_url || '') + '"' +
             (s.type === 'local-video' ? ' data-local-src="' + esc(s.video_url) + '"' : '') + '>' +
@@ -261,22 +258,8 @@
           else if (s.dataset.type === 'video') pauseVimeo(s);
         }
 
-        // 슬라이드 미디어를 실제로 불러옴 (현재 + 다음 1장만)
-        function arm(s) {
-          if (!s || s.dataset.armed) return;
-          s.dataset.armed = '1';
-          setPoster(s);
-          if (s.dataset.type === 'video') {
-            var f = s.querySelector('iframe[data-src]');
-            if (f && !f.getAttribute('src')) { f.setAttribute('src', f.getAttribute('data-src')); f.removeAttribute('loading'); }
-          } else if (s.dataset.type === 'local-video') {
-            ensureLocalVideo(s);
-          }
-        }
         function show(n) {
           i = (n + slides.length) % slides.length;
-          arm(slides[i]);
-          setTimeout(function () { arm(slides[(i + 1) % slides.length]); }, 1500);
           slides.forEach(function (s, idx) {
             var active = (idx === i);
             s.classList.toggle('active', active);
@@ -315,20 +298,20 @@
           }, 900);
         }
 
-        // 첫 슬라이드만 우선 준비 (나머지는 show() 에서 차례대로)
-        (function (s) {
-          if (!s) return;
+        slides.forEach(function (s, idx) {
+          setPoster(s);
           if (s.dataset.type === 'local-video') {
             var src = s.dataset.localSrc || '';
             if (src) injectPreloadVideoOnce(src);
-            arm(s);
-            var entry = localVideoMap.get(s);
-            if (entry && entry.video) { try { entry.video.load(); } catch (e) { } tryPlayLocal(entry); }
-          } else {
-            arm(s);
-            if (s.dataset.type === 'video') ensureVimeoPlayer(s);
+            var entry = ensureLocalVideo(s);
+            if (entry && entry.video && idx === 0) {
+              try { entry.video.load(); } catch (e) { }
+              tryPlayLocal(entry);
+            }
+          } else if (s.dataset.type === 'video') {
+            ensureVimeoPlayer(s);
           }
-        })(slides[0]);
+        });
 
         show(0);
         if (slides.length > 1) timer = setInterval(nextSlide, DUR);
@@ -340,7 +323,6 @@
 
         function resume() { var a = slides[i]; if (a) playSlide(a); }
         window.addEventListener('pageshow', resume);
-        root.addEventListener('nw-vimeo-ready', resume);
         window.addEventListener('focus', resume);
         document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') resume(); });
       }
