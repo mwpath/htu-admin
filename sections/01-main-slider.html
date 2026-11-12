@@ -100,7 +100,7 @@
         s2.style.height = (slidesData.length * 100) + 'vh';
 
         bg.innerHTML = slidesData.map(function (s, i) {
-          return '<img src="' + esc(s.image_url) + '" alt="' + esc(s.title_text || '') + '"' + (i === 0 ? ' class="active"' : '') + '>';
+          return '<img src="' + esc(s.image_url) + '" alt="' + esc(s.title_text || '') + '" decoding="async"' + (i === 0 ? ' class="active"' : ' loading="lazy"') + '>';
         }).join('');
 
         list.innerHTML = slidesData.map(function (s) {

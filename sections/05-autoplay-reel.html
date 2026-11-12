@@ -197,7 +197,17 @@
         }
       }
 
-      loadYTApi(buildPlayer);
+      // 속도: 유튜브 플레이어(약 1MB)는 이 섹션이 화면에 가까워질 때 불러옴
+      (function(){
+        var started = false;
+        function go(){ if(started) return; started = true; loadYTApi(buildPlayer); }
+        if("IntersectionObserver" in window){
+          var lio = new IntersectionObserver(function(entries){
+            if(entries.some(function(en){ return en.isIntersecting; })){ lio.disconnect(); go(); }
+          }, { rootMargin: "800px 0px" });
+          lio.observe(section);
+        } else { setTimeout(go, 2500); }
+      })();
     }
   })();
   </script>

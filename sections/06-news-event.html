@@ -165,6 +165,7 @@
 
           title.textContent = item.title || '';
           excerpt.textContent = item.excerpt || '';
+          img.loading = 'lazy'; img.decoding = 'async';
           img.src = item.img || '';
           img.alt = item.title ? item.title : 'news thumbnail';
 

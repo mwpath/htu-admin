@@ -140,6 +140,7 @@
           var slide = node.querySelector('.slide');
           var btn = node.querySelector('.slide-btn');
           var img = node.querySelector('img');
+          img.loading = 'lazy'; img.decoding = 'async';
           img.src = getThumbUrl(videoId);
           img.alt = item.title ? item.title : 'youtube thumbnail';
           btn.setAttribute('data-video-id', videoId);

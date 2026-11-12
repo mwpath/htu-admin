@@ -654,3 +654,22 @@ html.adm-lock, html.adm-lock body { overflow: hidden; }
 .adm-skel.h { height: 48px; width: 40%; }
 .adm-skel.short { width: 60%; }
 @keyframes admSkel { to { background-position: -200% 0; } }
+
+/* 사이트가 부를 관리자 주소 */
+.adm-endpoint { margin-top: 14px; padding: 14px; border: 1px solid #dfe8e4; border-radius: 12px; background: #fff; display: grid; gap: 10px; }
+.adm-endpoint.is-bad { border-color: #fca5a5; background: #fff7f7; }
+.adm-endpoint-head strong { display: block; font-size: 14.5px; }
+.adm-endpoint-head small { display: block; margin-top: 3px; font-size: 12.5px; color: #475569; word-break: break-all; line-height: 1.5; }
+.adm-endpoint-head em { font-style: normal; color: #b91c1c; font-weight: 700; }
+.adm-endpoint-cands { display: flex; flex-wrap: wrap; gap: 6px; }
+.adm-chip { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px; max-width: 100%; padding: 7px 11px; border: 1px solid #dfe5e2; border-radius: 10px; background: #f8faf9; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 700; color: #1f2d27; word-break: break-all; text-align: left; }
+.adm-chip i { font-style: normal; font-size: 11px; font-weight: 600; color: #64748b; }
+.adm-chip.on { border-color: var(--g-600); background: #ecf7f3; box-shadow: 0 0 0 2px rgba(10,106,98,.15); }
+.adm-chip.warn i { color: #b45309; }
+.adm-endpoint-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.adm-endpoint-row .adm-input { flex: 1 1 280px; min-width: 0; font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+.adm-endpoint .adm-alert { padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.55; word-break: break-all; }
+.adm-endpoint .adm-alert.ok { background: #ecfdf5; color: #065f46; }
+.adm-endpoint .adm-alert.err { background: #fef2f2; color: #991b1b; }
+@media (max-width: 640px) { .adm-endpoint-row .adm-btn { flex: 1; } }
+.adm-endpoint button.adm-link, .adm-alert button.adm-link { background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; font: inherit; color: #0f766e; font-weight: 700; }

@@ -2,12 +2,12 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { getPublicContent, siteOrigin } from '@/lib/content';
 import { checkSite } from '@/lib/site/check';
-import { stableEndpoint } from '@/lib/site/endpoint';
+import { resolveEndpoint } from '@/lib/site/endpoint';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 export async function GET(request) {
   if (!(await requireAdmin())) return Response.json({ error: '로그인이 필요합니다.' }, { status: 401 });
-  const origin = stableEndpoint(request.url);
+  const origin = await resolveEndpoint(request.url);
   const content = await getPublicContent(siteOrigin(request.url));
   const siteBase = String(content.settings?.site?.site_url || 'https://htuglobal.com').replace(/\/+$/, '');
   return Response.json({ site: siteBase, endpoint: origin, ...(await checkSite(siteBase, origin, content.menus)) });

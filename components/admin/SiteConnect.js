@@ -15,6 +15,88 @@ const FILES = [
 ];
 
 
+// 사이트가 부를 관리자 주소 — 직접 지정해서 사이트에 강제로 적용
+function EndpointPicker({ owner, onApplied }) {
+  const [info, setInfo] = useState(null);
+  const [url, setUrl] = useState('');
+  const [busy, setBusy] = useState('');
+  const [msg, setMsg] = useState(null);
+  const load = async () => {
+    try {
+      const d = await (await fetch('/api/site/endpoint', { cache: 'no-store' })).json();
+      setInfo(d);
+      setUrl((u) => u || d.saved || (d.candidates || []).find((c) => !c.deployment)?.url || d.endpoint || '');
+    } catch { /* noop */ }
+  };
+  useEffect(() => { load(); }, []);
+  const test = async () => {
+    setBusy('test'); setMsg(null);
+    try {
+      const d = await (await fetch('/api/site/endpoint?probe=' + encodeURIComponent(url), { cache: 'no-store' })).json();
+      const p = d.probe || {};
+      setMsg(p.ok ? { ok: true, text: `사용 가능 — 방문자가 이 주소에서 콘텐츠를 받을 수 있습니다 (${p.ms}ms)` } : { ok: false, text: `사용 불가 — ${p.reason || '확인 실패'}` });
+    } catch (e) { setMsg({ ok: false, text: String(e.message || e) }); }
+    setBusy('');
+  };
+  const apply = async (force) => {
+    if (!window.confirm(`사이트(htuglobal.com)가 부르는 관리자 주소를\n${url}\n로 바꾸고 GitHub 에 바로 적용합니다. 진행할까요?`)) return;
+    setBusy('apply'); setMsg(null);
+    try {
+      const r = await fetch('/api/site/endpoint', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, apply: true, force: !!force }) });
+      const d = await r.json();
+      if (!r.ok) {
+        setMsg({ ok: false, text: d.error, canForce: r.status === 422 });
+      } else {
+        setMsg({ ok: true, text: d.warning || `적용했습니다 → ${d.endpoint}. GitHub Pages 반영까지 1~2분 걸립니다. 90초 뒤 자동으로 다시 점검합니다.` });
+        load(); onApplied?.();
+      }
+    } catch (e) { setMsg({ ok: false, text: String(e.message || e) }); }
+    setBusy('');
+  };
+  const reset = async () => {
+    setBusy('apply');
+    await fetch('/api/site/endpoint', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ reset: true }) });
+    setUrl(''); setInfo(null); setBusy(''); load();
+  };
+  if (!info) return null;
+  const bad = info.live && (info.liveIsDeployment || info.live !== info.endpoint);
+  return (
+    <div className={`adm-endpoint ${bad ? 'is-bad' : ''}`}>
+      <div className="adm-endpoint-head">
+        <strong>사이트가 부를 관리자 주소</strong>
+        <small>
+          지금 사이트: <code>{info.live || '확인 불가'}</code>
+          {info.liveIsDeployment ? <em> ⚠ 배포별 임시 주소 — 방문자에게 막혀 빈 화면이 됩니다</em> : null}
+        </small>
+      </div>
+      <div className="adm-endpoint-cands">
+        {(info.candidates || []).map((c) => (
+          <button key={c.url} type="button" className={`adm-chip ${url === c.url ? 'on' : ''} ${c.deployment ? 'warn' : ''}`} onClick={() => { setUrl(c.url); setMsg(null); }}>
+            {c.url.replace('https://', '')}
+            <i>{c.saved ? '지정됨' : c.production ? '운영 주소 · 권장' : c.deployment ? '임시 주소 · 비권장' : c.current ? '지금 접속한 주소' : ''}</i>
+          </button>
+        ))}
+      </div>
+      <div className="adm-endpoint-row">
+        <input className="adm-input" value={url} onChange={(e) => { setUrl(e.target.value); setMsg(null); }} placeholder="https://htu-admin.vercel.app  또는  https://admin.htuglobal.com" spellCheck={false} />
+        <button type="button" className="adm-btn ghost" onClick={test} disabled={!!busy || !url}>{busy === 'test' ? '확인 중…' : '연결 테스트'}</button>
+        {owner ? <button type="button" className="adm-btn primary" onClick={() => apply(false)} disabled={!!busy || !url}>{busy === 'apply' ? '적용 중…' : '저장하고 사이트에 적용'}</button> : null}
+      </div>
+      {msg ? (
+        <div className={`adm-alert ${msg.ok ? 'ok' : 'err'}`}>
+          {msg.text}
+          {msg.canForce && owner ? <> <button type="button" className="adm-link" onClick={() => apply(true)}>그래도 적용</button></> : null}
+        </div>
+      ) : null}
+      <p className="adm-help">
+        Vercel → 프로젝트 → <b>Settings → Domains</b> 에 보이는 주소(해시가 없는 주소)를 쓰세요. 중간에 <code>-1n45tgdug-</code> 처럼 무작위 글자가 붙은 주소는 배포 1회용이라 방문자에게 막힙니다.
+        {info.saved && owner ? <> · <button type="button" className="adm-link" onClick={reset}>직접 지정 해제(자동)</button></> : null}
+        {!owner ? ' 변경은 대표 관리자 계정에서 할 수 있습니다.' : ''}
+      </p>
+    </div>
+  );
+}
+
 function SiteSync() {
   const me = useMe();
   const owner = me?.role === 'owner';
@@ -54,6 +136,8 @@ function SiteSync() {
           {owner && <button type="button" className="adm-btn sm primary" onClick={runDeploy} disabled={!!busy}>{busy === 'deploy' ? '올리는 중…' : '사이트 파일 자동 업데이트'}</button>}
         </div>
       </div>
+
+      <EndpointPicker owner={owner} onApplied={() => setTimeout(runCheck, 90000)} />
 
       {deploy && (deploy.ok ? (
         <div className="adm-alert ok">
