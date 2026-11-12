@@ -526,3 +526,24 @@ html.adm-lock, html.adm-lock body { overflow: hidden; }
 .adm-quickmenu { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin: 0 0 16px; padding: 14px 16px; border-radius: 12px; background: #f1f8f5; border: 1px solid #cfe5dc; font-size: 14px; line-height: 1.6; }
 .adm-quickmenu span { flex: 1 1 320px; }
 @media (max-width: 860px) { .adm-quickmenu .adm-btn { width: 100%; } }
+
+/* 실제 사이트 상태 점검 · 자동 업데이트 */
+.adm-sitesync{margin:16px 0;padding:16px;border:1px solid var(--adm-line,#e5e7eb);border-radius:12px;background:var(--adm-soft,#f8fafc)}
+.adm-sitesync-head{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.adm-sitesync-head>div:first-child{min-width:0;flex:1 1 240px}
+.adm-sitesync-head strong{display:block;font-size:15px}
+.adm-sitesync-head small{display:block;color:#64748b;margin-top:2px;line-height:1.5;word-break:break-all}
+.adm-sitesync .adm-alert{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.6}
+.adm-sitesync .adm-alert.ok{background:#ecfdf5;color:#065f46}
+.adm-sitesync .adm-alert.err{background:#fef2f2;color:#991b1b}
+.adm-sitesync-sum{margin:14px 0 8px;font-weight:700;font-size:14px}
+.adm-sitesync-sum.ok{color:#047857}.adm-sitesync-sum.err{color:#b91c1c}
+.adm-checklist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.adm-checklist li{display:flex;gap:10px;padding:10px 12px;background:#fff;border-radius:8px;border:1px solid #eef0f3;min-width:0}
+.adm-checklist li>div{min-width:0}
+.adm-checklist .dot{flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff}
+.adm-checklist li.ok .dot{background:#10b981}.adm-checklist li.err .dot{background:#ef4444}
+.adm-checklist b{display:block;font-size:13.5px}
+.adm-checklist small{display:block;color:#475569;font-size:12.5px;line-height:1.5;word-break:break-word}
+.adm-checklist em{display:block;font-style:normal;color:#b45309;font-size:12.5px;margin-top:3px;line-height:1.5}
+@media (max-width:640px){.adm-sitesync-head .adm-row-gap{width:100%}.adm-sitesync-head .adm-btn{flex:1}}

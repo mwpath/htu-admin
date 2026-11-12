@@ -59,7 +59,15 @@
     #nbbioHeaderLocal .m-lang:empty{ display:none; }
     #nbbioHeaderLocal .m-lang button{ height:38px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:#fff; font:inherit; font-size:14px; font-weight:700; color:#333; cursor:pointer; }
     #nbbioHeaderLocal .m-lang button.is-on{ background:var(--brand); border-color:var(--brand); color:#fff; }
-    @media (max-width:767.98px){ #nbbioHeaderLocal .lang-wrap{ display:none; } } /* 휴대폰은 메뉴 안 언어 버튼 사용 */
+    #nbbioHeaderLocal .lang-wrap.is-off{ display:none !important; }
+    #nbbioHeaderLocal .lang-wrap:not(.is-off) .globeBtn{ display:inline-flex !important; visibility:visible !important; opacity:1 !important; }
+    @media (max-width:767.98px){ /* 휴대폰: 헤더에 작은 언어 버튼 + 메뉴 안 언어 버튼 */
+      #nbbioHeaderLocal .lang-wrap{ display:block; margin-right:6px; }
+      #nbbioHeaderLocal .globeBtn.is-on{ min-width:34px; height:34px; padding:0 8px; gap:4px; }
+      #nbbioHeaderLocal .globeBtn svg{ width:16px; height:16px; }
+      #nbbioHeaderLocal .lang-menu, #nbbioHeaderLocal .lang-menu.is-many{ position:fixed; top:64px; right:12px; left:auto; min-width:160px; max-width:calc(100vw - 24px);
+        grid-template-columns:1fr; max-height:70vh; overflow:auto; }
+    }
   </style>
 
   <!-- ====== Header Bar ====== -->
@@ -237,12 +245,14 @@
   var LANG_NAMES = { ko: '한국어', en: 'English', ja: '日本語', zh: '简体中文' };
   function langName(l) { return (window.HTU_I18N && window.HTU_I18N.names[l]) || LANG_NAMES[l] || l.toUpperCase(); }
   function langShort(l) { return (window.HTU_I18N && window.HTU_I18N.short[l]) || l.toUpperCase(); }
-  function renderLangs(root, langs) {
-    // 관리자 설정을 아직 못 받았어도 기본 언어(한국어·영어·중국어·일본어)로 표시 → 설정이 오면 그 목록으로 갱신
-    var list = langs || (window.HTU_I18N && window.HTU_I18N.languages) || ['ko', 'en', 'zh', 'ja'];
+  function renderLangs(root, langs, enabled) {
+    // 관리자 설정을 아직 못 받았거나 언어가 1개뿐이어도 기본 언어(한국어·영어·중국어·일본어)로 항상 표시
+    var list = langs || (window.HTU_I18N && window.HTU_I18N.languages) || [];
+    if (!list || list.length < 2) list = ['ko', 'en', 'zh', 'ja'];
     var cur = curLang();
     var globe = root.querySelector('.globeBtn');
-    var show = list.length > 1;
+    var show = enabled !== false;
+    root.querySelector('.lang-wrap').classList.toggle('is-off', !show);
     globe.classList.toggle('is-on', show);
     globe.querySelector('.lang-code').textContent = langShort(cur);
     root.querySelector('.lang-menu').classList.toggle('is-many', list.length > 8);
@@ -317,7 +327,7 @@
       return '<li class="m-cta"><a' + linkAttrs(c) + '>' + esc(c.label) + (c.external ? EXT : '') + '</a></li>';
     }).join('');
 
-    renderLangs(root, state.header && state.header.lang_button === false ? ['ko'] : state.langs);
+    renderLangs(root, state.langs, !(state.header && state.header.lang_button === false));
     if (root.__syncLogo) root.__syncLogo();
   }
 
