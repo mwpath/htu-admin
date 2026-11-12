@@ -856,3 +856,12 @@
         font-size: .88rem;
       }
     }
+
+    /* 패밀리 사이트 카드: 번역된 글(중국어 · 일본어 · 긴 영어 단어)도 칸 안에서 줄바꿈 */
+    #mainSliderPack .family-site-card { min-width: 0; }
+    #mainSliderPack .family-site-card h4,
+    #mainSliderPack .family-site-card p,
+    #mainSliderPack .family-site-url,
+    #mainSliderPack .family-site-note { overflow-wrap: anywhere; min-width: 0; max-width: 100%; }
+    html:not([lang="ko"]) #mainSliderPack .family-site-card h4,
+    html:not([lang="ko"]) #mainSliderPack .family-site-card p { word-break: normal; }

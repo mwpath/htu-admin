@@ -87,7 +87,7 @@ export const SETTING_GROUPS = [
     fields: [
       { name: 'show', label: '메인에 표시', type: 'checkbox', default: true, half: true, switchLabel: 'News & Event 바로 아래에 최신 공지 목록 표시' },
       { name: 'title', label: '섹션 제목', type: 'text', default: '공지사항', half: true },
-      { name: 'count', label: '표시할 공지 수', type: 'number', default: 5, half: true, help: '상단 고정 공지가 먼저 나오고, 나머지는 최신순' },
+      { name: 'count', label: '표시할 공지 수', type: 'number', default: 6, half: true, help: '상단 고정 공지가 먼저 나오고, 나머지는 최신순 (3개씩 한 줄)' },
       { name: 'more_label', label: '전체 보기 버튼 문구', type: 'text', default: '전체 보기', half: true },
     ],
   },

@@ -351,3 +351,6 @@
         height: 17px;
       }
     }
+
+    #newsSlideSection .title, #newsSlideSection .excerpt { overflow-wrap: anywhere; }
+    html:not([lang="ko"]) #newsSlideSection .title, html:not([lang="ko"]) #newsSlideSection .excerpt { word-break: normal; }

@@ -1,59 +1,83 @@
-<section id="htuNoticeMain" aria-label="공지사항" hidden>
+<section id="htuNoticeMain" aria-label="공지사항" style="position: relative;" hidden>
   <style>
-    /* Scope: #htuNoticeMain ONLY — News & Event 바로 아래 최신 공지 */
-    #htuNoticeMain { --ink:#0b0b0b; --muted:rgba(11,11,11,.58); --line:rgba(11,11,11,.10); --green:#0a6a62;
-      font-family:Pretendard,"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); background:#fff;
-      padding:0 20px 96px; -webkit-font-smoothing:antialiased; }
-    #htuNoticeMain[hidden] { display:none; }
-    #htuNoticeMain * { box-sizing:border-box; }
-    #htuNoticeMain .nm-wrap { max-width:1200px; margin:0 auto; }
-    #htuNoticeMain .nm-box { display:grid; grid-template-columns:minmax(200px, 280px) minmax(0,1fr); gap:40px; padding:36px 40px; border:1px solid var(--line);
-      border-radius:22px; background:linear-gradient(180deg,#fbfdfc,#fff); box-shadow:0 10px 30px rgba(0,0,0,.04); }
-    #htuNoticeMain .nm-head { display:flex; flex-direction:column; justify-content:space-between; gap:18px; min-width:0; }
-    #htuNoticeMain .nm-eyebrow { margin:0 0 8px; font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--green); }
-    #htuNoticeMain h2 { margin:0; font-size:30px; font-weight:900; letter-spacing:-.04em; line-height:1.15; word-break:keep-all; }
-    #htuNoticeMain .nm-more { align-self:flex-start; display:inline-flex; align-items:center; gap:6px; height:40px; padding:0 18px; border-radius:999px;
-      border:1px solid var(--line); background:#fff; color:rgba(11,11,11,.86); font-size:14px; font-weight:800; text-decoration:none;
-      transition:border-color .15s ease, color .15s ease, transform .15s ease; }
-    #htuNoticeMain .nm-more:hover { border-color:var(--green); color:var(--green); transform:translateY(-1px); }
-    #htuNoticeMain .nm-list { list-style:none; margin:0; padding:0; border-top:2px solid var(--ink); min-width:0; }
-    #htuNoticeMain .nm-list li { border-bottom:1px solid var(--line); }
-    #htuNoticeMain .nm-list a { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:14px; padding:17px 6px;
-      color:var(--ink); text-decoration:none; transition:background .15s ease; }
-    #htuNoticeMain .nm-list a:hover { background:#f6f9f8; }
-    #htuNoticeMain .nm-list a:hover .nm-title { color:var(--green); }
-    #htuNoticeMain .nm-tag { display:inline-flex; align-items:center; justify-content:center; min-width:44px; height:24px; padding:0 9px; border-radius:999px;
-      font-size:11.5px; font-weight:800; background:#eef2f0; color:rgba(11,11,11,.6); }
-    #htuNoticeMain .nm-tag.is-pin { background:var(--green); color:#fff; }
-    #htuNoticeMain .nm-title { font-size:16px; font-weight:700; letter-spacing:-.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:color .15s ease; }
-    #htuNoticeMain .nm-new { display:inline-block; margin-left:6px; padding:1px 6px; border-radius:5px; background:#ef4444; color:#fff; font-size:10.5px; font-weight:800; vertical-align:2px; }
-    #htuNoticeMain .nm-date { color:var(--muted); font-size:14px; font-variant-numeric:tabular-nums; white-space:nowrap; }
-    @media (max-width:900px){
-      #htuNoticeMain .nm-box { grid-template-columns:1fr; gap:20px; padding:26px 22px; }
-      #htuNoticeMain .nm-head { flex-direction:row; align-items:flex-end; }
-      #htuNoticeMain h2 { font-size:26px; }
+    /* Scope: #htuNoticeMain ONLY — News & Event 바로 아래 최신 공지 (News & Event 카드와 같은 디자인)
+       position:relative + z-index + 흰 배경 → 아래 섹션의 배경 영상/이미지에 가려지지 않음 */
+    #htuNoticeMain {
+      --bg: #ffffff; --card: #ffffff; --ink: #0b0b0b; --muted: rgba(11, 11, 11, .62);
+      --subtle: rgba(11, 11, 11, .08); --line: rgba(11, 11, 11, .10); --green: #0a6a62;
+      --radius: 18px; --radius2: 14px; --gap: 18px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .08); --shadow2: 0 8px 22px rgba(0, 0, 0, .06);
+      position: relative; z-index: 3; isolation: isolate;
+      font-family: Pretendard, "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg); color: var(--ink);
+      padding: 0 20px 96px; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
     }
-    @media (max-width:520px){
-      #htuNoticeMain { padding-bottom:64px; }
-      #htuNoticeMain .nm-box { padding:22px 16px; border-radius:18px; }
-      #htuNoticeMain .nm-more { height:36px; padding:0 13px; font-size:13px; }
-      #htuNoticeMain .nm-list a { grid-template-columns:auto minmax(0,1fr); gap:6px 10px; padding:14px 2px; }
-      #htuNoticeMain .nm-date { grid-column:2; font-size:12.5px; }
-      #htuNoticeMain .nm-title { font-size:15px; }
+    #htuNoticeMain[hidden] { display: none; }
+    #htuNoticeMain * { box-sizing: border-box; }
+    #htuNoticeMain .wrap { max-width: 1200px; margin: 0 auto; }
+
+    #htuNoticeMain .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    #htuNoticeMain .head h2 { margin: 0; font-size: 34px; font-weight: 950; letter-spacing: -.04em; line-height: 1.12; }
+    #htuNoticeMain .more { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 999px; flex-shrink: 0;
+      border: 1px solid var(--line); background: rgba(255, 255, 255, .92); color: rgba(11, 11, 11, .86); font-size: 14px; font-weight: 800; text-decoration: none;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, .06); transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease; }
+    #htuNoticeMain .more:hover { transform: translateY(-1px); border-color: rgba(11, 11, 11, .16); box-shadow: 0 14px 30px rgba(0, 0, 0, .08); }
+
+    #htuNoticeMain .board { border-radius: var(--radius); border: 1px solid var(--subtle); background: rgba(0, 0, 0, .015); box-shadow: var(--shadow); padding: 16px; }
+    #htuNoticeMain .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); }
+
+    #htuNoticeMain .card { display: flex; flex-direction: column; height: 100%; min-width: 0; background: var(--card); border: 1px solid var(--subtle);
+      border-radius: var(--radius2); overflow: hidden; text-decoration: none; color: inherit; box-shadow: var(--shadow2);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; -webkit-tap-highlight-color: transparent; }
+    #htuNoticeMain .card:hover { transform: translateY(-2px); border-color: rgba(11, 11, 11, .12); box-shadow: 0 16px 40px rgba(0, 0, 0, .10); }
+    #htuNoticeMain .card:focus-visible { outline: 2px solid rgba(10, 106, 98, .5); outline-offset: 2px; }
+
+    #htuNoticeMain .thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; flex-shrink: 0; background: #f3f5f8; }
+    #htuNoticeMain .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.01); transition: transform .6s ease; }
+    #htuNoticeMain .card:hover .thumb img { transform: scale(1.07); }
+    #htuNoticeMain .thumb:after { content: ""; position: absolute; inset: auto 0 0 0; height: 44%; background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .14)); pointer-events: none; }
+    /* 썸네일이 없는 공지: 브랜드 색 배경 + 큰 제목 글자 */
+    #htuNoticeMain .thumb.is-empty { display: flex; align-items: center; justify-content: center; padding: 22px;
+      background: radial-gradient(120% 120% at 0% 0%, #0f7a6e 0%, #0a4f30 55%, #033b1e 100%); }
+    #htuNoticeMain .thumb.is-empty:after { display: none; }
+    #htuNoticeMain .thumb .ph { display: none; }
+    #htuNoticeMain .thumb.is-empty .ph { display: block; color: rgba(255, 255, 255, .92); font-size: 13px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase; }
+
+    #htuNoticeMain .chip { position: absolute; left: 12px; top: 12px; z-index: 2; display: inline-flex; align-items: center; height: 26px; padding: 0 11px;
+      border-radius: 999px; font-size: 11.5px; font-weight: 800; letter-spacing: -.01em; color: #0b1220; background: rgba(255, 255, 255, .92);
+      border: 1px solid rgba(255, 255, 255, .7); box-shadow: 0 6px 16px rgba(0, 0, 0, .12); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    #htuNoticeMain .chip.is-pin { color: #0a6a62; background: #fff; border-color: #fff; }
+    #htuNoticeMain .chip.is-pin:before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #ef4444; margin-right: 6px; }
+    #htuNoticeMain .new { position: absolute; right: 12px; top: 12px; z-index: 2; height: 22px; padding: 0 8px; display: inline-flex; align-items: center;
+      border-radius: 6px; background: #ef4444; color: #fff; font-size: 11px; font-weight: 900; }
+
+    #htuNoticeMain .text { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; }
+    #htuNoticeMain .title, #htuNoticeMain .excerpt { overflow-wrap: anywhere; }
+    #htuNoticeMain .title { margin: 0; font-size: 18px; font-weight: 950; line-height: 1.42; letter-spacing: -.02em; word-break: keep-all;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: calc(1em * 1.42 * 2); }
+    #htuNoticeMain .excerpt { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.68;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    #htuNoticeMain .date { margin-top: auto; padding-top: 4px; font-size: 13px; color: rgba(11, 11, 11, .5); font-variant-numeric: tabular-nums; }
+
+    @media (max-width: 900px) {
+      #htuNoticeMain { padding: 0 16px 68px; }
+      #htuNoticeMain .head h2 { font-size: 28px; }
+      #htuNoticeMain .board { padding: 12px; }
+      #htuNoticeMain .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      #htuNoticeMain .grid { grid-template-columns: 1fr; }
+      #htuNoticeMain .title { min-height: 0; }
+      #htuNoticeMain .more { height: 38px; padding: 0 13px; font-size: 13px; }
     }
   </style>
 
-  <div class="nm-wrap">
-    <div class="nm-box">
-      <div class="nm-head">
-        <div>
-          <p class="nm-eyebrow">Notice</p>
-          <h2 data-cms="title">공지사항</h2>
-        </div>
-        <a class="nm-more" href="./notice.html"><span data-cms="more">전체 보기</span> <span aria-hidden="true">›</span></a>
-      </div>
-      <ul class="nm-list"></ul>
+  <div class="wrap">
+    <div class="head">
+      <h2 data-cms="title">공지사항</h2>
+      <a class="more" href="./notice.html"><span data-cms="more">전체 보기</span> <span aria-hidden="true">›</span></a>
     </div>
+    <div class="board"><div class="grid"></div></div>
   </div>
 
   <script>
@@ -81,12 +105,18 @@
         if (st.show === false || !rows.length) return;
         section.querySelector('[data-cms="title"]').textContent = st.title || '공지사항';
         section.querySelector('[data-cms="more"]').textContent = st.more_label || '전체 보기';
-        if (data.links && data.links.notice) section.querySelector('.nm-more').href = data.links.notice;
-        section.querySelector('.nm-list').innerHTML = rows.map(function (n) {
-          return '<li><a href="' + esc(n.link) + '">' +
-            '<span class="nm-tag' + (n.pinned ? ' is-pin' : '') + '">' + (n.pinned ? '공지' : '안내') + '</span>' +
-            '<span class="nm-title">' + esc(n.title) + (n.isNew ? '<span class="nm-new">N</span>' : '') + '</span>' +
-            '<time class="nm-date" datetime="' + esc(n.date) + '">' + fmt(n.date) + '</time></a></li>';
+        if (data.links && data.links.notice) section.querySelector('.more').href = data.links.notice;
+        section.querySelector('.grid').innerHTML = rows.map(function (n) {
+          // 이미지가 없거나 열리지 않으면 브랜드 색 배경으로
+          var thumb = n.img
+            ? '<div class="thumb"><span class="ph">Notice</span><img src="' + esc(n.img) + '" alt="' + esc(n.title) + '" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-empty\');this.remove()">'
+            : '<div class="thumb is-empty"><span class="ph">Notice</span>';
+          return '<a class="card" href="' + esc(n.link) + '">' + thumb +
+              '<span class="chip' + (n.pinned ? ' is-pin' : '') + '">' + (n.pinned ? '공지' : '안내') + '</span>' +
+              (n.isNew ? '<span class="new">NEW</span>' : '') + '</div>' +
+            '<div class="text"><h3 class="title">' + esc(n.title) + '</h3>' +
+              (n.excerpt ? '<p class="excerpt">' + esc(n.excerpt) + '</p>' : '') +
+              '<time class="date" datetime="' + esc(n.date) + '">' + fmt(n.date) + '</time></div></a>';
         }).join('');
         section.hidden = false;
       });
